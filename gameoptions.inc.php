@@ -24,35 +24,26 @@
  *
  */
 
-$game_options = array(
-
-    /*
+$game_options = [
     
     // note: game variant ID should start at 100 (ie: 100, 101, 102, ...). The maximum is 199.
-    100 => array(
-                'name' => totranslate('my game option'),    
-                'values' => array(
+    100 => [
+        'name' => totranslate('Variant option'),    
+        'values' => [
+                1 => [
+                    'name' => totranslate('Disabled'),
+                    'description' => totranslate('Colored wall face'),
+                ],
+                2 => [
+                    'name' => totranslate('Enabled'), 
+                    'description' => totranslate('Grayed wall face'),
+                    'tmdisplay' => totranslate('Variant option (gray wall)'), 
+                    'nobeginner' => true
+                ]
+            ],
+        'default' => 1
+    ],
 
-                            // A simple value for this option:
-                            1 => array( 'name' => totranslate('option 1') )
-
-                            // A simple value for this option.
-                            // If this value is chosen, the value of "tmdisplay" is displayed in the game lobby
-                            2 => array( 'name' => totranslate('option 2'), 'tmdisplay' => totranslate('option 2') ),
-
-                            // Another value, with other options:
-                            //  description => this text will be displayed underneath the option when this value is selected to explain what it does
-                            //  beta=true => this option is in beta version right now (there will be a warning)
-                            //  alpha=true => this option is in alpha version right now (there will be a warning, and starting the game will be allowed only in training mode except for the developer)
-                            //  nobeginner=true  =>  this option is not recommended for beginners
-                            //  firstgameonly=true  =>  this option is recommended only for the first game (discovery option)
-                            3 => array( 'name' => totranslate('option 3'), 'description' => totranslate('this option does X'), 'beta' => true, 'nobeginner' => true )
-                        ),
-                'default' => 1
-            ),
-
-    */
-
-);
+];
 
 
