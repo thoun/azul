@@ -49,63 +49,103 @@
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
- 
-$machinestates = array(
+
+require_once("modules/constants.inc.php");
+
+$basicGameStates = [
 
     // The initial state. Please do not modify.
-    1 => array(
+    ST_BGA_GAME_SETUP => [
         "name" => "gameSetup",
-        "description" => "",
+        "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
-    ),
-    
-    // Note: ID=2 => your first state
+        "transitions" => [ "" => ST_START ]
+    ],
 
-    2 => array(
-    		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must play a card or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( "playCard", "pass" ),
-    		"transitions" => array( "playCard" => 2, "pass" => 2 )
-    ),
-    
-/*
-    Examples:
-    
-    2 => array(
+    ST_NEXT_PLAYER => [
         "name" => "nextPlayer",
-        "description" => '',
+        "description" => "",
         "type" => "game",
         "action" => "stNextPlayer",
-        "updateGameProgression" => true,   
-        "transitions" => array( "endGame" => 99, "nextPlayer" => 10 )
-    ),
-    
-    10 => array(
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-        "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ), 
-
-*/    
+        "transitions" => [
+            "nextPlayer" => ST_START_TURN, 
+            "endGame" => ST_END_GAME,
+        ],
+    ],
    
     // Final state.
-    // Please do not modify (and do not overload action/args methods).
-    99 => array(
+    // Please do not modify.
+    ST_END_GAME => [
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
         "action" => "stGameEnd",
-        "args" => "argGameEnd"
-    )
+        "args" => "argGameEnd",
+    ],
+];
 
-);
+$playerActionsGameStates = [
 
+    ST_FILL_FACTORIES => [
+        "name" => "fillFactories",
+        "description" => "",
+        "type" => "game",
+        "action" => "stFillFactories",
+        "transitions" => [ 
+            "next" => ST_PLAYER_CHOOSE_TILE,
+        ],
+    ],
 
+    ST_PLAYER_CHOOSE_TILE => [
+        "name" => "chooseTile",
+        "description" => clienttranslate('${actplayer} must choose tiles'),
+        "descriptionmyturn" => clienttranslate('${you} must choose tiles'),
+        "type" => "activeplayer",
+        "possibleactions" => [ 
+            "takeTiles" 
+        ],
+        "transitions" => [
+            "placeTiles" => ST_PLAYER_CHOOSE_LINE,
+        ]
+    ],
 
+    ST_PLAYER_CHOOSE_LINE => [
+        "name" => "chooseLine",
+        "description" => clienttranslate('${actplayer} must choose a line'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a line'),
+        "type" => "activeplayer",
+        "args" => "argChooseLine",
+        "possibleactions" => [ "selectLine" ],
+        "transitions" => [
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "chooseColumn" => ST_PLAYER_CHOOSE_COLUMN,
+        ],
+    ],  
+
+    ST_PLAYER_CHOOSE_COLUMN => [
+        "name" => "chooseColumn",
+        "description" => clienttranslate('${actplayer} must choose a column'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a column'),
+        "type" => "activeplayer",
+        "args" => "argChooseColumn",
+        "possibleactions" => [ "selectColumn" ],
+        "transitions" => [
+            "nextPlayer" => ST_NEXT_PLAYER,
+        ],
+
+    ],
+
+    ST_PLACE_TILES => [
+        "name" => "placeTiles",
+        "description" => "",
+        "type" => "game",
+        "updateGameProgression" => true,
+        "action" => "stPlaceTiles",
+        "transitions" => [ 
+            "next" => ST_NEXT_PLAYER,
+        ],
+    ],
+];
+ 
+$machinestates = $basicGameStates + $playerActionsGameStates;

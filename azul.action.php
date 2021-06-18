@@ -22,46 +22,50 @@
  */
   
   
-  class action_azul extends APP_GameAction
-  { 
+  class action_azul extends APP_GameAction { 
     // Constructor: please do not modify
-   	public function __default()
-  	{
-  	    if( self::isArg( 'notifwindow') )
-  	    {
-            $this->view = "common_notifwindow";
-  	        $this->viewArgs['table'] = self::getArg( "table", AT_posint, true );
-  	    }
-  	    else
-  	    {
-            $this->view = "azul_azul";
-            self::trace( "Complete reinitialization of board game" );
+   	public function __default() {
+      if (self::isArg( 'notifwindow')) {
+        $this->view = "common_notifwindow";
+        $this->viewArgs['table'] = self::getArg("table", AT_posint, true);
+      } else {
+        $this->view = "azul_azul";
+        self::trace( "Complete reinitialization of board game" );
       }
   	} 
-  	
-  	// TODO: defines your action entry points there
 
+    public function takeTiles() {
+      self::setAjaxMode();
 
-    /*
-    
-    Example:
-  	
-    public function myAction()
-    {
-        self::setAjaxMode();     
+      // Retrieve arguments
+      $id = self::getArg("id", AT_posint, true);
 
-        // Retrieve arguments
-        // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
+      $this->game->takeTiles($id);
 
-        // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
-        $this->game->myAction( $arg1, $arg2 );
-
-        self::ajaxResponse( );
+      self::ajaxResponse();
     }
-    
-    */
+
+    public function selectLine() {
+      self::setAjaxMode();
+
+      // Retrieve arguments
+      $id = self::getArg("id", AT_posint, true);
+
+      $this->game->selectLine($id);
+
+      self::ajaxResponse();
+    }
+
+    public function selectColumn() {
+      self::setAjaxMode();
+
+      // Retrieve arguments
+      $id = self::getArg("id", AT_posint, true);
+
+      $this->game->selectColumn($id);
+
+      self::ajaxResponse();
+    }
 
   }
   
