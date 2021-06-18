@@ -32,13 +32,13 @@ class Azul extends Table {
         parent::__construct();
         
         self::initGameStateLabels([
-            //    "my_first_global_variable" => 10,
-            //    "my_second_global_variable" => 11,
-            //      ...
-            //    "my_first_game_variant" => 100,
-            //    "my_second_game_variant" => 101,
-            //      ...
-        ]);        
+            FIRST_PLAYER_FOR_NEXT_TURN => 10,
+            VARIANT_OPTION => 100,
+        ]);
+
+        $this->tiles = self::getNew("module.common.deck");
+        $this->tiles->init("tile");
+        $this->tiles->autoreshuffle = true;      
 	}
 	
     protected function getGameName() {
@@ -64,8 +64,7 @@ class Azul extends Table {
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
         $values = [];
-        foreach( $players as $player_id => $player )
-        {
+        foreach ($players as $player_id => $player) {
             $color = array_shift( $default_colors );
             $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
         }
@@ -77,15 +76,16 @@ class Azul extends Table {
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
+        self::setGameStateInitialValue(FIRST_PLAYER_FOR_NEXT_TURN, intval(array_keys($players)[0]));
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
-        // TODO: setup the initial game situation here
+        // TODO set factories
        
+        // TODO set player tables
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -128,9 +128,8 @@ class Azul extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        // TODO: compute and return the game progression
-
-        return 0;
+        $maxColumns = intval(self::getUniqueValueFromDB("SELECT MAX(MOD(card_location_arg, 10)) FROM tile WHERE `card_location` like 'wall%'"));
+        return $maxColumns * 20;
     }
 
 
@@ -138,11 +137,9 @@ class Azul extends Table {
 //////////// Utility functions
 ////////////    
 
-    /*
-        In this space, you can put any utility methods useful for your game logic
-    */
-
-
+    function isVariant() {
+        return intval(self::getGameStateValue(VARIANT_OPTION)) === 2;
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
@@ -157,10 +154,9 @@ class Azul extends Table {
     
     Example:
 
-    function playCard( $card_id )
-    {
+    function playCard(int $card_id) {
         // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
+        self::checkAction('playCard'); 
         
         $player_id = self::getActivePlayerId();
         
@@ -168,16 +164,40 @@ class Azul extends Table {
         ...
         
         // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
+        self::notifyAllPlayers("cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), [
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'card_name' => $card_name,
             'card_id' => $card_id
-        ) );
+        ]);
           
     }
     
     */
+    
+    function takeTiles(int $id) {
+        self::checkAction('takeTiles'); 
+        
+        $playerId = self::getActivePlayerId();
+
+        // TODO
+    }
+
+    function selectLine($line) {
+        self::checkAction('selectLine'); 
+        
+        $playerId = self::getActivePlayerId();
+        
+        // TODO
+    }
+
+    function selectColumn($column) {
+        self::checkAction('selectColumn'); 
+        
+        $playerId = self::getActivePlayerId();
+        
+        // TODO
+    }
 
     
 //////////////////////////////////////////////////////////////////////////////
@@ -190,22 +210,19 @@ class Azul extends Table {
         game state.
     */
 
-    /*
-    
-    Example for game state "MyGameState":
-    
-    function argMyGameState()
-    {
-        // Get some values from the current game situation in database...
-    
-        // return values:
-        return array(
-            'variable1' => $value1,
-            'variable2' => $value2,
-            ...
-        );
-    }    
-    */
+    function argChooseLine() {
+        // TODO
+
+        return [
+        ];
+    }
+
+    function argChooseColumn() {
+        // TODO
+
+        return [
+        ];
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
@@ -220,14 +237,21 @@ class Azul extends Table {
     
     Example for game state "MyGameState":
 
-    function stMyGameState()
-    {
+    function stMyGameState() {
         // Do some stuff ...
         
         // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
+        $this->gamestate->nextState('some_gamestate_transition');
     }    
     */
+
+    function stFillFactories() {
+        // TODO
+    }
+
+    function stPlaceTiles() {
+        // TODO
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie
@@ -252,7 +276,7 @@ class Azul extends Table {
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
                 default:
-                    $this->gamestate->nextState( "zombiePass" );
+                    $this->gamestate->nextState("nextPlayer");
                 	break;
             }
 

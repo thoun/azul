@@ -107,6 +107,7 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "placeTiles" => ST_PLAYER_CHOOSE_LINE,
+            "nextPlayer" => ST_NEXT_PLAYER,
         ]
     ],
 

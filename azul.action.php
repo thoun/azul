@@ -49,9 +49,9 @@
       self::setAjaxMode();
 
       // Retrieve arguments
-      $id = self::getArg("id", AT_posint, true);
+      $line = self::getArg("line", AT_posint, true);
 
-      $this->game->selectLine($id);
+      $this->game->selectLine($line);
 
       self::ajaxResponse();
     }
@@ -60,9 +60,9 @@
       self::setAjaxMode();
 
       // Retrieve arguments
-      $id = self::getArg("id", AT_posint, true);
+      $column = self::getArg("column", AT_posint, true);
 
-      $this->game->selectColumn($id);
+      $this->game->selectColumn($column);
 
       self::ajaxResponse();
     }
