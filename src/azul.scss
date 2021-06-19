@@ -1,0 +1,10 @@
+@import url(../../../css/csslayer.css);
+
+@import 'players-tables/players-tables';
+@import 'playerboards';
+
+html {
+    background: url('img/background.jpg') #0D111A;
+    background-size: contain;
+    background-repeat: no-repeat;
+}

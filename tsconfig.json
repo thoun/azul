@@ -1,0 +1,19 @@
+{
+    "rootDir": ".", 
+    "compilerOptions": {
+      "target": "es5",
+      "module": "none",
+      "lib": ["dom", "esnext"],  
+      "sourceMap": false,
+      "outFile": "azul.js",
+    },
+    "files": [
+        "src/framework.d.ts",
+        "src/stock.d.ts",
+        "src/azul.d.ts",
+        "src/stock-utils.ts",
+        "src/players-tables/player-table.ts",
+        "src/minimap.ts",
+        "src/azul.ts"
+    ]
+}
