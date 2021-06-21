@@ -19,19 +19,11 @@
  *
  */
 
-
-/*
-
-Example:
-
-$this->card_types = array(
-    1 => array( "card_name" => ...,
-                ...
-              )
-);
-
-*/
-
+$this->factoriesByPlayers = [
+  2 => 5,
+  3 => 7,
+  4 => 9,
+];
 
 
 

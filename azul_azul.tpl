@@ -1,7 +1,7 @@
 {OVERALL_GAME_HEADER}
 
-<div id="market"></div>
+<div id="factories"></div>
 
-<div id="player-tables"></div>
+<div id="players-tables"></div>
 
 {OVERALL_GAME_FOOTER}

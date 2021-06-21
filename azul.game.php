@@ -111,8 +111,8 @@ class Azul extends Table {
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
-  
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
+
+        $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
   
         return $result;
     }
@@ -139,6 +139,14 @@ class Azul extends Table {
 
     function isVariant() {
         return intval(self::getGameStateValue(VARIANT_OPTION)) === 2;
+    }
+
+    function getFactoryNumber($playerNumber = null) {
+        if ($playerNumber == null) {
+            $playerNumber = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player "));
+        }
+
+        return $this->factoriesByPlayers[$playerNumber];
     }
 
 //////////////////////////////////////////////////////////////////////////////

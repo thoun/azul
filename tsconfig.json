@@ -11,9 +11,9 @@
         "src/framework.d.ts",
         "src/stock.d.ts",
         "src/azul.d.ts",
-        "src/stock-utils.ts",
+        "src/factories/factories.ts",
         "src/players-tables/player-table.ts",
-        "src/minimap.ts",
-        "src/azul.ts"
+        "src/azul.ts",
+        "src/define.ts"
     ]
 }

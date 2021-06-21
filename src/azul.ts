@@ -16,6 +16,7 @@ const log = isDebug ? console.log.bind(window.console) : function () { };
 class Azul implements AzulGame {
     private gamedatas: AzulGamedatas;
 
+    private factories: Factories;
     private playersTables: PlayerTable[] = [];
 
     constructor() {     
@@ -47,6 +48,7 @@ class Azul implements AzulGame {
         log('gamedatas', gamedatas);
 
         this.createPlayerPanels(gamedatas);
+        this.factories = new Factories(this, gamedatas.factoryNumber);
         this.createPlayerTables(gamedatas);
 
         this.setupNotifications();

@@ -15,6 +15,7 @@ interface AzulGamedatas {
     tablespeed: string;
 
     // Add here variables you set up in getAllDatas
+    factoryNumber: number;
 }
 
 interface AzulGame extends Game {
