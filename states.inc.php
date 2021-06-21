@@ -60,7 +60,7 @@ $basicGameStates = [
         "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => [ "" => ST_START ]
+        "transitions" => [ "" => ST_FILL_FACTORIES ]
     ],
 
     ST_NEXT_PLAYER => [
@@ -69,7 +69,8 @@ $basicGameStates = [
         "type" => "game",
         "action" => "stNextPlayer",
         "transitions" => [
-            "nextPlayer" => ST_START_TURN, 
+            "nextPlayer" => ST_PLAYER_CHOOSE_TILE, 
+            "endTurn" => ST_PLACE_TILES,
             "endGame" => ST_END_GAME,
         ],
     ],

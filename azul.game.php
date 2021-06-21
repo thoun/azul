@@ -19,7 +19,7 @@
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
-require_once('modules/php/constants.inc.php');
+require_once('modules/constants.inc.php');
 
 class Azul extends Table {
 	function __construct() {

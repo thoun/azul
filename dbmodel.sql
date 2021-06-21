@@ -18,11 +18,16 @@
 -- Note: The database schema is created from this file when the game starts. If you modify this file,
 --       you have to restart a game to see your changes in database.
 
+
+--   `card_type` int(1) NOT NULL, -- 0 : FP, 1 : black, 2 : white, 3 : blue, 4 : yellow, 5 : red
+--   `card_type_arg` int(1), -- unused
+--   `card_location` varchar(20) NOT NULL, -- deck (bag), factory, line${playerId}, wall${playerId}, discard
+--   `card_location_arg` int(11), -- factory : 0 for center 1-9 for factories, line : 0 for floor line, 1-5, wall : yx line/column or x for floor line
 CREATE TABLE IF NOT EXISTS `tile` (
    `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-   `card_type` int(1) NOT NULL, -- 0 : FP, 1 : black, 2 : white, 3 : blue, 4 : yellow, 5 : red
-   `card_type_arg` int(1), -- unused
-   `card_location` varchar(20) NOT NULL, -- deck (bag), factory, line${playerId}, wall${playerId}, discard
-   `card_location_arg` int(11), -- factory : 0 for center 1-9 for factories, line : 0 for floor line, 1-5, wall : yx line/column
+   `card_type` int(1) NOT NULL,
+   `card_type_arg` int(1),
+   `card_location` varchar(20) NOT NULL,
+   `card_location_arg` int(11),
    PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
