@@ -9,11 +9,52 @@
   height: 250px;
   display: inline-block;
 }
+#factories .factory-center {
+  position: absolute;
+  display: inline-block;
+}
+#factories.selectable .tile {
+  cursor: pointer;
+}
 
 .player-table {
   background: url("img/playerboard.jpg");
   width: 740px;
   height: 484px;
+}
+
+.tile {
+  width: 62px;
+  height: 62px;
+  display: inline-block;
+  position: absolute;
+  border: 2px outset;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px 2px black;
+}
+.tile.tile0 {
+  background: url("img/first-player.svg") white;
+  border-color: white;
+}
+.tile.tile1 {
+  background: url("img/black.svg");
+  border-color: #231f20;
+}
+.tile.tile2 {
+  background: url("img/cyan.svg");
+  border-color: #1dcad3;
+}
+.tile.tile3 {
+  background: url("img/blue.svg");
+  border-color: #0083ad;
+}
+.tile.tile4 {
+  background: url("img/yellow.svg");
+  border-color: #ffbf3c;
+}
+.tile.tile5 {
+  background: url("img/red.svg");
+  border-color: #f5333f;
 }
 
 html {

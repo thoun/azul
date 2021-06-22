@@ -48,7 +48,7 @@ class Azul implements AzulGame {
         log('gamedatas', gamedatas);
 
         this.createPlayerPanels(gamedatas);
-        this.factories = new Factories(this, gamedatas.factoryNumber);
+        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories);
         this.createPlayerTables(gamedatas);
 
         this.setupNotifications();
@@ -66,56 +66,24 @@ class Azul implements AzulGame {
         log( 'Entering state: '+stateName , args.args );
 
         switch (stateName) {
-            /*case 'lordStackSelection':
-                const limitToHidden = (args.args as EnteringLordStackSelectionArgs).limitToHidden;
-                this.setGamestateDescription(limitToHidden ? `limitToHidden${limitToHidden}` : '');
-                this.onEnteringLordStackSelection(args.args);
+            case 'chooseTile':
+                this.onEnteringChooseTile();
                 break;
-            case 'lordSelection':
-                const multiple = (args.args as EnteringLordSelectionArgs).multiple;
-                const number = (args.args as EnteringLordSelectionArgs).lords?.length;
-                this.setGamestateDescription(multiple ? (number > 1 ? 'multiple' : 'last') : '');
-                this.onEnteringLordSelection(args.args);
-                break;
-            case 'lordPlacement':
-                this.onEnteringLordPlacement(args.args);
-                break;
-            case 'lordSwap':
-                this.onEnteringLordSwap();
-                break;
-
-            case 'locationStackSelection':
-                const allHidden = (args.args as EnteringLocationStackSelectionArgs).allHidden;
-                this.setGamestateDescription(allHidden ? 'allHidden' : '');
-                this.onEnteringLocationStackSelection(args.args);
-                break;
-            case 'locationSelection':
-                this.onEnteringLocationSelection(args.args);
-                break;
-            case 'addLocation':
-                this.onEnteringLocationPlacement(args.args);
-                break;
-
-            case 'showScore':
-                Object.keys(this.gamedatas.players).forEach(playerId => (this as any).scoreCtrl[playerId].setValue(0));
-                this.onEnteringShowScore();
-                break;*/
         }
     }
     
-    private setGamestateDescription(property: string = '') {
+    /*private setGamestateDescription(property: string = '') {
         const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
         this.gamedatas.gamestate.description = `${originalState['description' + property]}`; 
         this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`; 
         (this as any).updatePageTitle();        
-    }
-
-    /*onEnteringLordStackSelection(args: EnteringLordStackSelectionArgs) {
-        this.lordsStacks.setMax(args.max);
-        if ((this as any).isCurrentPlayerActive()) {
-            this.lordsStacks.setSelectable(true, args.limitToHidden);
-        }
     }*/
+
+    onEnteringChooseTile() {
+        if ((this as any).isCurrentPlayerActive()) {
+            dojo.addClass('factories', 'selectable');
+        }
+    }
 
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
@@ -124,28 +92,15 @@ class Azul implements AzulGame {
         log( 'Leaving state: '+stateName );
 
         switch (stateName) {
-            /*case 'lordStackSelection':
-                this.onLeavingLordStackSelection();
+            case 'chooseTile':
+                this.onLeavingChooseTile();
                 break;
-            case 'lordSelection':
-                this.onLeavingLordSelection();
-                break;
-            case 'lordSwap':
-                this.onLeavingLordSwap();
-                break;
-
-            case 'locationStackSelection':
-                this.onLeavingLocationStackSelection();
-                break;
-            case 'locationSelection':
-                this.onLeavingLocationSelection();
-                break;*/
         }
     }
 
-    /*onLeavingLordStackSelection() {
-        this.lordsStacks.setSelectable(false, null);
-    }*/
+    onLeavingChooseTile() {
+        dojo.removeClass('factories', 'selectable');
+    }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -263,12 +218,12 @@ class Azul implements AzulGame {
         this.playersTables[playerId] = new PlayerTable(this, gamedatas.players[playerId]/*, gamedatas.playersTables[playerId]*/);
     }
 
-    public lordPick(id: number) {
-        if(!(this as any).checkAction('addLord')) {
+    public takeTiles(id: number) {
+        if(!(this as any).checkAction('takeTiles')) {
             return;
         }
 
-        this.takeAction('pickLord', {
+        this.takeAction('takeTiles', {
             id
         });
     }
@@ -306,9 +261,9 @@ class Azul implements AzulGame {
         //log( 'notifications subscriptions setup' );
 
         const notifs = [
-            /*['lordPlayed', ANIMATION_MS],
-            ['lordSwapped', ANIMATION_MS],
-            ['extraLordRevealed', ANIMATION_MS],
+            ['factoriesFilled', ANIMATION_MS],
+            ['tilesSelected', ANIMATION_MS],
+            /*['extraLordRevealed', ANIMATION_MS],
             ['locationPlayed', ANIMATION_MS],
             ['discardLords', ANIMATION_MS],
             ['discardLocations', ANIMATION_MS],
@@ -329,11 +284,13 @@ class Azul implements AzulGame {
         });
     }
 
-    /*notif_lordSwapped(notif: Notif<NotifLordSwappedArgs>) {
-        this.playersTables[notif.args.playerId].lordSwapped(notif.args);
-        this.minimaps[notif.args.playerId].lordSwapped(notif.args);
-        this.setNewScore(notif.args);
-    }*/
+    notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
+        this.factories.fillFactories(notif.args.factories);
+    }
+
+    notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
+        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles);
+    }
 
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */

@@ -1,0 +1,34 @@
+.tile {
+    width: 62px;
+    height: 62px;
+    display: inline-block;
+    position: absolute;
+    border: 2px outset;
+    border-radius: 5px;
+    box-shadow: 1px 1px 2px 2px black;
+
+    &.tile0 {
+        background: url('img/first-player.svg') white;
+        border-color: white;
+    }
+    &.tile1 {
+        background: url('img/black.svg');
+        border-color: #231f20;
+    }
+    &.tile2 {
+        background: url('img/cyan.svg');
+        border-color: #1dcad3;
+    }
+    &.tile3 {
+        background: url('img/blue.svg');
+        border-color: #0083ad;
+    }
+    &.tile4 {
+        background: url('img/yellow.svg');
+        border-color: #ffbf3c;
+    }
+    &.tile5 {
+        background: url('img/red.svg');
+        border-color: #f5333f;
+    }
+}

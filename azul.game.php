@@ -20,6 +20,11 @@
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
 require_once('modules/constants.inc.php');
+require_once('modules/tile.php');
+
+function getIdPredicate($tile) {
+    return $tile->id;
+};
 
 class Azul extends Table {
 	function __construct() {
@@ -83,9 +88,7 @@ class Azul extends Table {
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
-        // TODO set factories
-       
-        // TODO set player tables
+        $this->setupTiles();
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -113,6 +116,15 @@ class Azul extends Table {
         $result['players'] = self::getCollectionFromDb($sql);
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
+
+        $factories = [];
+        $factoryNumber = $result['factoryNumber'];
+        for ($factory=0; $factory<=$factoryNumber; $factory++) {
+            $factories[$factory] = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
+        }
+        $result['factories'] = $factories;
+       
+        // TODO set player tables
   
         return $result;
     }
@@ -147,6 +159,45 @@ class Azul extends Table {
         }
 
         return $this->factoriesByPlayers[$playerNumber];
+    }
+
+    function getTileFromDb($dbTile) {
+        if (!$dbTile || !array_key_exists('id', $dbTile)) {
+            throw new Error('tile doesn\'t exists '.json_encode($dbTile));
+        }
+        return new Tile($dbTile);
+    }
+
+    function getTilesFromDb(array $dbTiles) {
+        return array_map(function($dbTile) { return $this->getTileFromDb($dbTile); }, array_values($dbTiles));
+    }
+
+    function setupTiles() {
+        $cards = [];
+        $cards[] = [ 'type' => 0, 'type_arg' => null, 'nbr' => 1 ];
+        for ($color=1; $color<=5; $color++) {
+            $cards[] = [ 'type' => $color, 'type_arg' => null, 'nbr' => 20 ];
+        }
+        $this->tiles->createCards($cards, 'deck');
+        $this->tiles->shuffle('deck');
+    }
+
+    function putFirstPlayerTile(object $firstPlayerTokens, int $playerId) {
+        self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
+
+        // TODO put token on floor line
+    }
+
+    function getColor(int $type) {
+        $colorName = null;
+        switch ($type) {
+            case 1: $colorName = _('Black'); break;
+            case 2: $colorName = _('Cyan'); break;
+            case 3: $colorName = _('Blue'); break;
+            case 4: $colorName = _('Yellow'); break;
+            case 5: $colorName = _('Red'); break;
+        }
+        return $colorName;
     }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -188,7 +239,65 @@ class Azul extends Table {
         
         $playerId = self::getActivePlayerId();
 
-        // TODO
+        $tile = $this->getTileFromDb($this->tiles->getCard($id));
+
+        if ($tile->location !== 'factory') {
+            throw new Error("Tile is not in a factory");
+        }
+        if ($tile->type === 0) {
+            throw new Error("Tile is First Player token");
+        }
+
+        $factory = $tile->location_arg;
+        $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
+        
+        $selectedTiles = [];
+        $discardedTiles = [];
+        $hasFirstPlayer = false;
+
+        if ($factory == 0) {
+            $firstPlayerTokens = array_values(array_filter($factoryTiles, function ($fpTile) { return $fpTile->type == 0; }));
+            $hasFirstPlayer = count($firstPlayerTokens) > 0;
+
+            foreach($factoryTiles as $factoryTile) {
+                if ($tile->type == $factoryTile->type) {
+                    $selectedTiles[] = $factoryTile;
+                }
+            }
+
+            $this->tiles->moveCards(array_map('getIdPredicate', $selectedTiles), 'hand', $playerId);
+
+            if ($hasFirstPlayer) {
+                $this->putFirstPlayerTile($firstPlayerTokens[0], $playerId);
+            }
+        } else {
+            foreach($factoryTiles as $factoryTile) {
+                if ($tile->type == $factoryTile->type) {
+                    $selectedTiles[] = $factoryTile;
+                } else {
+                    $discardedTiles[] = $factoryTile;
+                }
+            }
+
+            $this->tiles->moveCards(array_map('getIdPredicate', $selectedTiles), 'hand', $playerId);
+            $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'factory', 0);
+        }
+
+        $message = clienttranslate('${player_name} takes ${number} ${color}');
+        if ($hasFirstPlayer) {
+            $message .= ' ' . clienttranslate('and First Player tile');
+        }
+
+        self::notifyAllPlayers('tilesSelected', $message, [
+            'player_id' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'number' => count($selectedTiles),
+            'color' => $this->getColor($tile->type),
+            'selectedTiles' => $selectedTiles,
+            'discardedTiles' => $discardedTiles,
+        ]);
+
+        $this->gamestate->nextState('placeTiles');
     }
 
     function selectLine($line) {
@@ -240,21 +349,24 @@ class Azul extends Table {
         Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
         The action method of state X is called everytime the current game state is set to X.
     */
-    
-    /*
-    
-    Example for game state "MyGameState":
-
-    function stMyGameState() {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState('some_gamestate_transition');
-    }    
-    */
 
     function stFillFactories() {
-        // TODO
+        $factories = [];
+
+        $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation(0, null, 'deck'))[0];
+        $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
+        $factories[0] = [$firstPlayerTile];
+
+        $factoryNumber = $this->getFactoryNumber();
+        for ($factory=1; $factory<=$factoryNumber; $factory++) {
+            $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
+        }
+
+        self::notifyAllPlayers("factoriesFilled", clienttranslate("A new turn begins"), [
+            'factories' => $factories,
+        ]);
+
+        $this->gamestate->nextState('next');
     }
 
     function stPlaceTiles() {

@@ -1,3 +1,10 @@
+interface Tile {
+    id: number;
+    type: number;
+    location: string;
+    location_arg: number;
+}
+
 /**
  * Your game interfaces
  */
@@ -16,15 +23,22 @@ interface AzulGamedatas {
 
     // Add here variables you set up in getAllDatas
     factoryNumber: number;
+    factories: { [factoryId: number]: Tile[] };
 }
 
 interface AzulGame extends Game {
+    takeTiles(id: number): void;
 }
 
 /*interface EnteringStackSelectionArgs {
     max: number;
 }*/
 
-/*interface NotifDiscardLordPickArgs {
-    discardedLords: Lord[];
-}*/
+interface NotifFactoriesFilledArgs {
+    factories: { [factoryId: number]: Tile[] };
+}
+
+interface NotifTilesSelectedArgs {
+    selectedTiles: Tile[];
+    discardedTiles: Tile[];
+}

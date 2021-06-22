@@ -1,6 +1,24 @@
+function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
+    var destination = document.getElementById(destinationId);
+    if (destination.contains(object)) {
+        return;
+    }
+    object.style.zIndex = '10';
+    var animation = (posX || posY) ?
+        game.slideToObjectPos(object, destinationId, posX, posY) :
+        game.slideToObject(object, destinationId);
+    dojo.connect(animation, 'onEnd', dojo.hitch(this, function () {
+        object.style.top = 'unset';
+        object.style.left = 'unset';
+        object.style.position = 'relative';
+        object.style.zIndex = 'unset';
+        destination.appendChild(object);
+    }));
+    animation.play();
+}
 var FACTORY_RADIUS = 125;
 var Factories = /** @class */ (function () {
-    function Factories(game, factoryNumber) {
+    function Factories(game, factoryNumber, factories) {
         this.game = game;
         this.factoryNumber = factoryNumber;
         var factoriesDiv = document.getElementById('factories');
@@ -9,12 +27,36 @@ var Factories = /** @class */ (function () {
         var centerY = radius + FACTORY_RADIUS;
         factoriesDiv.style.height = centerY * 2 + "px";
         var html = "<div>";
+        html += "<div id=\"factory0\" class=\"factory-center\" style=\"left: " + (centerX - radius + FACTORY_RADIUS) + "px; top: " + (centerY - radius + FACTORY_RADIUS) + "px; width: " + (radius - FACTORY_RADIUS) + "px; height: " + (radius - FACTORY_RADIUS) + "px;\"></div>";
         for (var i = 1; i <= factoryNumber; i++) {
-            html += "<div id=\"factory" + i + "\" class=\"factory\" style=\"left: " + (centerX - FACTORY_RADIUS) + "px; top: " + (centerY - FACTORY_RADIUS) + "px; transform: rotate(" + (i - 1) * 360 / factoryNumber + "deg) translateY(-" + radius + "px);\"></div>";
+            var angle = (i - 1) * Math.PI * 2 / factoryNumber; // in radians
+            var left = radius * Math.sin(angle);
+            var top_1 = radius * Math.cos(angle);
+            html += "<div id=\"factory" + i + "\" class=\"factory\" style=\"left: " + (centerX - FACTORY_RADIUS + left) + "px; top: " + (centerY - FACTORY_RADIUS - top_1) + "px;\"></div>";
         }
         html += "</div>";
         dojo.place(html, 'factories');
+        this.fillFactories(factories);
     }
+    Factories.prototype.fillFactories = function (factories) {
+        var _this = this;
+        var _loop_1 = function (i) {
+            var factory = factories[i];
+            factory.forEach(function (tile, index) {
+                dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"left: " + (50 + Math.floor(index / 2) * 90) + "px; top: " + (50 + Math.floor(index % 2) * 90) + "px;\"></div>", "factory" + i);
+                document.getElementById("tile" + tile.id).addEventListener('click', function () { return _this.game.takeTiles(tile.id); });
+            });
+        };
+        for (var i = 0; i <= this.factoryNumber; i++) {
+            _loop_1(i);
+        }
+    };
+    Factories.prototype.moveSelectedTiles = function (selectedTiles, discardedTiles) {
+        var _this = this;
+        console.log(selectedTiles, discardedTiles);
+        selectedTiles.forEach(function (tile) { return _this.game.slideToObjectAndDestroy($("tile" + tile.id), 'topbar'); });
+        discardedTiles.forEach(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), 'factory0'); });
+    };
     return Factories;
 }());
 var PlayerTable = /** @class */ (function () {
@@ -55,7 +97,7 @@ var Azul = /** @class */ (function () {
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
         this.createPlayerPanels(gamedatas);
-        this.factories = new Factories(this, gamedatas.factoryNumber);
+        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories);
         this.createPlayerTables(gamedatas);
         this.setupNotifications();
         log("Ending game setup");
@@ -68,82 +110,36 @@ var Azul = /** @class */ (function () {
     Azul.prototype.onEnteringState = function (stateName, args) {
         log('Entering state: ' + stateName, args.args);
         switch (stateName) {
-            /*case 'lordStackSelection':
-                const limitToHidden = (args.args as EnteringLordStackSelectionArgs).limitToHidden;
-                this.setGamestateDescription(limitToHidden ? `limitToHidden${limitToHidden}` : '');
-                this.onEnteringLordStackSelection(args.args);
+            case 'chooseTile':
+                this.onEnteringChooseTile();
                 break;
-            case 'lordSelection':
-                const multiple = (args.args as EnteringLordSelectionArgs).multiple;
-                const number = (args.args as EnteringLordSelectionArgs).lords?.length;
-                this.setGamestateDescription(multiple ? (number > 1 ? 'multiple' : 'last') : '');
-                this.onEnteringLordSelection(args.args);
-                break;
-            case 'lordPlacement':
-                this.onEnteringLordPlacement(args.args);
-                break;
-            case 'lordSwap':
-                this.onEnteringLordSwap();
-                break;
-
-            case 'locationStackSelection':
-                const allHidden = (args.args as EnteringLocationStackSelectionArgs).allHidden;
-                this.setGamestateDescription(allHidden ? 'allHidden' : '');
-                this.onEnteringLocationStackSelection(args.args);
-                break;
-            case 'locationSelection':
-                this.onEnteringLocationSelection(args.args);
-                break;
-            case 'addLocation':
-                this.onEnteringLocationPlacement(args.args);
-                break;
-
-            case 'showScore':
-                Object.keys(this.gamedatas.players).forEach(playerId => (this as any).scoreCtrl[playerId].setValue(0));
-                this.onEnteringShowScore();
-                break;*/
         }
     };
-    Azul.prototype.setGamestateDescription = function (property) {
-        if (property === void 0) { property = ''; }
-        var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
-        this.gamedatas.gamestate.description = "" + originalState['description' + property];
-        this.gamedatas.gamestate.descriptionmyturn = "" + originalState['descriptionmyturn' + property];
-        this.updatePageTitle();
-    };
-    /*onEnteringLordStackSelection(args: EnteringLordStackSelectionArgs) {
-        this.lordsStacks.setMax(args.max);
-        if ((this as any).isCurrentPlayerActive()) {
-            this.lordsStacks.setSelectable(true, args.limitToHidden);
-        }
+    /*private setGamestateDescription(property: string = '') {
+        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        this.gamedatas.gamestate.description = `${originalState['description' + property]}`;
+        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`;
+        (this as any).updatePageTitle();
     }*/
+    Azul.prototype.onEnteringChooseTile = function () {
+        if (this.isCurrentPlayerActive()) {
+            dojo.addClass('factories', 'selectable');
+        }
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
     Azul.prototype.onLeavingState = function (stateName) {
         log('Leaving state: ' + stateName);
         switch (stateName) {
-            /*case 'lordStackSelection':
-                this.onLeavingLordStackSelection();
+            case 'chooseTile':
+                this.onLeavingChooseTile();
                 break;
-            case 'lordSelection':
-                this.onLeavingLordSelection();
-                break;
-            case 'lordSwap':
-                this.onLeavingLordSwap();
-                break;
-
-            case 'locationStackSelection':
-                this.onLeavingLocationStackSelection();
-                break;
-            case 'locationSelection':
-                this.onLeavingLocationSelection();
-                break;*/
         }
     };
-    /*onLeavingLordStackSelection() {
-        this.lordsStacks.setSelectable(false, null);
-    }*/
+    Azul.prototype.onLeavingChooseTile = function () {
+        dojo.removeClass('factories', 'selectable');
+    };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
@@ -250,11 +246,11 @@ var Azul = /** @class */ (function () {
     Azul.prototype.createPlayerTable = function (gamedatas, playerId) {
         this.playersTables[playerId] = new PlayerTable(this, gamedatas.players[playerId] /*, gamedatas.playersTables[playerId]*/);
     };
-    Azul.prototype.lordPick = function (id) {
-        if (!this.checkAction('addLord')) {
+    Azul.prototype.takeTiles = function (id) {
+        if (!this.checkAction('takeTiles')) {
             return;
         }
-        this.takeAction('pickLord', {
+        this.takeAction('takeTiles', {
             id: id
         });
     };
@@ -288,26 +284,32 @@ var Azul = /** @class */ (function () {
         //log( 'notifications subscriptions setup' );
         var _this = this;
         var notifs = [
-        /*['lordPlayed', ANIMATION_MS],
-        ['lordSwapped', ANIMATION_MS],
-        ['extraLordRevealed', ANIMATION_MS],
-        ['locationPlayed', ANIMATION_MS],
-        ['discardLords', ANIMATION_MS],
-        ['discardLocations', ANIMATION_MS],
-        ['newPearlMaster', 1],
-        ['discardLordPick', 1],
-        ['discardLocationPick', 1],
-        ['lastTurn', 1],
-        ['scoreLords', SCORE_MS],
-        ['scoreLocations', SCORE_MS],
-        ['scoreCoalition', SCORE_MS],
-        ['scorePearlMaster', SCORE_MS],
-        ['scoreTotal', SCORE_MS],*/
+            ['factoriesFilled', ANIMATION_MS],
+            ['tilesSelected', ANIMATION_MS],
+            /*['extraLordRevealed', ANIMATION_MS],
+            ['locationPlayed', ANIMATION_MS],
+            ['discardLords', ANIMATION_MS],
+            ['discardLocations', ANIMATION_MS],
+            ['newPearlMaster', 1],
+            ['discardLordPick', 1],
+            ['discardLocationPick', 1],
+            ['lastTurn', 1],
+            ['scoreLords', SCORE_MS],
+            ['scoreLocations', SCORE_MS],
+            ['scoreCoalition', SCORE_MS],
+            ['scorePearlMaster', SCORE_MS],
+            ['scoreTotal', SCORE_MS],*/
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
             _this.notifqueue.setSynchronous(notif[0], notif[1]);
         });
+    };
+    Azul.prototype.notif_factoriesFilled = function (notif) {
+        this.factories.fillFactories(notif.args.factories);
+    };
+    Azul.prototype.notif_tilesSelected = function (notif) {
+        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles);
     };
     return Azul;
 }());
