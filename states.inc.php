@@ -71,7 +71,6 @@ $basicGameStates = [
         "transitions" => [
             "nextPlayer" => ST_PLAYER_CHOOSE_TILE, 
             "endTurn" => ST_PLACE_TILES,
-            "endGame" => ST_END_GAME,
         ],
     ],
    
@@ -146,6 +145,7 @@ $playerActionsGameStates = [
         "action" => "stPlaceTiles",
         "transitions" => [ 
             "next" => ST_NEXT_PLAYER,
+            "endGame" => ST_END_GAME,
         ],
     ],
 ];

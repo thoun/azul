@@ -69,6 +69,9 @@ class Azul implements AzulGame {
             case 'chooseTile':
                 this.onEnteringChooseTile();
                 break;
+            case 'chooseLine':
+                this.onEnteringChooseLine();
+                break;
         }
     }
     
@@ -85,6 +88,14 @@ class Azul implements AzulGame {
         }
     }
 
+    onEnteringChooseLine() {
+        if ((this as any).isCurrentPlayerActive()) {
+            for (let i=0; i<=5; i++) {
+                dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
+            }
+        }
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -95,11 +106,20 @@ class Azul implements AzulGame {
             case 'chooseTile':
                 this.onLeavingChooseTile();
                 break;
+            case 'chooseLine':
+                this.onLeavingChooseLine();
+                break;
         }
     }
 
     onLeavingChooseTile() {
         dojo.removeClass('factories', 'selectable');
+    }
+
+    onLeavingChooseLine() {
+        for (let i=0; i<=5; i++) {
+            dojo.removeClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
+        }
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -124,6 +144,10 @@ class Azul implements AzulGame {
 
 
     ///////////////////////////////////////////////////
+
+    public getPlayerId(): number {
+        return Number((this as any).player_id);
+    }
 
     private createPlayerPanels(gamedatas: AzulGamedatas) {
 
@@ -216,6 +240,16 @@ class Azul implements AzulGame {
 
     private createPlayerTable(gamedatas: AzulGamedatas, playerId: number) {
         this.playersTables[playerId] = new PlayerTable(this, gamedatas.players[playerId]/*, gamedatas.playersTables[playerId]*/);
+    }
+
+    public selectLine(line: number) {
+        if(!(this as any).checkAction('selectLine')) {
+            return;
+        }
+
+        this.takeAction('selectLine', {
+            line
+        });
     }
 
     public takeTiles(id: number) {

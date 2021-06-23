@@ -61,9 +61,23 @@ var Factories = /** @class */ (function () {
 }());
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
+        var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        dojo.place("<div id=\"player-table-wrapper-" + this.playerId + "\">\n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">\n                " + player.name + "\n            </div>\n            <div id=\"player-table-" + this.playerId + "\" class=\"player-table\">\n            </div>\n        </div>", 'players-tables');
+        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\">\n        <div class=\"player-name\" style=\"color: #" + player.color + ";\">\n            " + player.name + "\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table\">";
+        for (var i = 1; i <= 5; i++) {
+            html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
+        }
+        html += "<div id=\"player-table-" + this.playerId + "-line0\" class=\"floor line\"></div>";
+        html += "    </div>\n        </div>";
+        dojo.place(html, 'players-tables');
+        var _loop_2 = function (i) {
+            document.getElementById("player-table-" + this_1.playerId + "-line" + i).addEventListener('click', function () { return _this.game.selectLine(i); });
+        };
+        var this_1 = this;
+        for (var i = 0; i <= 5; i++) {
+            _loop_2(i);
+        }
     }
     return PlayerTable;
 }());
@@ -113,6 +127,9 @@ var Azul = /** @class */ (function () {
             case 'chooseTile':
                 this.onEnteringChooseTile();
                 break;
+            case 'chooseLine':
+                this.onEnteringChooseLine();
+                break;
         }
     };
     /*private setGamestateDescription(property: string = '') {
@@ -126,6 +143,13 @@ var Azul = /** @class */ (function () {
             dojo.addClass('factories', 'selectable');
         }
     };
+    Azul.prototype.onEnteringChooseLine = function () {
+        if (this.isCurrentPlayerActive()) {
+            for (var i = 0; i <= 5; i++) {
+                dojo.addClass("player-table-" + this.getPlayerId() + "-line" + i, 'selectable');
+            }
+        }
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -135,10 +159,18 @@ var Azul = /** @class */ (function () {
             case 'chooseTile':
                 this.onLeavingChooseTile();
                 break;
+            case 'chooseLine':
+                this.onLeavingChooseLine();
+                break;
         }
     };
     Azul.prototype.onLeavingChooseTile = function () {
         dojo.removeClass('factories', 'selectable');
+    };
+    Azul.prototype.onLeavingChooseLine = function () {
+        for (var i = 0; i <= 5; i++) {
+            dojo.removeClass("player-table-" + this.getPlayerId() + "-line" + i, 'selectable');
+        }
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -157,6 +189,9 @@ var Azul = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Azul.prototype.getPlayerId = function () {
+        return Number(this.player_id);
+    };
     Azul.prototype.createPlayerPanels = function (gamedatas) {
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
@@ -245,6 +280,14 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.createPlayerTable = function (gamedatas, playerId) {
         this.playersTables[playerId] = new PlayerTable(this, gamedatas.players[playerId] /*, gamedatas.playersTables[playerId]*/);
+    };
+    Azul.prototype.selectLine = function (line) {
+        if (!this.checkAction('selectLine')) {
+            return;
+        }
+        this.takeAction('selectLine', {
+            line: line
+        });
     };
     Azul.prototype.takeTiles = function (id) {
         if (!this.checkAction('takeTiles')) {

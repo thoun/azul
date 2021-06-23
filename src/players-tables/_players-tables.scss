@@ -2,4 +2,24 @@
     background: url('img/playerboard.jpg');
     width: 740px;
     height: 484px;
+    position: relative;
+
+    .line {
+        display: inline-block;
+        position: absolute;
+        right: 389px;
+        border: 3px dashed transparent;
+        height: 63px;
+
+        &.floor {
+            right: 209px;
+            top: 362px;
+            left: 1px;
+            height: 116px;
+        }
+
+        &.selectable {
+            border-color: red;
+        }
+    }
 }

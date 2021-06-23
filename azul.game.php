@@ -182,10 +182,18 @@ class Azul extends Table {
         $this->tiles->shuffle('deck');
     }
 
-    function putFirstPlayerTile(object $firstPlayerTokens, int $playerId) {
+    function putFirstPlayerTile(array $firstPlayerTokens, int $playerId) {
         self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
 
-        // TODO put token on floor line
+        $this->placeTilesOnFloorLine($firstPlayerTokens);
+    }
+
+    function placeTilesOnLine(array $tiles, int $line) {
+        // TODO
+    }
+
+    function placeTilesOnFloorLine(array $tiles) {
+        // TODO
     }
 
     function getColor(int $type) {
@@ -200,6 +208,11 @@ class Azul extends Table {
         return $colorName;
     }
 
+    function multipleColumnsForLineWithColor($line, $type) {
+        // TODO sometimes Yes with Variant
+        return false;
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
 //////////// 
@@ -207,31 +220,6 @@ class Azul extends Table {
     /*
         Each time a player is doing some game action, one of the methods below is called.
         (note: each method below must match an input method in azul.action.php)
-    */
-
-    /*
-    
-    Example:
-
-    function playCard(int $card_id) {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction('playCard'); 
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers("cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), [
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ]);
-          
-    }
-    
     */
     
     function takeTiles(int $id) {
@@ -268,7 +256,7 @@ class Azul extends Table {
             $this->tiles->moveCards(array_map('getIdPredicate', $selectedTiles), 'hand', $playerId);
 
             if ($hasFirstPlayer) {
-                $this->putFirstPlayerTile($firstPlayerTokens[0], $playerId);
+                $this->putFirstPlayerTile($firstPlayerTokens, $playerId);
             }
         } else {
             foreach($factoryTiles as $factoryTile) {
@@ -300,12 +288,23 @@ class Azul extends Table {
         $this->gamestate->nextState('placeTiles');
     }
 
-    function selectLine($line) {
+    function selectLine(int $line) {
         self::checkAction('selectLine'); 
         
         $playerId = self::getActivePlayerId();
-        
-        // TODO
+
+        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        if ($line > 0) {
+            $this->placeTilesOnLine($tiles, $line);
+        } else {
+            $this->placeTilesOnFloorLine($tiles);
+        }
+
+        if ($this->multipleColumnsForLineWithColor($line, $tiles[0]->type)) {
+            $this->gamestate->nextState('chooseColumn');
+        } else {
+            $this->gamestate->nextState('nextPlayer');
+        }
     }
 
     function selectColumn($column) {
@@ -314,6 +313,8 @@ class Azul extends Table {
         $playerId = self::getActivePlayerId();
         
         // TODO
+
+        $this->gamestate->nextState('nextPlayer');
     }
 
     
@@ -369,9 +370,35 @@ class Azul extends Table {
         $this->gamestate->nextState('next');
     }
 
+    function stNextPlayer() {
+        $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') === 0;
+
+        if ($factoriesAllEmpty) {
+            $this->gamestate->nextState('endTurn');
+        } else {
+            $this->activeNextPlayer();
+        
+            $playerId = self::getActivePlayerId();
+            self::giveExtraTime($playerId);
+
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
     function stPlaceTiles() {
         // TODO
+
+        if ($this->getGameProgression() === 30) {
+            $this->gamestate->nextState('endGame');
+        } else {
+            $playerId = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
+            $this->gamestate->changeActivePlayer($playerId);
+            self::giveExtraTime($playerId);
+
+            $this->gamestate->nextState('next');
+        }
     }
+    
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

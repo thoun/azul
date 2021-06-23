@@ -28,6 +28,7 @@ interface AzulGamedatas {
 
 interface AzulGame extends Game {
     takeTiles(id: number): void;
+    selectLine(line: number): void;
 }
 
 /*interface EnteringStackSelectionArgs {
