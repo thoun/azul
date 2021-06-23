@@ -78,9 +78,31 @@ var PlayerTable = /** @class */ (function () {
         for (var i = 0; i <= 5; i++) {
             _loop_2(i);
         }
+        console.log(player.lines);
+        var _loop_3 = function (i) {
+            var tiles = player.lines.filter(function (tile) { return tile.line === i; });
+            this_2.placeTilesOnLine(tiles, i);
+        };
+        var this_2 = this;
+        for (var i = 0; i <= 5; i++) {
+            _loop_3(i);
+        }
     }
+    PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
+        var _this = this;
+        var top = line ? 0 : 43;
+        tiles.forEach(function (tile) {
+            var position = line ? "right: " + (tile.column - 1) * 69 + "px" : "left: " + (3 + (tile.column - 1) * 74) + "px";
+            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + position + "; top: " + top + "px;\"></div>", "player-table-" + _this.playerId + "-line" + line);
+        });
+    };
     return PlayerTable;
 }());
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
+};
 var ANIMATION_MS = 500;
 var SCORE_MS = 1500;
 var isDebug = window.location.host == 'studio.boardgamearena.com';
@@ -192,6 +214,9 @@ var Azul = /** @class */ (function () {
     Azul.prototype.getPlayerId = function () {
         return Number(this.player_id);
     };
+    Azul.prototype.getPlayerTable = function (playerId) {
+        return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
+    };
     Azul.prototype.createPlayerPanels = function (gamedatas) {
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
@@ -270,16 +295,15 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.createPlayerTables = function (gamedatas) {
         var _this = this;
-        var currentPlayer = Object.values(gamedatas.players).find(function (player) { return Number(player.id) === Number(_this.player_id); });
-        if (currentPlayer) {
-            this.createPlayerTable(gamedatas, Number(currentPlayer.id));
-        }
-        Object.values(gamedatas.players).filter(function (player) { return Number(player.id) !== Number(_this.player_id); }).forEach(function (player) {
+        var players = Object.values(gamedatas.players).sort(function (a, b) { return a.playerNo - b.playerNo; });
+        var playerIndex = players.findIndex(function (player) { return Number(player.id) === Number(_this.player_id); });
+        var orderedPlayers = playerIndex > 0 ? __spreadArray(__spreadArray([], players.slice(playerIndex)), players.slice(0, playerIndex)) : players;
+        orderedPlayers.forEach(function (player) {
             return _this.createPlayerTable(gamedatas, Number(player.id));
         });
     };
     Azul.prototype.createPlayerTable = function (gamedatas, playerId) {
-        this.playersTables[playerId] = new PlayerTable(this, gamedatas.players[playerId] /*, gamedatas.playersTables[playerId]*/);
+        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId] /*, gamedatas.playersTables[playerId]*/));
     };
     Azul.prototype.selectLine = function (line) {
         if (!this.checkAction('selectLine')) {
@@ -329,6 +353,7 @@ var Azul = /** @class */ (function () {
         var notifs = [
             ['factoriesFilled', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
+            ['tilesPlacedOnLine', ANIMATION_MS],
             /*['extraLordRevealed', ANIMATION_MS],
             ['locationPlayed', ANIMATION_MS],
             ['discardLords', ANIMATION_MS],
@@ -353,6 +378,9 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.notif_tilesSelected = function (notif) {
         this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles);
+    };
+    Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.tiles, notif.args.line);
     };
     return Azul;
 }());

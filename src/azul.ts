@@ -149,6 +149,10 @@ class Azul implements AzulGame {
         return Number((this as any).player_id);
     }
 
+    getPlayerTable(playerId: number): PlayerTable {
+        return this.playersTables.find(playerTable => playerTable.playerId === playerId);
+    }
+
     private createPlayerPanels(gamedatas: AzulGamedatas) {
 
         Object.values(gamedatas.players).forEach(player => {
@@ -229,18 +233,20 @@ class Azul implements AzulGame {
     }
 
     private createPlayerTables(gamedatas: AzulGamedatas) {
-        const currentPlayer = Object.values(gamedatas.players).find(player => Number(player.id) === Number((this as any).player_id));
-        if (currentPlayer) {
-            this.createPlayerTable(gamedatas, Number(currentPlayer.id));
-        }
-        Object.values(gamedatas.players).filter(player => Number(player.id) !== Number((this as any).player_id)).forEach(player => 
+        const players = Object.values(gamedatas.players).sort((a, b) => a.playerNo - b.playerNo);
+        const playerIndex = players.findIndex(player => Number(player.id) === Number((this as any).player_id));
+        const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
+
+        orderedPlayers.forEach(player => 
             this.createPlayerTable(gamedatas, Number(player.id))
         );
     }
 
     private createPlayerTable(gamedatas: AzulGamedatas, playerId: number) {
-        this.playersTables[playerId] = new PlayerTable(this, gamedatas.players[playerId]/*, gamedatas.playersTables[playerId]*/);
+        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId]/*, gamedatas.playersTables[playerId]*/));
     }
+
+    
 
     public selectLine(line: number) {
         if(!(this as any).checkAction('selectLine')) {
@@ -297,6 +303,7 @@ class Azul implements AzulGame {
         const notifs = [
             ['factoriesFilled', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
+            ['tilesPlacedOnLine', ANIMATION_MS],
             /*['extraLordRevealed', ANIMATION_MS],
             ['locationPlayed', ANIMATION_MS],
             ['discardLords', ANIMATION_MS],
@@ -324,6 +331,10 @@ class Azul implements AzulGame {
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
         this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles);
+    }
+
+    notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.tiles, notif.args.line);
     }
 
     /* This enable to inject translatable styled things to logs or action bar */

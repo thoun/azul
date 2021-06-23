@@ -13,7 +13,7 @@
   position: absolute;
   display: inline-block;
 }
-#factories.selectable .tile {
+#factories.selectable .tile:not(.tile0) {
   cursor: pointer;
 }
 

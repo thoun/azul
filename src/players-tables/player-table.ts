@@ -1,9 +1,9 @@
 class PlayerTable {
-    private playerId: number;
+    public playerId: number;
 
     constructor(
         private game: AzulGame, 
-        player: Player) {
+        player: AzulPlayer) {
 
         this.playerId = Number(player.id);
 
@@ -24,5 +24,19 @@ class PlayerTable {
         for (let i=0; i<=5; i++) {
             document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
         }
+
+        console.log(player.lines);
+        for (let i=0; i<=5; i++) {
+            const tiles = player.lines.filter(tile => tile.line === i);
+            this.placeTilesOnLine(tiles, i);
+        }
+    }
+
+    public placeTilesOnLine(tiles: Tile[], line: number) {
+        const top = line ? 0 : 43;
+        tiles.forEach(tile => {
+            const position = line ? `right: ${(tile.column-1) * 69}px` : `left: ${3 + (tile.column-1) * 74}px`;
+            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${position}; top: ${top}px;"></div>`, `player-table-${this.playerId}-line${line}`);
+        });
     }
 }

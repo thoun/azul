@@ -15,7 +15,7 @@
     }
 
     &.selectable {
-        .tile {
+        .tile:not(.tile0) {
             cursor: pointer;
         }
     }

@@ -112,7 +112,7 @@ class Azul extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
+        $sql = "SELECT player_id id, player_score score player_no playerNo FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
@@ -123,6 +123,11 @@ class Azul extends Table {
             $factories[$factory] = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
         }
         $result['factories'] = $factories;
+
+        foreach($result['players'] as $playerId => &$player) {
+            $player['lines'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
+            $player['playerNo'] = intval($player['playerNo']);
+        }
        
         // TODO set player tables
   
@@ -140,7 +145,7 @@ class Azul extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        $maxColumns = intval(self::getUniqueValueFromDB("SELECT MAX(MOD(card_location_arg, 10)) FROM tile WHERE `card_location` like 'wall%'"));
+        $maxColumns = intval(self::getUniqueValueFromDB("SELECT MAX(MOD(card_location_arg, 100)) FROM tile WHERE `card_location` like 'wall%'"));
         return $maxColumns * 20;
     }
 
@@ -185,15 +190,32 @@ class Azul extends Table {
     function putFirstPlayerTile(array $firstPlayerTokens, int $playerId) {
         self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
 
-        $this->placeTilesOnFloorLine($firstPlayerTokens);
+        $this->placeTilesOnLine($playerId, $firstPlayerTokens, 0);
     }
 
-    function placeTilesOnLine(array $tiles, int $line) {
-        // TODO
-    }
+    function placeTilesOnLine(int $playerId, array $tiles, int $line) {
+        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
-    function placeTilesOnFloorLine(array $tiles) {
-        // TODO
+        $startIndex = count(array_values(array_filter(
+            $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), function($tile) use ($line) { return $tile->line === $line; })
+        ));
+
+        foreach ($tiles as $tile) {
+            $this->tiles->moveCard($tile->id, 'line'.$playerId, $line*100 + (++$startIndex));
+        }
+
+        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
+
+        $message = $tiles[0]->type == 0 ? '' : clienttranslate('TODO');
+
+        self::notifyAllPlayers('tilesPlacedOnLine', $message, [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'number' => count($tiles),
+            'color' => $this->getColor($tiles[0]->type),
+            'tiles' => $tiles,
+            'line' => $line,
+        ]);
     }
 
     function getColor(int $type) {
@@ -236,7 +258,7 @@ class Azul extends Table {
             throw new Error("Tile is First Player token");
         }
 
-        $factory = $tile->location_arg;
+        $factory = $tile->column;
         $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
         
         $selectedTiles = [];
@@ -277,7 +299,7 @@ class Azul extends Table {
         }
 
         self::notifyAllPlayers('tilesSelected', $message, [
-            'player_id' => $playerId,
+            'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'number' => count($selectedTiles),
             'color' => $this->getColor($tile->type),
@@ -294,11 +316,7 @@ class Azul extends Table {
         $playerId = self::getActivePlayerId();
 
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-        if ($line > 0) {
-            $this->placeTilesOnLine($tiles, $line);
-        } else {
-            $this->placeTilesOnFloorLine($tiles);
-        }
+        $this->placeTilesOnLine($playerId, $tiles, $line);
 
         if ($this->multipleColumnsForLineWithColor($line, $tiles[0]->type)) {
             $this->gamestate->nextState('chooseColumn');

@@ -2,7 +2,13 @@ interface Tile {
     id: number;
     type: number;
     location: string;
-    location_arg: number;
+    line: number;
+    column: number;
+}
+
+interface AzulPlayer extends Player {
+    lines: Tile[];
+    playerNo: number;
 }
 
 /**
@@ -18,7 +24,7 @@ interface AzulGamedatas {
     neutralized_player_id: string;
     notifications: {last_packet_id: string, move_nbr: string}
     playerorder: (string | number)[];
-    players: { [playerId: number]: Player };
+    players: { [playerId: number]: AzulPlayer };
     tablespeed: string;
 
     // Add here variables you set up in getAllDatas
@@ -42,4 +48,10 @@ interface NotifFactoriesFilledArgs {
 interface NotifTilesSelectedArgs {
     selectedTiles: Tile[];
     discardedTiles: Tile[];
+}
+
+interface NotifTilesPlacedOnLineArgs {
+    playerId: number;
+    tiles: Tile[];
+    line: number;
 }
