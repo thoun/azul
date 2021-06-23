@@ -52,6 +52,7 @@ interface NotifTilesSelectedArgs {
 
 interface NotifTilesPlacedOnLineArgs {
     playerId: number;
-    tiles: Tile[];
     line: number;
+    placedTiles: Tile[];
+    discardedTiles: Tile[];
 }

@@ -37,8 +37,11 @@ class PlayerTable {
             if (document.getElementById(`tile${tile.id}`)) {
                 dojo.destroy(`tile${tile.id}`);
             }
-            const position = line ? `right: ${(tile.column-1) * 69}px` : `left: ${3 + (tile.column-1) * 74}px`;
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${position}; top: ${top}px;"></div>`, `player-table-${this.playerId}-line${line}`);
+
+            if (line !== 0 || tile.column <= 7) {
+                const position = line ? `right: ${(tile.column-1) * 69}px` : `left: ${3 + (tile.column-1) * 74}px`;
+                dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${position}; top: ${top}px;"></div>`, `player-table-${this.playerId}-line${line}`);
+            }
         });
     }
 }

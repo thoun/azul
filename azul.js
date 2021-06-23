@@ -93,8 +93,10 @@ var PlayerTable = /** @class */ (function () {
             if (document.getElementById("tile" + tile.id)) {
                 dojo.destroy("tile" + tile.id);
             }
-            var position = line ? "right: " + (tile.column - 1) * 69 + "px" : "left: " + (3 + (tile.column - 1) * 74) + "px";
-            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + position + "; top: " + top + "px;\"></div>", "player-table-" + _this.playerId + "-line" + line);
+            if (line !== 0 || tile.column <= 7) {
+                var position = line ? "right: " + (tile.column - 1) * 69 + "px" : "left: " + (3 + (tile.column - 1) * 74) + "px";
+                dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + position + "; top: " + top + "px;\"></div>", "player-table-" + _this.playerId + "-line" + line);
+            }
         });
     };
     return PlayerTable;
@@ -380,7 +382,9 @@ var Azul = /** @class */ (function () {
         this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles);
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.tiles, notif.args.line);
+        console.log(notif.args);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
     };
     return Azul;
 }());

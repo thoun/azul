@@ -194,13 +194,25 @@ class Azul extends Table {
     }
 
     function placeTilesOnLine(int $playerId, array $tiles, int $line) {
-        $currentTilesInLine = $this->getTilesFromLine($playerId, $line);
-        $startIndex = count($currentTilesInLine);
+        $startIndex = count($this->getTilesFromLine($playerId, $line));
+        $startIndexFloorLine = count($this->getTilesFromLine($playerId, $line));
+
+        $placedTiles = [];
+        $discardedTiles = [];
 
         foreach ($tiles as $tile) {
-            $tile->line = $line;
-            $tile->column = ++$startIndex;
-            $this->tiles->moveCard($tile->id, 'line'.$playerId, $line*100 + $tile->column);
+            $aimColumn = ++$startIndex;
+            if ($line == 0 || $aimColumn <= $line) {
+                $tile->line = $line;
+                $tile->column = $aimColumn;
+                $placedTiles[] = $tile;
+            } else {
+                $tile->line = 0;
+                $tile->column = ++$startIndexFloorLine;
+                $discardedTiles[] = $tile;
+            }
+
+            $this->tiles->moveCard($tile->id, 'line'.$playerId, $tile->line * 100 + $tile->column);
         }
 
         $message = $tiles[0]->type == 0 ? '' : clienttranslate('TODO');
@@ -210,8 +222,9 @@ class Azul extends Table {
             'player_name' => self::getActivePlayerName(),
             'number' => count($tiles),
             'color' => $this->getColor($tiles[0]->type),
-            'tiles' => $tiles,
             'line' => $line,
+            'placedTiles' => $placedTiles,
+            'discardedTiles' => $discardedTiles,
         ]);
     }
 
@@ -371,7 +384,7 @@ class Azul extends Table {
 
     function argChooseLine() {
         $playerId = self::getActivePlayerId();
-        
+
         return [
             'lines' => $this->availableLines($playerId),
         ];

@@ -332,7 +332,9 @@ class Azul implements AzulGame {
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.tiles, notif.args.line);
+        console.log(notif.args);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
     }
 
     /* This enable to inject translatable styled things to logs or action bar */
