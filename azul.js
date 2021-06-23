@@ -53,7 +53,6 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.moveSelectedTiles = function (selectedTiles, discardedTiles) {
         var _this = this;
-        console.log(selectedTiles, discardedTiles);
         selectedTiles.forEach(function (tile) { return _this.game.slideToObjectAndDestroy($("tile" + tile.id), 'topbar'); });
         discardedTiles.forEach(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), 'factory0'); });
     };
@@ -78,7 +77,6 @@ var PlayerTable = /** @class */ (function () {
         for (var i = 0; i <= 5; i++) {
             _loop_2(i);
         }
-        console.log(player.lines);
         var _loop_3 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
             this_2.placeTilesOnLine(tiles, i);
@@ -92,6 +90,9 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         var top = line ? 0 : 43;
         tiles.forEach(function (tile) {
+            if (document.getElementById("tile" + tile.id)) {
+                dojo.destroy("tile" + tile.id);
+            }
             var position = line ? "right: " + (tile.column - 1) * 69 + "px" : "left: " + (3 + (tile.column - 1) * 74) + "px";
             dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + position + "; top: " + top + "px;\"></div>", "player-table-" + _this.playerId + "-line" + line);
         });
@@ -150,7 +151,7 @@ var Azul = /** @class */ (function () {
                 this.onEnteringChooseTile();
                 break;
             case 'chooseLine':
-                this.onEnteringChooseLine();
+                this.onEnteringChooseLine(args.args);
                 break;
         }
     };
@@ -165,11 +166,10 @@ var Azul = /** @class */ (function () {
             dojo.addClass('factories', 'selectable');
         }
     };
-    Azul.prototype.onEnteringChooseLine = function () {
+    Azul.prototype.onEnteringChooseLine = function (args) {
+        var _this = this;
         if (this.isCurrentPlayerActive()) {
-            for (var i = 0; i <= 5; i++) {
-                dojo.addClass("player-table-" + this.getPlayerId() + "-line" + i, 'selectable');
-            }
+            args.lines.forEach(function (i) { return dojo.addClass("player-table-" + _this.getPlayerId() + "-line" + i, 'selectable'); });
         }
     };
     // onLeavingState: this method is called each time we are leaving a game state.

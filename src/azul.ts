@@ -70,7 +70,7 @@ class Azul implements AzulGame {
                 this.onEnteringChooseTile();
                 break;
             case 'chooseLine':
-                this.onEnteringChooseLine();
+                this.onEnteringChooseLine(args.args);
                 break;
         }
     }
@@ -88,11 +88,9 @@ class Azul implements AzulGame {
         }
     }
 
-    onEnteringChooseLine() {
+    onEnteringChooseLine(args: EnteringChooseLineArgs) {
         if ((this as any).isCurrentPlayerActive()) {
-            for (let i=0; i<=5; i++) {
-                dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
-            }
+            args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
         }
     }
 

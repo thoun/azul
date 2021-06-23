@@ -112,7 +112,7 @@ class Azul extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score player_no playerNo FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
@@ -194,17 +194,14 @@ class Azul extends Table {
     }
 
     function placeTilesOnLine(int $playerId, array $tiles, int $line) {
-        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-
-        $startIndex = count(array_values(array_filter(
-            $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), function($tile) use ($line) { return $tile->line === $line; })
-        ));
+        $currentTilesInLine = $this->getTilesFromLine($playerId, $line);
+        $startIndex = count($currentTilesInLine);
 
         foreach ($tiles as $tile) {
-            $this->tiles->moveCard($tile->id, 'line'.$playerId, $line*100 + (++$startIndex));
+            $tile->line = $line;
+            $tile->column = ++$startIndex;
+            $this->tiles->moveCard($tile->id, 'line'.$playerId, $line*100 + $tile->column);
         }
-
-        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
 
         $message = $tiles[0]->type == 0 ? '' : clienttranslate('TODO');
 
@@ -233,6 +230,28 @@ class Azul extends Table {
     function multipleColumnsForLineWithColor($line, $type) {
         // TODO sometimes Yes with Variant
         return false;
+    }
+
+    function getTilesFromLine(int $playerId, int $line) {
+        return array_values(array_filter(
+            $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), function($tile) use ($line) { return $tile->line == $line; })
+        );
+    }
+
+    function availableLines(int $playerId) {
+
+        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $color = $tiles[0]->type;
+
+        $lines = [0];
+        for ($i=1; $i<=5; $i++) {
+            $lineTiles = $this->getTilesFromLine($playerId, $i);
+            if (count($lineTiles) == 0 || $lineTiles[0]->type == $color) {
+                $lines[] = $i;
+            }
+        }
+
+        return $lines;
     }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -315,6 +334,10 @@ class Azul extends Table {
         
         $playerId = self::getActivePlayerId();
 
+        if (array_search($line, $this->availableLines($playerId)) === false) {
+            throw new Error('Line not available');
+        }
+
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $this->placeTilesOnLine($playerId, $tiles, $line);
 
@@ -347,9 +370,10 @@ class Azul extends Table {
     */
 
     function argChooseLine() {
-        // TODO
-
+        $playerId = self::getActivePlayerId();
+        
         return [
+            'lines' => $this->availableLines($playerId),
         ];
     }
 

@@ -41,7 +41,6 @@ class Factories {
     }
 
     public moveSelectedTiles(selectedTiles: Tile[], discardedTiles: Tile[]) {
-        console.log(selectedTiles, discardedTiles);
         selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
         discardedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), 'factory0'));
     }

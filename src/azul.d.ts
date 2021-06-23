@@ -37,9 +37,9 @@ interface AzulGame extends Game {
     selectLine(line: number): void;
 }
 
-/*interface EnteringStackSelectionArgs {
-    max: number;
-}*/
+interface EnteringChooseLineArgs {
+    lines: number[];
+}
 
 interface NotifFactoriesFilledArgs {
     factories: { [factoryId: number]: Tile[] };
