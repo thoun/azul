@@ -17,6 +17,7 @@
     &.selectable {
         .tile:not(.tile0) {
             cursor: pointer;
+            pointer-events: all;
         }
     }
 }

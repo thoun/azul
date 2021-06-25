@@ -10,6 +10,7 @@
         right: 389px;
         border: 3px dashed transparent;
         height: 63px;
+        pointer-events: none;
 
         &.floor {
             right: 209px;
@@ -20,6 +21,7 @@
 
         &.selectable {
             border-color: red;
+            pointer-events: all;
         }
     }
 }

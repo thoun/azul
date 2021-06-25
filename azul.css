@@ -15,6 +15,7 @@
 }
 #factories.selectable .tile:not(.tile0) {
   cursor: pointer;
+  pointer-events: all;
 }
 
 .player-table {
@@ -29,6 +30,7 @@
   right: 389px;
   border: 3px dashed transparent;
   height: 63px;
+  pointer-events: none;
 }
 .player-table .line.floor {
   right: 209px;
@@ -38,6 +40,7 @@
 }
 .player-table .line.selectable {
   border-color: red;
+  pointer-events: all;
 }
 
 .tile {
@@ -48,6 +51,7 @@
   border: 2px outset;
   border-radius: 5px;
   box-shadow: 1px 1px 2px 2px black;
+  pointer-events: none;
 }
 .tile.tile0 {
   background: url("img/first-player.svg") white;
