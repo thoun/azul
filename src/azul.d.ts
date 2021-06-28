@@ -8,6 +8,7 @@ interface Tile {
 
 interface AzulPlayer extends Player {
     lines: Tile[];
+    wall: Tile[];
     playerNo: number;
 }
 
@@ -35,6 +36,8 @@ interface AzulGamedatas {
 interface AzulGame extends Game {
     takeTiles(id: number): void;
     selectLine(line: number): void;
+    removeTile(tile: Tile): void;
+    removeTiles(tiles: Tile[]): void;
 }
 
 interface EnteringChooseLineArgs {
@@ -55,4 +58,29 @@ interface NotifTilesPlacedOnLineArgs {
     line: number;
     placedTiles: Tile[];
     discardedTiles: Tile[];
+}
+
+interface WallTilePointDetail {
+    points: number;
+    rowTiles: Tile[];
+    columnTiles: Tile[];
+}
+
+interface CompleteLine {
+    placedTile: Tile;
+    discardedTiles: Tile[];
+    pointsDetail: WallTilePointDetail;
+}
+
+interface NotifPlaceTileOnWallArgs {
+    completeLines: { [playerId: number]: CompleteLine };
+}
+
+interface FloorLine {
+    points: number;
+    tiles: Tile[];
+}
+
+interface NotifEmptyFloorLineArgs {
+    floorLines: { [playerId: number]: FloorLine };
 }

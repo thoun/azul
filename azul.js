@@ -68,6 +68,7 @@ var PlayerTable = /** @class */ (function () {
             html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
         }
         html += "<div id=\"player-table-" + this.playerId + "-line0\" class=\"floor line\"></div>";
+        html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall\"></div>";
         html += "    </div>\n        </div>";
         dojo.place(html, 'players-tables');
         var _loop_2 = function (i) {
@@ -85,18 +86,25 @@ var PlayerTable = /** @class */ (function () {
         for (var i = 0; i <= 5; i++) {
             _loop_3(i);
         }
+        this.placeTilesOnWall(player.wall);
     }
     PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
         var _this = this;
+        this.game.removeTiles(tiles);
         var top = line ? 0 : 43;
         tiles.forEach(function (tile) {
-            if (document.getElementById("tile" + tile.id)) {
-                dojo.destroy("tile" + tile.id);
-            }
             if (line !== 0 || tile.column <= 7) {
                 var position = line ? "right: " + (tile.column - 1) * 69 + "px" : "left: " + (3 + (tile.column - 1) * 74) + "px";
                 dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + position + "; top: " + top + "px;\"></div>", "player-table-" + _this.playerId + "-line" + line);
             }
+        });
+    };
+    PlayerTable.prototype.placeTilesOnWall = function (tiles) {
+        var _this = this;
+        this.game.removeTiles(tiles);
+        tiles.forEach(function (tile) {
+            var position = "left: " + (tile.column - 1) * 69 + "px; top: " + (tile.line - 1) * 69 + "px";
+            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + position + ";\"></div>", "player-table-" + _this.playerId + "-wall");
         });
     };
     return PlayerTable;
@@ -216,8 +224,15 @@ var Azul = /** @class */ (function () {
     Azul.prototype.getPlayerId = function () {
         return Number(this.player_id);
     };
+    Azul.prototype.getPlayerColor = function (playerId) {
+        return this.gamedatas.players[playerId].color;
+    };
     Azul.prototype.getPlayerTable = function (playerId) {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
+    };
+    Azul.prototype.incScore = function (playerId, incScore) {
+        var _a;
+        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(incScore);
     };
     Azul.prototype.createPlayerPanels = function (gamedatas) {
         Object.values(gamedatas.players).forEach(function (player) {
@@ -307,6 +322,17 @@ var Azul = /** @class */ (function () {
     Azul.prototype.createPlayerTable = function (gamedatas, playerId) {
         this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId] /*, gamedatas.playersTables[playerId]*/));
     };
+    Azul.prototype.removeTile = function (tile, fadeOut) {
+        if (document.getElementById("tile" + tile.id)) {
+            fadeOut ?
+                this.fadeOutAndDestroy("tile" + tile.id) :
+                dojo.destroy("tile" + tile.id);
+        }
+    };
+    Azul.prototype.removeTiles = function (tiles, fadeOut) {
+        var _this = this;
+        tiles.forEach(function (tile) { return _this.removeTile(tile, fadeOut); });
+    };
     Azul.prototype.selectLine = function (line) {
         if (!this.checkAction('selectLine')) {
             return;
@@ -356,9 +382,9 @@ var Azul = /** @class */ (function () {
             ['factoriesFilled', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
-            /*['extraLordRevealed', ANIMATION_MS],
-            ['locationPlayed', ANIMATION_MS],
-            ['discardLords', ANIMATION_MS],
+            ['placeTileOnWall', SCORE_MS],
+            ['emptyFloorLine', SCORE_MS],
+            /*['discardLords', ANIMATION_MS],
             ['discardLocations', ANIMATION_MS],
             ['newPearlMaster', 1],
             ['discardLordPick', 1],
@@ -382,9 +408,29 @@ var Azul = /** @class */ (function () {
         this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles);
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
-        console.log(notif.args);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+    };
+    Azul.prototype.notif_placeTileOnWall = function (notif) {
+        var _this = this;
+        Object.keys(notif.args.completeLines).forEach(function (playerId) {
+            var completeLine = notif.args.completeLines[playerId];
+            _this.getPlayerTable(Number(playerId)).placeTilesOnWall([completeLine.placedTile]);
+            completeLine.pointsDetail.columnTiles.forEach(function (tile) { return dojo.addClass("tile" + tile.id, 'highlight'); });
+            setTimeout(function () { return completeLine.pointsDetail.columnTiles.forEach(function (tile) { return dojo.removeClass("tile" + tile.id, 'highlight'); }); }, SCORE_MS - 50);
+            _this.removeTiles(completeLine.discardedTiles, true);
+            _this.displayScoring("tile" + completeLine.placedTile.id, _this.getPlayerColor(Number(playerId)), completeLine.pointsDetail.points, SCORE_MS);
+            _this.incScore(Number(playerId), completeLine.pointsDetail.points);
+        });
+    };
+    Azul.prototype.notif_emptyFloorLine = function (notif) {
+        var _this = this;
+        Object.keys(notif.args.floorLines).forEach(function (playerId) {
+            var floorLine = notif.args.floorLines[playerId];
+            _this.removeTiles(floorLine.tiles, true);
+            _this.displayScoring("player-table-" + playerId + "-line0", _this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
+            _this.incScore(Number(playerId), floorLine.points);
+        });
     };
     return Azul;
 }());

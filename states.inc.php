@@ -91,6 +91,7 @@ $playerActionsGameStates = [
         "name" => "fillFactories",
         "description" => "",
         "type" => "game",
+        "updateGameProgression" => true,
         "action" => "stFillFactories",
         "transitions" => [ 
             "next" => ST_PLAYER_CHOOSE_TILE,
@@ -141,10 +142,9 @@ $playerActionsGameStates = [
         "name" => "placeTiles",
         "description" => "",
         "type" => "game",
-        "updateGameProgression" => true,
         "action" => "stPlaceTiles",
         "transitions" => [ 
-            "next" => ST_NEXT_PLAYER,
+            "next" => ST_FILL_FACTORIES,
             "endGame" => ST_END_GAME,
         ],
     ],

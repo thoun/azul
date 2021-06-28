@@ -22,6 +22,28 @@
         &.selectable {
             border-color: red;
             pointer-events: all;
+            cursor: pointer;
+        }
+    }
+
+    .wall {
+        position: absolute;
+        top: 12px;
+        left: 385px;
+        width: 337px;
+        height: 339px;
+
+        .tile {
+            &.highlight {
+                animation: highlight-animation 0.7s alternate 2;
+            }
+            
+            @keyframes highlight-animation {
+                100% { 
+                    box-shadow: 0 0 30px 15px white;
+                }
+            }
+            
         }
     }
 }

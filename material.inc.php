@@ -26,4 +26,12 @@ $this->factoriesByPlayers = [
 ];
 
 
+$this->indexForDefaultWall = [
+  1 => 3,
+  2 => 4,
+  3 => 0,
+  4 => 1,
+  5 => 2,
+];
+
 

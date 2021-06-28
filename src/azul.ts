@@ -147,8 +147,16 @@ class Azul implements AzulGame {
         return Number((this as any).player_id);
     }
 
-    getPlayerTable(playerId: number): PlayerTable {
+    private getPlayerColor(playerId: number): string {
+        return this.gamedatas.players[playerId].color;
+    }
+
+    private getPlayerTable(playerId: number): PlayerTable {
         return this.playersTables.find(playerTable => playerTable.playerId === playerId);
+    }
+
+    private incScore(playerId: number, incScore: number) {
+        (this as any).scoreCtrl[playerId]?.incValue(incScore);
     }
 
     private createPlayerPanels(gamedatas: AzulGamedatas) {
@@ -244,7 +252,17 @@ class Azul implements AzulGame {
         this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId]/*, gamedatas.playersTables[playerId]*/));
     }
 
-    
+    public removeTile(tile: Tile, fadeOut?: boolean) {
+        if (document.getElementById(`tile${tile.id}`)) {
+            fadeOut ?
+                (this as any).fadeOutAndDestroy(`tile${tile.id}`) :
+                dojo.destroy(`tile${tile.id}`);
+        }
+    }
+
+    public removeTiles(tiles: Tile[], fadeOut?: boolean) {
+        tiles.forEach(tile => this.removeTile(tile, fadeOut));
+    }
 
     public selectLine(line: number) {
         if(!(this as any).checkAction('selectLine')) {
@@ -302,9 +320,9 @@ class Azul implements AzulGame {
             ['factoriesFilled', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
-            /*['extraLordRevealed', ANIMATION_MS],
-            ['locationPlayed', ANIMATION_MS],
-            ['discardLords', ANIMATION_MS],
+            ['placeTileOnWall', SCORE_MS],
+            ['emptyFloorLine', SCORE_MS],
+            /*['discardLords', ANIMATION_MS],
             ['discardLocations', ANIMATION_MS],
             ['newPearlMaster', 1],
             ['discardLordPick', 1],
@@ -316,7 +334,7 @@ class Azul implements AzulGame {
             ['scorePearlMaster', SCORE_MS],
             ['scoreTotal', SCORE_MS],*/
         ];
-    
+
         notifs.forEach((notif) => {
             dojo.subscribe(notif[0], this, `notif_${notif[0]}`);
             (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
@@ -332,9 +350,33 @@ class Azul implements AzulGame {
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
-        console.log(notif.args);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+    }
+
+    notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
+        Object.keys(notif.args.completeLines).forEach(playerId => {
+            const completeLine: CompleteLine = notif.args.completeLines[playerId];
+            
+            this.getPlayerTable(Number(playerId)).placeTilesOnWall([completeLine.placedTile]);
+
+            completeLine.pointsDetail.columnTiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
+            setTimeout(() => completeLine.pointsDetail.columnTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+
+            this.removeTiles(completeLine.discardedTiles, true);
+            (this as any).displayScoring(`tile${completeLine.placedTile.id}`, this.getPlayerColor(Number(playerId)), completeLine.pointsDetail.points, SCORE_MS);
+            this.incScore(Number(playerId), completeLine.pointsDetail.points);
+        });
+    }
+
+    notif_emptyFloorLine(notif: Notif<NotifEmptyFloorLineArgs>) {
+        Object.keys(notif.args.floorLines).forEach(playerId => {
+            const floorLine: FloorLine = notif.args.floorLines[playerId];
+            
+            this.removeTiles(floorLine.tiles, true);
+            (this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
+            this.incScore(Number(playerId), floorLine.points);
+        });
     }
 
     /* This enable to inject translatable styled things to logs or action bar */

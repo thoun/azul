@@ -126,10 +126,9 @@ class Azul extends Table {
 
         foreach($result['players'] as $playerId => &$player) {
             $player['lines'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
+            $player['wall'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
             $player['playerNo'] = intval($player['playerNo']);
         }
-       
-        // TODO set player tables
   
         return $result;
     }
@@ -145,7 +144,19 @@ class Azul extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        $maxColumns = intval(self::getUniqueValueFromDB("SELECT MAX(MOD(card_location_arg, 100)) FROM tile WHERE `card_location` like 'wall%'"));
+        $maxColumns = 0;
+        
+        $playerIds = $this->getPlayersIds();
+        foreach ($playerIds as $playerId) {
+            $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+            for ($i=1; $i<=5; $i++) {
+                $playerWallTileLineCount = count(array_values(array_filter($playerWallTiles, function ($tile) use ($i) { return $tile->line == $i; })));
+                if ($playerWallTileLineCount > $maxColumns) {
+                    $maxColumns = $playerWallTileLineCount;
+                }
+            }
+        }
+        
         return $maxColumns * 20;
     }
 
@@ -164,6 +175,10 @@ class Azul extends Table {
         }
 
         return $this->factoriesByPlayers[$playerNumber];
+    }
+
+    function incPlayerScore(int $playerId, int $incScore) {
+        self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
     }
 
     function getTileFromDb($dbTile) {
@@ -195,7 +210,7 @@ class Azul extends Table {
 
     function placeTilesOnLine(int $playerId, array $tiles, int $line) {
         $startIndex = count($this->getTilesFromLine($playerId, $line));
-        $startIndexFloorLine = count($this->getTilesFromLine($playerId, $line));
+        $startIndexFloorLine = count($this->getTilesFromLine($playerId, 0));
 
         $placedTiles = [];
         $discardedTiles = [];
@@ -246,9 +261,28 @@ class Azul extends Table {
     }
 
     function getTilesFromLine(int $playerId, int $line) {
-        return array_values(array_filter(
+        $tiles = array_values(array_filter(
             $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), function($tile) use ($line) { return $tile->line == $line; })
         );
+        
+        // sort by column
+        usort($tiles, function ($a, $b) {
+            if ($a->column == $b->column) {
+                return 0;
+            }
+            return ($a->column < $b->column) ? -1 : 1;
+        });
+
+        return $tiles;
+    }
+
+    function someOfColor(array $tiles, int $type) {
+        foreach ($tiles as $tile) {
+            if ($tile->type == $type) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function availableLines(int $playerId) {
@@ -256,15 +290,113 @@ class Azul extends Table {
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $color = $tiles[0]->type;
 
+        $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+
         $lines = [0];
         for ($i=1; $i<=5; $i++) {
             $lineTiles = $this->getTilesFromLine($playerId, $i);
-            if (count($lineTiles) == 0 || $lineTiles[0]->type == $color) {
+            $playerWallTileLine = array_values(array_filter($playerWallTiles, function ($tile) use ($i) { return $tile->line == $i; }));
+            $availableLine = count($lineTiles) == 0 || ($lineTiles[0]->type == $color && count($lineTiles) < $i);
+            $availableWall = !$this->someOfColor($playerWallTileLine, $color);
+            if ($availableLine && $availableWall) {
                 $lines[] = $i;
             }
         }
 
         return $lines;
+    }
+
+    function getPlayersIds() {
+        $sql = "SELECT player_id FROM player ORDER BY player_no";
+        $dbResults = self::getCollectionFromDB($sql);
+        return array_map(function($dbResult) { return intval($dbResult['player_id']); }, array_values($dbResults));
+    }
+
+    function getTileOnWallCoordinates(array $tiles, int $row, int $column) {
+        foreach ($tiles as $tile) {
+            if ($tile->line == $row && $tile->column == $column) {
+                return $tile;
+            }
+        }
+        return null;
+    }
+
+    function getPointsDetailForPlacedTile(int $playerId, object $tile) {
+        $tilesOnWall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+
+        $rowTiles = [$tile];
+        $columnTiles = [$tile];
+
+        // tiles above
+        for ($i = $tile->line - 1; $i >= 1; $i--) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $i, $tile->column);
+            if ($iTile != null) {
+                $columnTiles[] = $iTile;
+            } else {
+                break;
+            }
+        }
+        // tiles under
+        for ($i = $tile->line + 1; $i <= 5; $i++) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $i, $tile->column);
+            if ($iTile != null) {
+                $columnTiles[] = $iTile;
+            } else {
+                break;
+            }
+        }
+        // tiles left
+        for ($i = $tile->column - 1; $i >= 1; $i--) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $tile->line, $i);
+            if ($iTile != null) {
+                $rowTiles[] = $iTile;
+            } else {
+                break;
+            }
+        }
+        // tiles right
+        for ($i = $tile->column + 1; $i <= 5; $i++) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $tile->line, $i);
+            if ($iTile != null) {
+                $rowTiles[] = $iTile;
+            } else {
+                break;
+            }
+        }
+
+        $result = new stdClass;
+        $result->rowTiles = $rowTiles;
+        $result->columnTiles = $columnTiles;
+
+        $rowSize = count($rowTiles);
+        $columnSize = count($columnTiles);
+
+        if ($rowSize > 1 && $columnSize > 1) {
+            $result->points = $columnSize + $rowSize;
+        } else if ($columnSize > 1) {
+            $result->points = $columnSize;
+        } else if ($rowSize > 1) {
+            $result->points = $rowSize;
+        } else {
+            $result->points = 1;
+        }
+
+        return $result;
+    }
+        
+    function getPointsForFloorLine(int $tileNumber) {
+        switch ($tileNumber) {
+            case 0: return 0;
+            case 1: case 2: return -1;
+            case 3: case 4: case 5: return -2;
+            default: return -3;
+        }
+    }
+
+    function getColumnForTile(int $row, int $type) {
+        // TODO variant
+
+        return ($row + $this->indexForDefaultWall[$type] - 1) % 5 + 1;
     }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -409,7 +541,7 @@ class Azul extends Table {
     function stFillFactories() {
         $factories = [];
 
-        $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation(0, null, 'deck'))[0];
+        $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0, null))[0];
         $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
         $factories[0] = [$firstPlayerTile];
 
@@ -426,7 +558,7 @@ class Azul extends Table {
     }
 
     function stNextPlayer() {
-        $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') === 0;
+        $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') == 0;
 
         if ($factoriesAllEmpty) {
             $this->gamestate->nextState('endTurn');
@@ -441,9 +573,64 @@ class Azul extends Table {
     }
 
     function stPlaceTiles() {
-        // TODO
+        $playersIds = $this->getPlayersIds();
 
-        if ($this->getGameProgression() === 30) {
+        for ($line = 1; $line <=5; $line++) {
+            $completeLinesNotif = [];
+            foreach ($playersIds as $playerId) {
+                $playerTiles = $this->getTilesFromLine($playerId, $line);
+                if (count($playerTiles) == $line) {
+                    
+                    $wallTile = $playerTiles[0];
+                    $wallTile->column = $this->getColumnForTile($line, $wallTile->type);
+                    $discardedTiles = array_slice($playerTiles, 1);
+                    $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
+                    $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
+
+                    $pointsDetail = $this->getPointsDetailForPlacedTile($playerId, $wallTile);
+
+                    $obj = new stdClass();
+                    $obj->placedTile = $wallTile;
+                    $obj->discardedTiles = $discardedTiles;
+                    $obj->pointsDetail = $pointsDetail;
+
+                    $completeLinesNotif[$playerId] = $obj;
+
+                    $this->incPlayerScore($playerId, $pointsDetail->points);
+                }
+            }
+
+            if (count($completeLinesNotif) > 0) {
+                self::notifyAllPlayers('placeTileOnWall', 'place tile on wall', [
+                    'completeLines' => $completeLinesNotif,
+                ]);
+            }
+        }
+
+        $floorLinesNotif = [];
+        foreach ($playersIds as $playerId) {
+            $playerTiles = $this->getTilesFromLine($playerId, 0);
+            if (count($playerTiles) > 0) {                
+                $this->tiles->moveCards(array_map('getIdPredicate', $playerTiles), 'discard');
+                $points = $this->getPointsForFloorLine(count($playerTiles));
+
+                $obj = new stdClass();
+                $obj->tiles = $playerTiles;
+                $obj->points = $points;
+
+                $floorLinesNotif[$playerId] = $obj;
+
+                $this->incPlayerScore($playerId, $points);
+            } 
+        }
+        self::notifyAllPlayers('emptyFloorLine', 'empty floor line', [
+            'floorLines' => $floorLinesNotif,
+        ]);
+        
+        $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
+        $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
+
+        if ($this->getGameProgression() == 100) {
             $this->gamestate->nextState('endGame');
         } else {
             $playerId = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
