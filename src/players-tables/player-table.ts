@@ -35,23 +35,14 @@ class PlayerTable {
     }
 
     public placeTilesOnLine(tiles: Tile[], line: number) {
-        this.game.removeTiles(tiles);
-        
         const top = line ? 0 : 43;
         tiles.forEach(tile => {
-            if (line !== 0 || tile.column <= 7) {
-                const position = line ? `right: ${(tile.column-1) * 69}px` : `left: ${3 + (tile.column-1) * 74}px`;
-                dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${position}; top: ${top}px;"></div>`, `player-table-${this.playerId}-line${line}`);
-            }
+            const left = line ? (line - tile.column) * 69 : 3 + (tile.column-1) * 74;
+            this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top);
         });
     }
 
     public placeTilesOnWall(tiles: Tile[]) {
-        this.game.removeTiles(tiles);
-
-        tiles.forEach(tile => {
-            const position = `left: ${(tile.column-1) * 69}px; top: ${(tile.line-1) * 69}px`;
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${position};"></div>`, `player-table-${this.playerId}-wall`);
-        });
+        tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-wall`, (tile.column-1) * 69, (tile.line-1) * 69));
     }
 }

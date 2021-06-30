@@ -159,6 +159,18 @@ class Azul implements AzulGame {
         (this as any).scoreCtrl[playerId]?.incValue(incScore);
     }
 
+    public placeTile(tile: Tile, destinationId: string, left: number, top: number) {
+        //this.removeTile(tile);
+        //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
+        const tileDiv = document.getElementById(`tile${tile.id}`);
+        if (tileDiv) {
+            slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
+        } else {
+            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
+        }
+        
+    }
+
     private createPlayerPanels(gamedatas: AzulGamedatas) {
 
         Object.values(gamedatas.players).forEach(player => {
@@ -346,7 +358,7 @@ class Azul implements AzulGame {
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
-        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles);
+        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId);
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {

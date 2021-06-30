@@ -40,8 +40,10 @@ class Factories {
         }
     }
 
-    public moveSelectedTiles(selectedTiles: Tile[], discardedTiles: Tile[]) {
-        selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
-        discardedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), 'factory0'));
+    public moveSelectedTiles(selectedTiles: Tile[], discardedTiles: Tile[], playerId: number) {
+        selectedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), `player_board_${playerId}`));
+        discardedTiles.forEach(tile => this.game.placeTile(tile, 'factory0', Math.round(Math.random()* 120), Math.round(Math.random()* 120)));
+        //selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
+        //discardedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), 'factory0'));
     }
 }

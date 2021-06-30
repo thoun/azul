@@ -4,13 +4,13 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
         return;
     }
     object.style.zIndex = '10';
-    var animation = (posX || posY) ?
+    var animation = (posX !== undefined || posY !== undefined) ?
         game.slideToObjectPos(object, destinationId, posX, posY) :
         game.slideToObject(object, destinationId);
     dojo.connect(animation, 'onEnd', dojo.hitch(this, function () {
-        object.style.top = 'unset';
-        object.style.left = 'unset';
-        object.style.position = 'relative';
+        object.style.top = posY !== undefined ? posY + "px" : 'unset';
+        object.style.left = posX !== undefined ? posX + "px" : 'unset';
+        object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
         object.style.zIndex = 'unset';
         destination.appendChild(object);
     }));
@@ -51,10 +51,12 @@ var Factories = /** @class */ (function () {
             _loop_1(i);
         }
     };
-    Factories.prototype.moveSelectedTiles = function (selectedTiles, discardedTiles) {
+    Factories.prototype.moveSelectedTiles = function (selectedTiles, discardedTiles, playerId) {
         var _this = this;
-        selectedTiles.forEach(function (tile) { return _this.game.slideToObjectAndDestroy($("tile" + tile.id), 'topbar'); });
-        discardedTiles.forEach(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), 'factory0'); });
+        selectedTiles.forEach(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), "player_board_" + playerId); });
+        discardedTiles.forEach(function (tile) { return _this.game.placeTile(tile, 'factory0', Math.round(Math.random() * 120), Math.round(Math.random() * 120)); });
+        //selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
+        //discardedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), 'factory0'));
     };
     return Factories;
 }());
@@ -90,22 +92,15 @@ var PlayerTable = /** @class */ (function () {
     }
     PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
         var _this = this;
-        this.game.removeTiles(tiles);
         var top = line ? 0 : 43;
         tiles.forEach(function (tile) {
-            if (line !== 0 || tile.column <= 7) {
-                var position = line ? "right: " + (tile.column - 1) * 69 + "px" : "left: " + (3 + (tile.column - 1) * 74) + "px";
-                dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + position + "; top: " + top + "px;\"></div>", "player-table-" + _this.playerId + "-line" + line);
-            }
+            var left = line ? (line - tile.column) * 69 : 3 + (tile.column - 1) * 74;
+            _this.game.placeTile(tile, "player-table-" + _this.playerId + "-line" + line, left, top);
         });
     };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
         var _this = this;
-        this.game.removeTiles(tiles);
-        tiles.forEach(function (tile) {
-            var position = "left: " + (tile.column - 1) * 69 + "px; top: " + (tile.line - 1) * 69 + "px";
-            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + position + ";\"></div>", "player-table-" + _this.playerId + "-wall");
-        });
+        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-table-" + _this.playerId + "-wall", (tile.column - 1) * 69, (tile.line - 1) * 69); });
     };
     return PlayerTable;
 }());
@@ -233,6 +228,17 @@ var Azul = /** @class */ (function () {
     Azul.prototype.incScore = function (playerId, incScore) {
         var _a;
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(incScore);
+    };
+    Azul.prototype.placeTile = function (tile, destinationId, left, top) {
+        //this.removeTile(tile);
+        //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
+        var tileDiv = document.getElementById("tile" + tile.id);
+        if (tileDiv) {
+            slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
+        }
+        else {
+            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"left: " + left + "px; top: " + top + "px;\"></div>", destinationId);
+        }
     };
     Azul.prototype.createPlayerPanels = function (gamedatas) {
         Object.values(gamedatas.players).forEach(function (player) {
@@ -405,7 +411,7 @@ var Azul = /** @class */ (function () {
         this.factories.fillFactories(notif.args.factories);
     };
     Azul.prototype.notif_tilesSelected = function (notif) {
-        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles);
+        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId);
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);

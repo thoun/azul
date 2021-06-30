@@ -38,6 +38,7 @@ interface AzulGame extends Game {
     selectLine(line: number): void;
     removeTile(tile: Tile): void;
     removeTiles(tiles: Tile[]): void;
+    placeTile(tile: Tile, destinationId: string, left: number, top: number): void;
 }
 
 interface EnteringChooseLineArgs {
@@ -49,6 +50,7 @@ interface NotifFactoriesFilledArgs {
 }
 
 interface NotifTilesSelectedArgs {
+    playerId: number;
     selectedTiles: Tile[];
     discardedTiles: Tile[];
 }
