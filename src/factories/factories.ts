@@ -1,4 +1,5 @@
 const FACTORY_RADIUS = 125;
+const HALF_TILE_SIZE = 31;
 
 class Factories {
     constructor(
@@ -14,7 +15,7 @@ class Factories {
         factoriesDiv.style.height = `${centerY*2}px`;
 
         let html = `<div>`;
-        html += `<div id="factory0" class="factory-center" style="left: ${centerX-radius+FACTORY_RADIUS}px; top: ${centerY-radius+FACTORY_RADIUS}px; width: ${radius-FACTORY_RADIUS}px; height: ${radius-FACTORY_RADIUS}px;"></div>`;
+        html += `<div id="factory0" class="factory-center"></div>`;
         for (let i=1; i<=factoryNumber; i++) {
             const angle = (i-1)*Math.PI*2/factoryNumber; // in radians
             const left = radius*Math.sin(angle);
@@ -33,16 +34,44 @@ class Factories {
         for (let i=0; i<=this.factoryNumber; i++) {
             const factory = factories[i];
             factory.forEach((tile, index) => {
-                dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${50 + Math.floor(index / 2) * 90}px; top: ${50 + Math.floor(index % 2) * 90}px;"></div>`, `factory${i}`);
+                let left = null;
+                let top = null;
+                if (i > 0) {
+                    left = 50 + Math.floor(index / 2) * 90;
+                    top = 50 + Math.floor(index % 2) * 90;
+                } else {
+                    if (tile.type == 0) {
+                        const centerFactoryDiv = document.getElementById('factory0');
+                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE;
+                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
+                    } else {
+                        const coords = this.getFreePlaceForFactoryCenter();
+                        left = coords.left;
+                        top = coords.top;
+                    }
+                }
+                this.game.placeTile(tile, `factory${i}`, left, top);
 
                 document.getElementById(`tile${tile.id}`).addEventListener('click', () => this.game.takeTiles(tile.id));
             });
         }
     }
 
+    private getFreePlaceForFactoryCenter():  {left: number, top: number} {
+        const centerFactoryDiv = document.getElementById('factory0');
+        const xCenter = centerFactoryDiv.clientWidth / 2;
+        const yCenter = centerFactoryDiv.clientHeight / 2;
+        const left = xCenter + Math.round(Math.random()* 120)-60;
+        const top = yCenter + Math.round(Math.random()* 120)-60;
+        return {left, top};
+    }
+
     public moveSelectedTiles(selectedTiles: Tile[], discardedTiles: Tile[], playerId: number) {
         selectedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), `player_board_${playerId}`));
-        discardedTiles.forEach(tile => this.game.placeTile(tile, 'factory0', Math.round(Math.random()* 120), Math.round(Math.random()* 120)));
+        discardedTiles.forEach(tile => {
+            const {left, top} = this.getFreePlaceForFactoryCenter();
+            this.game.placeTile(tile, 'factory0', left, top);
+        });
         //selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
         //discardedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), 'factory0'));
     }

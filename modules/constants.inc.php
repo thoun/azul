@@ -11,7 +11,7 @@ define('ST_PLAYER_CHOOSE_TILE', 20);
 
 define('ST_PLAYER_CHOOSE_LINE', 30);
 
-define('ST_PLAYER_CHOOSE_COLUMN', 40);
+//define('ST_PLAYER_CHOOSE_COLUMN', 40);
 
 define('ST_PLACE_TILES', 50);
 

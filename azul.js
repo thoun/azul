@@ -17,6 +17,7 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
     animation.play();
 }
 var FACTORY_RADIUS = 125;
+var HALF_TILE_SIZE = 31;
 var Factories = /** @class */ (function () {
     function Factories(game, factoryNumber, factories) {
         this.game = game;
@@ -27,7 +28,7 @@ var Factories = /** @class */ (function () {
         var centerY = radius + FACTORY_RADIUS;
         factoriesDiv.style.height = centerY * 2 + "px";
         var html = "<div>";
-        html += "<div id=\"factory0\" class=\"factory-center\" style=\"left: " + (centerX - radius + FACTORY_RADIUS) + "px; top: " + (centerY - radius + FACTORY_RADIUS) + "px; width: " + (radius - FACTORY_RADIUS) + "px; height: " + (radius - FACTORY_RADIUS) + "px;\"></div>";
+        html += "<div id=\"factory0\" class=\"factory-center\"></div>";
         for (var i = 1; i <= factoryNumber; i++) {
             var angle = (i - 1) * Math.PI * 2 / factoryNumber; // in radians
             var left = radius * Math.sin(angle);
@@ -43,7 +44,25 @@ var Factories = /** @class */ (function () {
         var _loop_1 = function (i) {
             var factory = factories[i];
             factory.forEach(function (tile, index) {
-                dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"left: " + (50 + Math.floor(index / 2) * 90) + "px; top: " + (50 + Math.floor(index % 2) * 90) + "px;\"></div>", "factory" + i);
+                var left = null;
+                var top = null;
+                if (i > 0) {
+                    left = 50 + Math.floor(index / 2) * 90;
+                    top = 50 + Math.floor(index % 2) * 90;
+                }
+                else {
+                    if (tile.type == 0) {
+                        var centerFactoryDiv = document.getElementById('factory0');
+                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE;
+                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
+                    }
+                    else {
+                        var coords = _this.getFreePlaceForFactoryCenter();
+                        left = coords.left;
+                        top = coords.top;
+                    }
+                }
+                _this.game.placeTile(tile, "factory" + i, left, top);
                 document.getElementById("tile" + tile.id).addEventListener('click', function () { return _this.game.takeTiles(tile.id); });
             });
         };
@@ -51,10 +70,21 @@ var Factories = /** @class */ (function () {
             _loop_1(i);
         }
     };
+    Factories.prototype.getFreePlaceForFactoryCenter = function () {
+        var centerFactoryDiv = document.getElementById('factory0');
+        var xCenter = centerFactoryDiv.clientWidth / 2;
+        var yCenter = centerFactoryDiv.clientHeight / 2;
+        var left = xCenter + Math.round(Math.random() * 120) - 60;
+        var top = yCenter + Math.round(Math.random() * 120) - 60;
+        return { left: left, top: top };
+    };
     Factories.prototype.moveSelectedTiles = function (selectedTiles, discardedTiles, playerId) {
         var _this = this;
         selectedTiles.forEach(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), "player_board_" + playerId); });
-        discardedTiles.forEach(function (tile) { return _this.game.placeTile(tile, 'factory0', Math.round(Math.random() * 120), Math.round(Math.random() * 120)); });
+        discardedTiles.forEach(function (tile) {
+            var _a = _this.getFreePlaceForFactoryCenter(), left = _a.left, top = _a.top;
+            _this.game.placeTile(tile, 'factory0', left, top);
+        });
         //selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
         //discardedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), 'factory0'));
     };

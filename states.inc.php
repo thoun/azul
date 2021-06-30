@@ -121,21 +121,7 @@ $playerActionsGameStates = [
         "possibleactions" => [ "selectLine" ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER,
-            "chooseColumn" => ST_PLAYER_CHOOSE_COLUMN,
         ],
-    ],  
-
-    ST_PLAYER_CHOOSE_COLUMN => [
-        "name" => "chooseColumn",
-        "description" => clienttranslate('${actplayer} must choose a column'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a column'),
-        "type" => "activeplayer",
-        "args" => "argChooseColumn",
-        "possibleactions" => [ "selectColumn" ],
-        "transitions" => [
-            "nextPlayer" => ST_NEXT_PLAYER,
-        ],
-
     ],
 
     ST_PLACE_TILES => [
