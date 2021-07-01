@@ -1,49 +1,90 @@
-.player-table {
-    background: url('img/playerboard.jpg');
-    width: 740px;
-    height: 484px;
+
+#players-tables {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.player-table-wrapper {
     position: relative;
 
-    .line {
-        display: inline-block;
+    .player-name {
         position: absolute;
-        right: 389px;
-        border: 3px dashed transparent;
-        height: 63px;
-        pointer-events: none;
+        font-size: 20px;
+        font-family: 'Algeria';
+        top: 80px;
+        left: 53px;
+        width: 120px;
+        text-align: center;
+        vertical-align: middle;
+        text-transform: uppercase;
+        text-overflow: ellipsis;
+        white-space: nowrap;
 
-        &.floor {
-            right: 209px;
-            top: 362px;
-            left: 1px;
-            height: 116px;
-        }
-
-        &.selectable {
-            border-color: red;
-            pointer-events: all;
-            cursor: pointer;
+        &.dark {
+            color: #012c3c;
+            top: 79px;
+            left: 52px;
         }
     }
+    
+    .player-table {
+        background: url('img/playerboard.jpg');
+        width: 740px;
+        height: 484px;
+        position: relative;
 
-    .wall {
-        position: absolute;
-        top: 12px;
-        left: 385px;
-        width: 337px;
-        height: 339px;
+        border: 2px solid black;
+        border-radius: 8px;
+        margin: 5px;
 
-        .tile {
-            &.highlight {
-                animation: highlight-animation 0.7s alternate 2;
+        .line {
+            display: inline-block;
+            position: absolute;
+            right: 389px;
+            border: 3px dashed transparent;
+            height: 63px;
+            pointer-events: none;
+
+            &.floor {
+                right: 209px;
+                top: 362px;
+                left: 1px;
+                height: 116px;
             }
-            
-            @keyframes highlight-animation {
-                100% { 
-                    box-shadow: 0 0 30px 15px white;
+
+            &.selectable {
+                border-color: red;
+                pointer-events: all;
+                cursor: pointer;
+            }
+        }
+
+        .wall {
+            position: absolute;
+            top: 12px;
+            left: 385px;
+            width: 339px;
+            height: 341px;
+
+            &.colored-side {
+                background: #ffffffb0;
+                box-shadow: 0 0 10px 5px #ffffffb0;
+            }
+
+            .tile {
+                &.highlight {
+                    animation: highlight-animation 0.7s alternate 2;
                 }
+                
+                @keyframes highlight-animation {
+                    100% { 
+                        box-shadow: 0 0 30px 15px white;
+                    }
+                }
+                
             }
-            
         }
     }
 }

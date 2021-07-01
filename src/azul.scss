@@ -10,3 +10,11 @@ html {
     background-repeat: repeat;
     background-blend-mode: multiply;
 }
+
+@font-face {
+    font-family: 'Algeria';
+    src: url('img/algeria.woff2') format('woff2'),
+        url('img/algeria.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}

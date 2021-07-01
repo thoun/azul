@@ -20,13 +20,44 @@
   pointer-events: all;
 }
 
-.player-table {
+#players-tables {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.player-table-wrapper {
+  position: relative;
+}
+.player-table-wrapper .player-name {
+  position: absolute;
+  font-size: 20px;
+  font-family: "Algeria";
+  top: 80px;
+  left: 53px;
+  width: 120px;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-table-wrapper .player-name.dark {
+  color: #012c3c;
+  top: 79px;
+  left: 52px;
+}
+.player-table-wrapper .player-table {
   background: url("img/playerboard.jpg");
   width: 740px;
   height: 484px;
   position: relative;
+  border: 2px solid black;
+  border-radius: 8px;
+  margin: 5px;
 }
-.player-table .line {
+.player-table-wrapper .player-table .line {
   display: inline-block;
   position: absolute;
   right: 389px;
@@ -34,25 +65,29 @@
   height: 63px;
   pointer-events: none;
 }
-.player-table .line.floor {
+.player-table-wrapper .player-table .line.floor {
   right: 209px;
   top: 362px;
   left: 1px;
   height: 116px;
 }
-.player-table .line.selectable {
+.player-table-wrapper .player-table .line.selectable {
   border-color: red;
   pointer-events: all;
   cursor: pointer;
 }
-.player-table .wall {
+.player-table-wrapper .player-table .wall {
   position: absolute;
   top: 12px;
   left: 385px;
-  width: 337px;
-  height: 339px;
+  width: 339px;
+  height: 341px;
 }
-.player-table .wall .tile.highlight {
+.player-table-wrapper .player-table .wall.colored-side {
+  background: #ffffffb0;
+  box-shadow: 0 0 10px 5px #ffffffb0;
+}
+.player-table-wrapper .player-table .wall .tile.highlight {
   animation: highlight-animation 0.7s alternate 2;
 }
 @keyframes highlight-animation {
@@ -62,8 +97,8 @@
 }
 
 .tile {
-  width: 62px;
-  height: 62px;
+  width: 58px;
+  height: 58px;
   display: inline-block;
   position: absolute;
   border: 2px outset;
@@ -100,4 +135,11 @@ html {
   background: url("img/background.jpg") #00587a;
   background-repeat: repeat;
   background-blend-mode: multiply;
+}
+
+@font-face {
+  font-family: "Algeria";
+  src: url("img/algeria.woff2") format("woff2"), url("img/algeria.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
 }

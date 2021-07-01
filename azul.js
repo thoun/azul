@@ -17,23 +17,24 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
     animation.play();
 }
 var FACTORY_RADIUS = 125;
-var HALF_TILE_SIZE = 31;
+var HALF_TILE_SIZE = 29;
 var Factories = /** @class */ (function () {
     function Factories(game, factoryNumber, factories) {
         this.game = game;
         this.factoryNumber = factoryNumber;
         var factoriesDiv = document.getElementById('factories');
         var radius = 40 + factoryNumber * 40;
-        var centerX = factoriesDiv.clientWidth / 2;
-        var centerY = radius + FACTORY_RADIUS;
-        factoriesDiv.style.height = centerY * 2 + "px";
+        var halfSize = radius + FACTORY_RADIUS;
+        var size = halfSize * 2 + "px";
+        factoriesDiv.style.width = size;
+        factoriesDiv.style.height = size;
         var html = "<div>";
         html += "<div id=\"factory0\" class=\"factory-center\"></div>";
         for (var i = 1; i <= factoryNumber; i++) {
             var angle = (i - 1) * Math.PI * 2 / factoryNumber; // in radians
             var left = radius * Math.sin(angle);
             var top_1 = radius * Math.cos(angle);
-            html += "<div id=\"factory" + i + "\" class=\"factory\" style=\"left: " + (centerX - FACTORY_RADIUS + left) + "px; top: " + (centerY - FACTORY_RADIUS - top_1) + "px;\"></div>";
+            html += "<div id=\"factory" + i + "\" class=\"factory\" style=\"left: " + (halfSize - FACTORY_RADIUS + left) + "px; top: " + (halfSize - FACTORY_RADIUS - top_1) + "px;\"></div>";
         }
         html += "</div>";
         dojo.place(html, 'factories');
@@ -95,13 +96,13 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\">\n        <div class=\"player-name\" style=\"color: #" + player.color + ";\">\n            " + player.name + "\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table\">";
+        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table\" style=\"border-color: #" + player.color + ";\">";
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
         }
         html += "<div id=\"player-table-" + this.playerId + "-line0\" class=\"floor line\"></div>";
-        html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall\"></div>";
-        html += "    </div>\n        </div>";
+        html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall colored-side\"></div>";
+        html += "    </div>\n        \n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>\n        </div>";
         dojo.place(html, 'players-tables');
         var _loop_2 = function (i) {
             document.getElementById("player-table-" + this_1.playerId + "-line" + i).addEventListener('click', function () { return _this.game.selectLine(i); });
@@ -122,9 +123,9 @@ var PlayerTable = /** @class */ (function () {
     }
     PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
         var _this = this;
-        var top = line ? 0 : 43;
+        var top = line ? 0 : 45;
         tiles.forEach(function (tile) {
-            var left = line ? (line - tile.column) * 69 : 3 + (tile.column - 1) * 74;
+            var left = line ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74;
             _this.game.placeTile(tile, "player-table-" + _this.playerId + "-line" + line, left, top);
         });
     };

@@ -1,5 +1,5 @@
 const FACTORY_RADIUS = 125;
-const HALF_TILE_SIZE = 31;
+const HALF_TILE_SIZE = 29;
 
 class Factories {
     constructor(
@@ -10,9 +10,10 @@ class Factories {
         const factoriesDiv = document.getElementById('factories');
 
         const radius = 40 + factoryNumber*40;
-        const centerX = factoriesDiv.clientWidth / 2;
-        const centerY = radius + FACTORY_RADIUS;
-        factoriesDiv.style.height = `${centerY*2}px`;
+        const halfSize = radius + FACTORY_RADIUS;
+        const size = `${halfSize*2}px`;
+        factoriesDiv.style.width = size;
+        factoriesDiv.style.height = size;
 
         let html = `<div>`;
         html += `<div id="factory0" class="factory-center"></div>`;
@@ -21,7 +22,7 @@ class Factories {
             const left = radius*Math.sin(angle);
             const top = radius*Math.cos(angle);
             
-            html += `<div id="factory${i}" class="factory" style="left: ${centerX-FACTORY_RADIUS+left}px; top: ${centerY-FACTORY_RADIUS-top}px;"></div>`;
+            html += `<div id="factory${i}" class="factory" style="left: ${halfSize-FACTORY_RADIUS+left}px; top: ${halfSize-FACTORY_RADIUS-top}px;"></div>`;
         }
         html += `</div>`;
 
