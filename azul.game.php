@@ -230,7 +230,7 @@ class Azul extends Table {
             $this->tiles->moveCard($tile->id, 'line'.$playerId, $tile->line * 100 + $tile->column);
         }
 
-        $message = $tiles[0]->type == 0 ? '' : clienttranslate('TODO');
+        $message = $tiles[0]->type == 0 ? '' : clienttranslate('${player_name} places ${number} ${color} on line ${line}');
 
         self::notifyAllPlayers('tilesPlacedOnLine', $message, [
             'playerId' => $playerId,
@@ -253,11 +253,6 @@ class Azul extends Table {
             case 5: $colorName = _('Red'); break;
         }
         return $colorName;
-    }
-
-    function multipleColumnsForLineWithColor($line, $type) {
-        // TODO sometimes Yes with Variant
-        return false;
     }
 
     function getTilesFromLine(int $playerId, int $line) {
@@ -486,20 +481,6 @@ class Azul extends Table {
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $this->placeTilesOnLine($playerId, $tiles, $line);
 
-        if ($this->multipleColumnsForLineWithColor($line, $tiles[0]->type)) {
-            $this->gamestate->nextState('chooseColumn');
-        } else {
-            $this->gamestate->nextState('nextPlayer');
-        }
-    }
-
-    function selectColumn($column) {
-        self::checkAction('selectColumn'); 
-        
-        $playerId = self::getActivePlayerId();
-        
-        // TODO
-
         $this->gamestate->nextState('nextPlayer');
     }
 
@@ -519,13 +500,6 @@ class Azul extends Table {
 
         return [
             'lines' => $this->availableLines($playerId),
-        ];
-    }
-
-    function argChooseColumn() {
-        // TODO
-
-        return [
         ];
     }
 

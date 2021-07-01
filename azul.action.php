@@ -56,17 +56,6 @@
       self::ajaxResponse();
     }
 
-    public function selectColumn() {
-      self::setAjaxMode();
-
-      // Retrieve arguments
-      $column = self::getArg("column", AT_posint, true);
-
-      $this->game->selectColumn($column);
-
-      self::ajaxResponse();
-    }
-
   }
   
 
