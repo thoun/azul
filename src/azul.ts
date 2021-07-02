@@ -174,73 +174,14 @@ class Azul implements AzulGame {
     private createPlayerPanels(gamedatas: AzulGamedatas) {
 
         Object.values(gamedatas.players).forEach(player => {
-            const playerId = Number(player.id);
-/*            const playerTable = Object.values(gamedatas.playersTables[playerId]);         
-
-            // Lord & pearl counters
-
-            dojo.place(`<div class="counters">
-                <div id="lord-counter-wrapper-${player.id}" class="lord-counter"></div>
-                <div id="pearl-counter-wrapper-${player.id}" class="pearl-counter">
-                    <div class="token pearl"></div> 
-                    <span id="pearl-counter-${player.id}" class="left"></span>
-                </div>
-            </div>`, `player_board_${player.id}`);
-
-            this.minimaps[playerId] = new Minimap(playerId, playerTable);
-
-            const pearlCounter = new ebg.counter();
-            pearlCounter.create(`pearl-counter-${player.id}`);
-            pearlCounter.setValue((player as any).pearls);
-            this.pearlCounters[playerId] = pearlCounter;
-
-            // keys counters
-
-            dojo.place(`<div class="counters">
-                <div id="silver-key-counter-wrapper-${player.id}" class="key-counter silver-key-counter">
-                    <div id="silver-key-${player.id}" class="token silver key"></div> 
-                    <span id="silver-key-counter-${player.id}" class="left"></span>
-                </div>
-                <div id="gold-key-counter-wrapper-${player.id}" class="key-counter gold-key-counter">
-                    <div id="gold-key-${player.id}"  class="token gold key"></div> 
-                    <span id="gold-key-counter-${player.id}" class="left"></span>
-                </div>
-            </div>`, `player_board_${player.id}`);
-
-            const lastLocationSpotIndex = playerTable.map((spot: PlayerTableSpot, spotIndex: number) => spot.location ? spotIndex : -1).reduce((a, b) => a > b ? a : b, -1);
-
-            const silverKeyAvailable = playerTable.filter((spot: PlayerTableSpot, spotIndex: number) => spotIndex > lastLocationSpotIndex && spot.lord?.key === 1).length > 0;
-            dojo.toggleClass(`silver-key-counter-wrapper-${player.id}`, 'available', silverKeyAvailable);
-            const silverKeyCounter = new ebg.counter();
-            silverKeyCounter.create(`silver-key-counter-${player.id}`);
-            silverKeyCounter.setValue(playerTable.filter((spot: PlayerTableSpot) => spot.lord?.key === 1).length);
-            this.silverKeyCounters[playerId] = silverKeyCounter;
-
-            const goldKeyAvailable = playerTable.filter((spot: PlayerTableSpot, spotIndex: number) => spotIndex > lastLocationSpotIndex && spot.lord?.key === 2).length > 0;
-            dojo.toggleClass(`gold-key-counter-wrapper-${player.id}`, 'available', goldKeyAvailable);
-            const goldKeyCounter = new ebg.counter();
-            goldKeyCounter.create(`gold-key-counter-${player.id}`);
-            goldKeyCounter.setValue(playerTable.filter((spot: PlayerTableSpot) => spot.lord?.key === 2).length);
-            this.goldKeyCounters[playerId] = goldKeyCounter;
-
-            // top lord tokens
-
-            let html = `<div class="top-lord-tokens">`;
-            GUILD_IDS.forEach(guild => html += `<div class="token guild${guild} token-guild${guild}" id="top-lord-token-${guild}-${player.id}"></div>`);
-            html += `</div>`;
-            dojo.place(html, `player_board_${player.id}`);
+            const playerId = Number(player.id);     
 
             // pearl master token
-            dojo.place(`<div id="player_board_${player.id}_pearlMasterWrapper" class="pearlMasterWrapper"></div>`, `player_board_${player.id}`);
+            dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper"></div>`, `player_board_${player.id}`);
 
-            if (gamedatas.pearlMasterPlayer === playerId) {
-                this.placePearlMasterToken(gamedatas.pearlMasterPlayer);
+            if (gamedatas.firstPlayerTokenPlayerId === playerId) {
+                this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
-
-            this.setNewScore({
-                playerId,
-                newScore: (player as any).newScore
-            });*/
         });
 
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
@@ -302,16 +243,16 @@ class Azul implements AzulGame {
         (this as any).ajaxcall(`/azul/azul/${action}.html`, data, this, () => {});
     }
 
-    /*placePearlMasterToken(playerId: number) {
-        const pearlMasterToken = document.getElementById('pearlMasterToken');
-        if (pearlMasterToken) {
-            slideToObjectAndAttach(this, pearlMasterToken, `player_board_${playerId}_pearlMasterWrapper`);
+    placeFirstPlayerToken(playerId: number) {
+        const firstPlayerToken = document.getElementById('firstPlayerToken');
+        if (firstPlayerToken) {
+            slideToObjectAndAttach(this, firstPlayerToken, `player_board_${playerId}_firstPlayerWrapper`);
         } else {
-            dojo.place('<div id="pearlMasterToken" class="token"></div>', `player_board_${playerId}_pearlMasterWrapper`);
+            dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);
 
-            (this as any).addTooltipHtml('pearlMasterToken', _("Pearl Master token. At the end of the game, the player possessing the Pearl Master token gains a bonus of 5 Influence Points."));
+            (this as any).addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
-    }*/
+    }
 
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
@@ -322,7 +263,7 @@ class Azul implements AzulGame {
         In this method, you associate each of your game notifications with your local method to handle it.
 
         Note: game notification names correspond to "notifyAllPlayers" and "notifyPlayer" calls in
-                your pylos.game.php file.
+                your azul.game.php file.
 
     */
     setupNotifications() {
@@ -334,17 +275,8 @@ class Azul implements AzulGame {
             ['tilesPlacedOnLine', ANIMATION_MS],
             ['placeTileOnWall', SCORE_MS],
             ['emptyFloorLine', SCORE_MS],
-            /*['discardLords', ANIMATION_MS],
-            ['discardLocations', ANIMATION_MS],
-            ['newPearlMaster', 1],
-            ['discardLordPick', 1],
-            ['discardLocationPick', 1],
-            ['lastTurn', 1],
-            ['scoreLords', SCORE_MS],
-            ['scoreLocations', SCORE_MS],
-            ['scoreCoalition', SCORE_MS],
-            ['scorePearlMaster', SCORE_MS],
-            ['scoreTotal', SCORE_MS],*/
+            ['endScore', SCORE_MS],
+            ['firstPlayerToken', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -368,7 +300,7 @@ class Azul implements AzulGame {
 
     notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
         Object.keys(notif.args.completeLines).forEach(playerId => {
-            const completeLine: CompleteLine = notif.args.completeLines[playerId];
+            const completeLine: PlacedTileOnWall = notif.args.completeLines[playerId];
             
             this.getPlayerTable(Number(playerId)).placeTilesOnWall([completeLine.placedTile]);
 
@@ -389,6 +321,22 @@ class Azul implements AzulGame {
             (this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
             this.incScore(Number(playerId), floorLine.points);
         });
+    }
+
+    notif_endScore(notif: Notif<NotifEndScoreArgs>) {
+        Object.keys(notif.args.scores).forEach(playerId => {
+            const endScore: EndScoreTiles = notif.args.scores[playerId];
+
+            endScore.tiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
+            setTimeout(() => endScore.tiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+
+            (this as any).displayScoring(`tile${endScore.tiles[2].id}`, this.getPlayerColor(Number(playerId)), endScore.points, SCORE_MS);
+            this.incScore(Number(playerId), endScore.points);
+        });
+    }
+
+    notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
+        this.placeFirstPlayerToken(notif.args.playerId);
     }
 
     /* This enable to inject translatable styled things to logs or action bar */

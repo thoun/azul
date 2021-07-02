@@ -33,3 +33,11 @@
         border-color: #f5333f;
     }
 }
+
+#firstPlayerToken {
+    pointer-events: all;
+    width: 32px;
+    height: 32px;
+    position: relative;
+    box-shadow: 1px 1px 1px 1px #00000099;
+}

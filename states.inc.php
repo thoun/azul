@@ -131,6 +131,16 @@ $playerActionsGameStates = [
         "action" => "stPlaceTiles",
         "transitions" => [ 
             "next" => ST_FILL_FACTORIES,
+            "endScore" => ST_END_SCORE,
+        ],
+    ],
+
+    ST_END_SCORE => [
+        "name" => "endScore",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndScore",
+        "transitions" => [
             "endGame" => ST_END_GAME,
         ],
     ],

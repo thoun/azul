@@ -21,12 +21,30 @@ require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
 require_once('modules/constants.inc.php');
 require_once('modules/tile.php');
+require_once('modules/debug-util.php');
 
 function getIdPredicate($tile) {
     return $tile->id;
 };
 
+function sortByLine($a, $b) {
+    if ($a->line == $b->line) {
+        return 0;
+    }
+    return ($a->line < $b->line) ? -1 : 1;
+}
+
+function sortByColumn($a, $b) {
+    if ($a->column == $b->column) {
+        return 0;
+    }
+    return ($a->column < $b->column) ? -1 : 1;
+}
+
 class Azul extends Table {
+
+    use DebugUtilTrait;
+
 	function __construct() {
         // Your global variables labels:
         //  Here, you can assign labels to global variables you are using for this game.
@@ -90,6 +108,9 @@ class Azul extends Table {
 
         $this->setupTiles();
 
+        // TODO TEMP to test
+        //$this->debugSetup();
+
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
@@ -116,6 +137,7 @@ class Azul extends Table {
         $result['players'] = self::getCollectionFromDb($sql);
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
+        $result['firstPlayerTokenPlayerId'] = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
 
         $factories = [];
         $factoryNumber = $result['factoryNumber'];
@@ -181,6 +203,10 @@ class Azul extends Table {
         self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
     }
 
+    function incPlayerScoreAux(int $playerId, int $incScoreAux) {
+        self::DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
+    }
+
     function getTileFromDb($dbTile) {
         if (!$dbTile || !array_key_exists('id', $dbTile)) {
             throw new Error('tile doesn\'t exists '.json_encode($dbTile));
@@ -206,6 +232,11 @@ class Azul extends Table {
         self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
 
         $this->placeTilesOnLine($playerId, $firstPlayerTokens, 0);
+
+        self::notifyAllPlayers('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+        ]);
     }
 
     function placeTilesOnLine(int $playerId, array $tiles, int $line) {
@@ -259,14 +290,7 @@ class Azul extends Table {
         $tiles = array_values(array_filter(
             $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), function($tile) use ($line) { return $tile->line == $line; })
         );
-        
-        // sort by column
-        usort($tiles, function ($a, $b) {
-            if ($a->column == $b->column) {
-                return 0;
-            }
-            return ($a->column < $b->column) ? -1 : 1;
-        });
+        usort($tiles, 'sortByColumn');
 
         return $tiles;
     }
@@ -392,6 +416,136 @@ class Azul extends Table {
         // TODO variant
 
         return ($row + $this->indexForDefaultWall[$type] - 1) % 5 + 1;
+    }
+
+    function notifPlaceLine(array $playersIds, int $line) {
+        $completeLinesNotif = [];
+        foreach ($playersIds as $playerId) {
+            $playerTiles = $this->getTilesFromLine($playerId, $line);
+            if (count($playerTiles) == $line) {
+                
+                $wallTile = $playerTiles[0];
+                $wallTile->column = $this->getColumnForTile($line, $wallTile->type);
+                $discardedTiles = array_slice($playerTiles, 1);
+                $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
+                $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
+
+                $pointsDetail = $this->getPointsDetailForPlacedTile($playerId, $wallTile);
+
+                $obj = new stdClass();
+                $obj->placedTile = $wallTile;
+                $obj->discardedTiles = $discardedTiles;
+                $obj->pointsDetail = $pointsDetail;
+
+                $completeLinesNotif[$playerId] = $obj;
+
+                $this->incPlayerScore($playerId, $pointsDetail->points);
+            }
+        }
+
+        if (count($completeLinesNotif) > 0) {
+            self::notifyAllPlayers('placeTileOnWall', 'place tile on wall', [
+                'completeLines' => $completeLinesNotif,
+            ]);
+        }
+    }
+
+    function notifFloorLine(array $playersIds) {
+        $floorLinesNotif = [];
+        foreach ($playersIds as $playerId) {
+            $playerTiles = $this->getTilesFromLine($playerId, 0);
+            if (count($playerTiles) > 0) {                
+                $this->tiles->moveCards(array_map('getIdPredicate', $playerTiles), 'discard');
+                $points = $this->getPointsForFloorLine(count($playerTiles));
+
+                $obj = new stdClass();
+                $obj->tiles = $playerTiles;
+                $obj->points = $points;
+
+                $floorLinesNotif[$playerId] = $obj;
+
+                $this->incPlayerScore($playerId, $points);
+            } 
+        }
+        self::notifyAllPlayers('emptyFloorLine', 'empty floor line', [
+            'floorLines' => $floorLinesNotif,
+        ]);
+    }
+
+    function notifCompleteLines(array $playersIds, array $walls, int $line) {        
+        $scoresNotif = [];
+        foreach ($playersIds as $playerId) {
+            $playerTiles = array_values(array_filter($walls[$playerId], function($tile) use ($line) { return $tile->line == $line; }));
+            usort($playerTiles, 'sortByColumn');
+
+            if (count($playerTiles) == 5) {
+
+                $obj = new stdClass();
+                $obj->tiles = $playerTiles;
+                $obj->points = 2;
+
+                $scoresNotif[$playerId] = $obj;
+
+                $this->incPlayerScore($playerId, $obj->points);
+                $this->incPlayerScoreAux($playerId, 1);
+            }
+        }
+
+        if (count($scoresNotif) > 0) {
+            self::notifyAllPlayers('endScore', '', [
+                'scores' => $scoresNotif,
+            ]);
+        }
+    }
+
+    function notifCompleteColumns(array $playersIds, array $walls, int $column) {                
+        $scoresNotif = [];
+        foreach ($playersIds as $playerId) {
+            $playerTiles = array_values(array_filter($walls[$playerId], function($tile) use ($column) { return $tile->column == $column; }));
+            usort($playerTiles, 'sortByLine');
+            
+            if (count($playerTiles) == 5) {
+
+                $obj = new stdClass();
+                $obj->tiles = $playerTiles;
+                $obj->points = 7;
+
+                $scoresNotif[$playerId] = $obj;
+
+                $this->incPlayerScore($playerId, $obj->points);
+            }
+        }
+
+        if (count($scoresNotif) > 0) {
+            self::notifyAllPlayers('endScore', '', [
+                'scores' => $scoresNotif,
+            ]);
+        }
+    }
+
+    function notifCompleteColors(array $playersIds, array $walls, int $color) {                
+        $scoresNotif = [];
+        foreach ($playersIds as $playerId) {
+            $playerTiles = array_values(array_filter($walls[$playerId], function($tile) use ($color) { return $tile->type == $color; }));
+            usort($playerTiles, 'sortByLine');
+            
+            if (count($playerTiles) == 5) {
+
+                $obj = new stdClass();
+                $obj->tiles = $playerTiles;
+                $obj->points = 10;
+
+                $scoresNotif[$playerId] = $obj;
+
+                $this->incPlayerScore($playerId, $obj->points);
+            }
+        }
+
+        if (count($scoresNotif) > 0) {
+            self::notifyAllPlayers('endScore', '', [
+                'scores' => $scoresNotif,
+            ]);
+        }
     }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -549,63 +703,17 @@ class Azul extends Table {
     function stPlaceTiles() {
         $playersIds = $this->getPlayersIds();
 
-        for ($line = 1; $line <=5; $line++) {
-            $completeLinesNotif = [];
-            foreach ($playersIds as $playerId) {
-                $playerTiles = $this->getTilesFromLine($playerId, $line);
-                if (count($playerTiles) == $line) {
-                    
-                    $wallTile = $playerTiles[0];
-                    $wallTile->column = $this->getColumnForTile($line, $wallTile->type);
-                    $discardedTiles = array_slice($playerTiles, 1);
-                    $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
-                    $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
 
-                    $pointsDetail = $this->getPointsDetailForPlacedTile($playerId, $wallTile);
-
-                    $obj = new stdClass();
-                    $obj->placedTile = $wallTile;
-                    $obj->discardedTiles = $discardedTiles;
-                    $obj->pointsDetail = $pointsDetail;
-
-                    $completeLinesNotif[$playerId] = $obj;
-
-                    $this->incPlayerScore($playerId, $pointsDetail->points);
-                }
-            }
-
-            if (count($completeLinesNotif) > 0) {
-                self::notifyAllPlayers('placeTileOnWall', 'place tile on wall', [
-                    'completeLines' => $completeLinesNotif,
-                ]);
-            }
+        for ($line = 1; $line <= 5; $line++) {
+            $this->notifPlaceLine($playersIds, $line);
         }
-
-        $floorLinesNotif = [];
-        foreach ($playersIds as $playerId) {
-            $playerTiles = $this->getTilesFromLine($playerId, 0);
-            if (count($playerTiles) > 0) {                
-                $this->tiles->moveCards(array_map('getIdPredicate', $playerTiles), 'discard');
-                $points = $this->getPointsForFloorLine(count($playerTiles));
-
-                $obj = new stdClass();
-                $obj->tiles = $playerTiles;
-                $obj->points = $points;
-
-                $floorLinesNotif[$playerId] = $obj;
-
-                $this->incPlayerScore($playerId, $points);
-            } 
-        }
-        self::notifyAllPlayers('emptyFloorLine', 'empty floor line', [
-            'floorLines' => $floorLinesNotif,
-        ]);
+        $this->notifFloorLine($playersIds);
         
         $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
         $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
 
         if ($this->getGameProgression() == 100) {
-            $this->gamestate->nextState('endGame');
+            $this->gamestate->nextState('endScore');
         } else {
             $playerId = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
             $this->gamestate->changeActivePlayer($playerId);
@@ -614,87 +722,112 @@ class Azul extends Table {
             $this->gamestate->nextState('next');
         }
     }
-    
 
-//////////////////////////////////////////////////////////////////////////////
-//////////// Zombie
-////////////
+    function stEndScore() {
+        $playersIds = $this->getPlayersIds();
 
-    /*
-        zombieTurn:
-        
-        This method is called each time it is the turn of a player who has quit the game (= "zombie" player).
-        You can do whatever you want in order to make sure the turn of this player ends appropriately
-        (ex: pass).
-        
-        Important: your zombie code will be called when the player leaves the game. This action is triggered
-        from the main site and propagated to the gameserver from a server, not from a browser.
-        As a consequence, there is no current player associated to this action. In your zombieTurn function,
-        you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
-    */
-
-    function zombieTurn($state, $active_player) {
-    	$statename = $state['name'];
-    	
-        if ($state['type'] === "activeplayer") {
-            switch ($statename) {
-                default:
-                    $this->gamestate->nextState("nextPlayer");
-                	break;
-            }
-
-            return;
+        $walls = [];
+        foreach ($playersIds as $playerId) {
+            $walls[$playerId] = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
         }
 
-        if ($state['type'] === "multipleactiveplayer") {
-            // Make sure player is in a non blocking status for role turn
-            $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
-            
-            return;
+        // Gain 2 points for each complete horizontal line of 5 consecutive tiles on your wall.
+        for ($line = 1; $line <= 5; $line++) {
+            $this->notifCompleteLines($playersIds, $walls, $line);
+        }
+        // Gain 7 points for each complete vertical line of 5 consecutive tiles on your wall.
+        for ($column = 1; $column <= 5; $column++) {
+            $this->notifCompleteColumns($playersIds, $walls, $column);
+        }
+        // Gain 10 points for each color of which you have placed all 5 tiles on your wall.
+        for ($color = 1; $color <= 5; $color++) {
+            $this->notifCompleteColors($playersIds, $walls, $color);
         }
 
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        //$this->gamestate->jumpToState(ST_FILL_FACTORIES);
+        $this->gamestate->nextState('endGame');
     }
     
-///////////////////////////////////////////////////////////////////////////////////:
-////////// DB upgrade
-//////////
 
-    /*
-        upgradeTableDb:
-        
-        You don't have to care about this until your game has been published on BGA.
-        Once your game is on BGA, this method is called everytime the system detects a game running with your old
-        Database scheme.
-        In this case, if you change your Database scheme, you just have to apply the needed changes in order to
-        update the game database and allow the game to continue to run with your new version.
+    //////////////////////////////////////////////////////////////////////////////
+    //////////// Zombie
+    ////////////
     
-    */
+        /*
+            zombieTurn:
+            
+            This method is called each time it is the turn of a player who has quit the game (= "zombie" player).
+            You can do whatever you want in order to make sure the turn of this player ends appropriately
+            (ex: pass).
+            
+            Important: your zombie code will be called when the player leaves the game. This action is triggered
+            from the main site and propagated to the gameserver from a server, not from a browser.
+            As a consequence, there is no current player associated to this action. In your zombieTurn function,
+            you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
+        */
     
-    function upgradeTableDb($from_version) {
-        // $from_version is the current version of this game database, in numerical form.
-        // For example, if the game was running with a release of your game named "140430-1345",
-        // $from_version is equal to 1404301345
+        function zombieTurn($state, $active_player) {
+            $statename = $state['name'];
+            
+            if ($state['type'] === "activeplayer") {
+                switch ($statename) {
+                    default:
+                        $this->gamestate->nextState("nextPlayer");
+                        break;
+                }
+    
+                return;
+            }
+    
+            if ($state['type'] === "multipleactiveplayer") {
+                // Make sure player is in a non blocking status for role turn
+                $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
+                
+                return;
+            }
+    
+            throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        }
         
-        // Example:
-//        if( $from_version <= 1404301345 )
-//        {
-//            // ! important ! Use DBPREFIX_<table_name> for all tables
-//
-//            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
-//            self::applyDbUpgradeToAllDB( $sql );
-//        }
-//        if( $from_version <= 1405061421 )
-//        {
-//            // ! important ! Use DBPREFIX_<table_name> for all tables
-//
-//            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
-//            self::applyDbUpgradeToAllDB( $sql );
-//        }
-//        // Please add your future database scheme changes here
-//
-//
-
-
-    }    
+    ///////////////////////////////////////////////////////////////////////////////////:
+    ////////// DB upgrade
+    //////////
+    
+        /*
+            upgradeTableDb:
+            
+            You don't have to care about this until your game has been published on BGA.
+            Once your game is on BGA, this method is called everytime the system detects a game running with your old
+            Database scheme.
+            In this case, if you change your Database scheme, you just have to apply the needed changes in order to
+            update the game database and allow the game to continue to run with your new version.
+        
+        */
+        
+        function upgradeTableDb($from_version) {
+            // $from_version is the current version of this game database, in numerical form.
+            // For example, if the game was running with a release of your game named "140430-1345",
+            // $from_version is equal to 1404301345
+            
+            // Example:
+    //        if( $from_version <= 1404301345 )
+    //        {
+    //            // ! important ! Use DBPREFIX_<table_name> for all tables
+    //
+    //            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
+    //            self::applyDbUpgradeToAllDB( $sql );
+    //        }
+    //        if( $from_version <= 1405061421 )
+    //        {
+    //            // ! important ! Use DBPREFIX_<table_name> for all tables
+    //
+    //            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
+    //            self::applyDbUpgradeToAllDB( $sql );
+    //        }
+    //        // Please add your future database scheme changes here
+    //
+    //
+    
+    
+        }    
 }

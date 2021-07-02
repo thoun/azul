@@ -31,6 +31,7 @@ interface AzulGamedatas {
     // Add here variables you set up in getAllDatas
     factoryNumber: number;
     factories: { [factoryId: number]: Tile[] };
+    firstPlayerTokenPlayerId: number;
 }
 
 interface AzulGame extends Game {
@@ -43,6 +44,10 @@ interface AzulGame extends Game {
 
 interface EnteringChooseLineArgs {
     lines: number[];
+}
+
+interface NotifFirstPlayerTokenArgs {
+    playerId: number;
 }
 
 interface NotifFactoriesFilledArgs {
@@ -68,14 +73,14 @@ interface WallTilePointDetail {
     columnTiles: Tile[];
 }
 
-interface CompleteLine {
+interface PlacedTileOnWall {
     placedTile: Tile;
     discardedTiles: Tile[];
     pointsDetail: WallTilePointDetail;
 }
 
 interface NotifPlaceTileOnWallArgs {
-    completeLines: { [playerId: number]: CompleteLine };
+    completeLines: { [playerId: number]: PlacedTileOnWall };
 }
 
 interface FloorLine {
@@ -85,4 +90,13 @@ interface FloorLine {
 
 interface NotifEmptyFloorLineArgs {
     floorLines: { [playerId: number]: FloorLine };
+}
+
+interface EndScoreTiles {
+    tiles: Tile[];
+    points: number;
+}
+
+interface NotifEndScoreArgs {
+    scores: { [playerId: number]: EndScoreTiles };
 }
