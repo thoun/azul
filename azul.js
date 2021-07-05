@@ -101,7 +101,7 @@ var PlayerTable = /** @class */ (function () {
             html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
         }
         html += "<div id=\"player-table-" + this.playerId + "-line0\" class=\"floor line\"></div>";
-        html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall colored-side\"></div>";
+        html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall " + (this.game.isVariant() ? 'grayed-side' : 'colored-side') + "\"></div>";
         html += "    </div>\n        \n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>\n        </div>";
         dojo.place(html, 'players-tables');
         var _loop_2 = function (i) {
@@ -247,6 +247,10 @@ var Azul = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Azul.prototype.isVariant = function () {
+        console.log(this.gamedatas.variant);
+        return this.gamedatas.variant;
+    };
     Azul.prototype.getPlayerId = function () {
         return Number(this.player_id);
     };

@@ -33,9 +33,11 @@ interface AzulGamedatas {
     factoryNumber: number;
     factories: { [factoryId: number]: Tile[] };
     firstPlayerTokenPlayerId: number;
+    variant: boolean;
 }
 
 interface AzulGame extends Game {
+    isVariant(): boolean;
     takeTiles(id: number): void;
     selectLine(line: number): void;
     removeTile(tile: Tile): void;

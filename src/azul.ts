@@ -143,6 +143,11 @@ class Azul implements AzulGame {
 
     ///////////////////////////////////////////////////
 
+    public isVariant(): boolean {
+        console.log(this.gamedatas.variant)
+        return this.gamedatas.variant;
+    }
+
     public getPlayerId(): number {
         return Number((this as any).player_id);
     }

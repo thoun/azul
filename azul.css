@@ -87,6 +87,10 @@
   background: #ffffffb0;
   box-shadow: 0 0 10px 5px #ffffffb0;
 }
+.player-table-wrapper .player-table .wall.grayed-side {
+  background: #b0b0b0f0;
+  box-shadow: 0 0 10px 5px #b0b0b0f0;
+}
 .player-table-wrapper .player-table .wall .tile.highlight {
   animation: highlight-animation 0.7s alternate 2;
 }
@@ -98,6 +102,7 @@
 
 .player_board_content .tile {
   position: relative;
+  margin: 5px;
 }
 
 .tile {

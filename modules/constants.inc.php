@@ -13,7 +13,9 @@ define('ST_PLAYER_CHOOSE_LINE', 30);
 
 //define('ST_PLAYER_CHOOSE_COLUMN', 40);
 
-define('ST_PLACE_TILES', 50);
+define('ST_END_ROUND', 50);
+define('ST_MULTIPLAYER_CHOOSE_COLUMN', 51);
+define('ST_PLACE_TILES', 52);
 
 define('ST_NEXT_PLAYER', 80);
 
@@ -33,5 +35,6 @@ define('VARIANT_OPTION', 'VariantOption');
  */
 
 define('FIRST_PLAYER_FOR_NEXT_TURN', 'FirstPlayerForNextTurn');
+define('RESOLVING_LINE', 'ResolvingLine');
 
 ?>

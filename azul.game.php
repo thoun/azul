@@ -56,6 +56,7 @@ class Azul extends Table {
         
         self::initGameStateLabels([
             FIRST_PLAYER_FOR_NEXT_TURN => 10,
+            RESOLVING_LINE => 11,
             VARIANT_OPTION => 100,
         ]);
 
@@ -138,6 +139,7 @@ class Azul extends Table {
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
         $result['firstPlayerTokenPlayerId'] = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
+        $result['variant'] = $this->isVariant();
 
         $factories = [];
         $factoryNumber = $result['factoryNumber'];
@@ -679,7 +681,7 @@ class Azul extends Table {
             $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
         }
 
-        self::notifyAllPlayers("factoriesFilled", clienttranslate("A new turn begins"), [
+        self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins"), [
             'factories' => $factories,
         ]);
 
@@ -690,7 +692,7 @@ class Azul extends Table {
         $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') == 0;
 
         if ($factoriesAllEmpty) {
-            $this->gamestate->nextState('endTurn');
+            $this->gamestate->nextState('endRound');
         } else {
             $this->activeNextPlayer();
         
@@ -701,26 +703,51 @@ class Azul extends Table {
         }
     }
 
+    function stEndRound() {
+        self::setGameStateValue(RESOLVING_LINE, 1);
+
+        if ($this->isVariant()) {
+            $this->gamestate->nextState('chooseColumn');
+        } else {
+            $this->gamestate->nextState('placeTiles');
+        }
+    }
+
     function stPlaceTiles() {
         $playersIds = $this->getPlayersIds();
+        $line = intval(self::getGameStateValue(RESOLVING_LINE));
 
-
-        for ($line = 1; $line <= 5; $line++) {
+        if ($line > 0) {
             $this->notifPlaceLine($playersIds, $line);
-        }
-        $this->notifFloorLine($playersIds);
-        
-        $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
-        $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
 
-        if ($this->getGameProgression() == 100) {
-            $this->gamestate->nextState('endScore');
+            if ($line < 5) {
+                $line++;
+                self::setGameStateValue(RESOLVING_LINE, $line);                
+
+                if ($this->isVariant()) {
+                    $this->gamestate->nextState('chooseColumn');
+                } else {
+                    $this->gamestate->nextState('nextLine');
+                }
+            } else {
+                self::setGameStateValue(RESOLVING_LINE, 0);
+                $this->gamestate->nextState('nextLine');
+            }
         } else {
-            $playerId = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
-            $this->gamestate->changeActivePlayer($playerId);
-            self::giveExtraTime($playerId);
+            $this->notifFloorLine($playersIds);
+        
+            $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
+            $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
 
-            $this->gamestate->nextState('next');
+            if ($this->getGameProgression() == 100) {
+                $this->gamestate->nextState('endScore');
+            } else {
+                $playerId = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
+                $this->gamestate->changeActivePlayer($playerId);
+                self::giveExtraTime($playerId);
+    
+                $this->gamestate->nextState('newRound');
+            }
         }
     }
 

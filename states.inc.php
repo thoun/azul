@@ -70,7 +70,7 @@ $basicGameStates = [
         "action" => "stNextPlayer",
         "transitions" => [
             "nextPlayer" => ST_PLAYER_CHOOSE_TILE, 
-            "endTurn" => ST_PLACE_TILES,
+            "endRound" => ST_END_ROUND,
         ],
     ],
    
@@ -124,13 +124,28 @@ $playerActionsGameStates = [
         ],
     ],
 
+    ST_END_ROUND => [
+        "name" => "endRound",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndRound",
+        "transitions" => [
+            "chooseColumn" => ST_PLACE_TILES, // TODO
+            "placeTiles" => ST_PLACE_TILES,
+        ],
+    ],
+
+    // TODO ST_MULTIPLAYER_CHOOSE_COLUMN
+
     ST_PLACE_TILES => [
         "name" => "placeTiles",
         "description" => "",
         "type" => "game",
         "action" => "stPlaceTiles",
         "transitions" => [ 
-            "next" => ST_FILL_FACTORIES,
+            "chooseColumn" => ST_PLACE_TILES, // TODO
+            "nextLine" => ST_PLACE_TILES,
+            "newRound" => ST_FILL_FACTORIES,
             "endScore" => ST_END_SCORE,
         ],
     ],
