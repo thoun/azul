@@ -9,6 +9,7 @@ interface Tile {
 interface AzulPlayer extends Player {
     lines: Tile[];
     wall: Tile[];
+    hand: Tile[];
     playerNo: number;
 }
 

@@ -96,6 +96,10 @@
   }
 }
 
+.player_board_content .tile {
+  position: relative;
+}
+
 .tile {
   width: 58px;
   height: 58px;

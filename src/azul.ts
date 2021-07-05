@@ -159,14 +159,14 @@ class Azul implements AzulGame {
         (this as any).scoreCtrl[playerId]?.incValue(incScore);
     }
 
-    public placeTile(tile: Tile, destinationId: string, left: number, top: number) {
+    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number) {
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         const tileDiv = document.getElementById(`tile${tile.id}`);
         if (tileDiv) {
             slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
         } else {
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
+            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}"></div>`, destinationId);
         }
         
     }
@@ -182,6 +182,8 @@ class Azul implements AzulGame {
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
+
+            player.hand.forEach(tile => this.placeTile(tile, `player_board_${playerId}`));
         });
 
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));

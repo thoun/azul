@@ -268,7 +268,7 @@ var Azul = /** @class */ (function () {
             slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
         }
         else {
-            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"left: " + left + "px; top: " + top + "px;\"></div>", destinationId);
+            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + (left !== undefined ? "left: " + left + "px;" : '') + (top !== undefined ? "top: " + top + "px;" : '') + "\"></div>", destinationId);
         }
     };
     Azul.prototype.createPlayerPanels = function (gamedatas) {
@@ -280,6 +280,7 @@ var Azul = /** @class */ (function () {
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 _this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
+            player.hand.forEach(function (tile) { return _this.placeTile(tile, "player_board_" + playerId); });
         });
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
         (this as any).addTooltipHtmlToClass('pearl-counter', _("Number of pearls"));
