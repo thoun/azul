@@ -28,3 +28,5 @@ CREATE TABLE IF NOT EXISTS `tile` (
    `card_location_arg` int(11),
    PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `player` ADD `selected_column` tinyint UNSIGNED;

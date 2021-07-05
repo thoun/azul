@@ -130,12 +130,23 @@ $playerActionsGameStates = [
         "type" => "game",
         "action" => "stEndRound",
         "transitions" => [
-            "chooseColumn" => ST_PLACE_TILES, // TODO
+            "chooseColumn" => ST_MULTIPLAYER_CHOOSE_COLUMN,
             "placeTiles" => ST_PLACE_TILES,
         ],
     ],
 
-    // TODO ST_MULTIPLAYER_CHOOSE_COLUMN
+    ST_MULTIPLAYER_CHOOSE_COLUMN => [
+        "name" => "chooseColumn",
+        "description" => clienttranslate('Players with  complete line ${line} must choose a column'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a column'),
+        "type" => "multipleactiveplayer",
+        "action" => "stChooseColumn",
+        "args" => "argChooseColumn",
+        "possibleactions" => [ "selectColumn" ],
+        "transitions" => [
+            "placeTiles" => ST_PLACE_TILES,
+        ],
+    ],
 
     ST_PLACE_TILES => [
         "name" => "placeTiles",
@@ -143,7 +154,7 @@ $playerActionsGameStates = [
         "type" => "game",
         "action" => "stPlaceTiles",
         "transitions" => [ 
-            "chooseColumn" => ST_PLACE_TILES, // TODO
+            "chooseColumn" => ST_MULTIPLAYER_CHOOSE_COLUMN,
             "nextLine" => ST_PLACE_TILES,
             "newRound" => ST_FILL_FACTORIES,
             "endScore" => ST_END_SCORE,

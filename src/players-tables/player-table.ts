@@ -14,6 +14,12 @@ class PlayerTable {
         }
         html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
         html += `<div id="player-table-${this.playerId}-wall" class="wall ${this.game.isVariant() ? 'grayed-side' : 'colored-side'}"></div>`;
+        if (this.game.isVariant()) {
+            for (let i=1; i<=5; i++) {
+                html += `<div id="player-table-${this.playerId}-column${i}" class="column" style="left: ${384 + 69*(i-1)}px; width: ${64}px;"></div>`;
+            }
+            html += `<div id="player-table-${this.playerId}-column0" class="floor column"></div>`;
+        }
         html += `    </div>
         
             <div class="player-name" style="color: #${player.color};">${player.name}</div>
@@ -24,6 +30,11 @@ class PlayerTable {
 
         for (let i=0; i<=5; i++) {
             document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
+        }
+        if (this.game.isVariant()) {
+            for (let i=0; i<=5; i++) {
+                document.getElementById(`player-table-${this.playerId}-column${i}`).addEventListener('click', () => this.game.selectColumn(i));
+            }
         }
 
         for (let i=0; i<=5; i++) {
@@ -44,5 +55,11 @@ class PlayerTable {
 
     public placeTilesOnWall(tiles: Tile[]) {
         tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-wall`, (tile.column-1) * 69, (tile.line-1) * 69));
+    }
+
+    public setColumnTop(line: number) {
+        for (let i=1; i<=5; i++) {
+            document.getElementById(`player-table-${this.playerId}-column${i}`).style.top = `${10 + 70*(line-1)}px`;
+        }
     }
 }

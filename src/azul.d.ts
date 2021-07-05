@@ -40,6 +40,7 @@ interface AzulGame extends Game {
     isVariant(): boolean;
     takeTiles(id: number): void;
     selectLine(line: number): void;
+    selectColumn(column: number): void;
     removeTile(tile: Tile): void;
     removeTiles(tiles: Tile[]): void;
     placeTile(tile: Tile, destinationId: string, left: number, top: number): void;
@@ -47,6 +48,11 @@ interface AzulGame extends Game {
 
 interface EnteringChooseLineArgs {
     lines: number[];
+}
+
+interface EnteringChooseColumnArgs {
+    line: number;
+    columns: { [playerId: number]: number[] };
 }
 
 interface NotifFirstPlayerTokenArgs {

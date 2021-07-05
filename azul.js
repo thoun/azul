@@ -102,6 +102,12 @@ var PlayerTable = /** @class */ (function () {
         }
         html += "<div id=\"player-table-" + this.playerId + "-line0\" class=\"floor line\"></div>";
         html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall " + (this.game.isVariant() ? 'grayed-side' : 'colored-side') + "\"></div>";
+        if (this.game.isVariant()) {
+            for (var i = 1; i <= 5; i++) {
+                html += "<div id=\"player-table-" + this.playerId + "-column" + i + "\" class=\"column\" style=\"left: " + (384 + 69 * (i - 1)) + "px; width: " + 64 + "px;\"></div>";
+            }
+            html += "<div id=\"player-table-" + this.playerId + "-column0\" class=\"floor column\"></div>";
+        }
         html += "    </div>\n        \n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>\n        </div>";
         dojo.place(html, 'players-tables');
         var _loop_2 = function (i) {
@@ -111,13 +117,22 @@ var PlayerTable = /** @class */ (function () {
         for (var i = 0; i <= 5; i++) {
             _loop_2(i);
         }
-        var _loop_3 = function (i) {
+        if (this.game.isVariant()) {
+            var _loop_3 = function (i) {
+                document.getElementById("player-table-" + this_2.playerId + "-column" + i).addEventListener('click', function () { return _this.game.selectColumn(i); });
+            };
+            var this_2 = this;
+            for (var i = 0; i <= 5; i++) {
+                _loop_3(i);
+            }
+        }
+        var _loop_4 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
-            this_2.placeTilesOnLine(tiles, i);
+            this_3.placeTilesOnLine(tiles, i);
         };
-        var this_2 = this;
+        var this_3 = this;
         for (var i = 0; i <= 5; i++) {
-            _loop_3(i);
+            _loop_4(i);
         }
         this.placeTilesOnWall(player.wall);
     }
@@ -132,6 +147,11 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
         var _this = this;
         tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-table-" + _this.playerId + "-wall", (tile.column - 1) * 69, (tile.line - 1) * 69); });
+    };
+    PlayerTable.prototype.setColumnTop = function (line) {
+        for (var i = 1; i <= 5; i++) {
+            document.getElementById("player-table-" + this.playerId + "-column" + i).style.top = 10 + 70 * (line - 1) + "px";
+        }
     };
     return PlayerTable;
 }());
@@ -208,6 +228,14 @@ var Azul = /** @class */ (function () {
             args.lines.forEach(function (i) { return dojo.addClass("player-table-" + _this.getPlayerId() + "-line" + i, 'selectable'); });
         }
     };
+    Azul.prototype.onEnteringChooseColumn = function (args) {
+        var _this = this;
+        if (this.isCurrentPlayerActive()) {
+            var playerId = this.getPlayerId();
+            this.getPlayerTable(playerId).setColumnTop(args.line);
+            args.columns[playerId].forEach(function (i) { return dojo.addClass("player-table-" + _this.getPlayerId() + "-column" + i, 'selectable'); });
+        }
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -220,6 +248,9 @@ var Azul = /** @class */ (function () {
             case 'chooseLine':
                 this.onLeavingChooseLine();
                 break;
+            case 'chooseColumn':
+                this.onLeavingChooseColumn();
+                break;
         }
     };
     Azul.prototype.onLeavingChooseTile = function () {
@@ -230,17 +261,21 @@ var Azul = /** @class */ (function () {
             dojo.removeClass("player-table-" + this.getPlayerId() + "-line" + i, 'selectable');
         }
     };
+    Azul.prototype.onLeavingChooseColumn = function () {
+        for (var i = 1; i <= 5; i++) {
+            dojo.removeClass("player-table-" + this.getPlayerId() + "-column" + i, 'selectable');
+        }
+        dojo.removeClass("player-table-" + this.getPlayerId() + "-line0", 'selectable');
+    };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
     Azul.prototype.onUpdateActionButtons = function (stateName, args) {
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
-                /*case 'lordSwap':
-                (this as any).addActionButton('swap_button', _("Swap"), 'onSwap');
-                (this as any).addActionButton('dontSwap_button', _("Don't swap"), 'onDontSwap', null, false, 'red');
-                dojo.addClass('swap_button', 'disabled');
-                break;*/
+                case 'chooseColumn': // for multiplayer states we have to do it here
+                    this.onEnteringChooseColumn(args);
+                    break;
             }
         }
     };
@@ -248,7 +283,6 @@ var Azul = /** @class */ (function () {
     //// Utility methods
     ///////////////////////////////////////////////////
     Azul.prototype.isVariant = function () {
-        console.log(this.gamedatas.variant);
         return this.gamedatas.variant;
     };
     Azul.prototype.getPlayerId = function () {
@@ -322,6 +356,15 @@ var Azul = /** @class */ (function () {
         this.takeAction('selectLine', {
             line: line
         });
+    };
+    Azul.prototype.selectColumn = function (column) {
+        if (!this.checkAction('selectColumn')) {
+            return;
+        }
+        this.takeAction('selectColumn', {
+            column: column
+        });
+        this.onLeavingChooseColumn();
     };
     Azul.prototype.takeTiles = function (id) {
         if (!this.checkAction('takeTiles')) {

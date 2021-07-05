@@ -94,6 +94,14 @@ class Azul implements AzulGame {
         }
     }
 
+    onEnteringChooseColumn(args: EnteringChooseColumnArgs) {
+        if ((this as any).isCurrentPlayerActive()) {
+            const playerId = this.getPlayerId();
+            this.getPlayerTable(playerId).setColumnTop(args.line);
+            args.columns[playerId].forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-column${i}`, 'selectable'));
+        }
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -106,6 +114,9 @@ class Azul implements AzulGame {
                 break;
             case 'chooseLine':
                 this.onLeavingChooseLine();
+                break;
+            case 'chooseColumn':
+                this.onLeavingChooseColumn();
                 break;
         }
     }
@@ -120,19 +131,23 @@ class Azul implements AzulGame {
         }
     }
 
+    onLeavingChooseColumn() {
+        for (let i=1; i<=5; i++) {
+            dojo.removeClass(`player-table-${this.getPlayerId()}-column${i}`, 'selectable');
+        }
+        dojo.removeClass(`player-table-${this.getPlayerId()}-line0`, 'selectable');
+    }
+
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
     public onUpdateActionButtons(stateName: string, args: any) {
         if((this as any).isCurrentPlayerActive()) {
-            switch (stateName) {
-                /*case 'lordSwap':
-                (this as any).addActionButton('swap_button', _("Swap"), 'onSwap');
-                (this as any).addActionButton('dontSwap_button', _("Don't swap"), 'onDontSwap', null, false, 'red');
-                dojo.addClass('swap_button', 'disabled');
-                break;*/
+            switch (stateName) {                
+                case 'chooseColumn': // for multiplayer states we have to do it here
+                    this.onEnteringChooseColumn(args);
+                    break;
             }
-
         }
     } 
     
@@ -144,7 +159,6 @@ class Azul implements AzulGame {
     ///////////////////////////////////////////////////
 
     public isVariant(): boolean {
-        console.log(this.gamedatas.variant)
         return this.gamedatas.variant;
     }
 
@@ -232,6 +246,18 @@ class Azul implements AzulGame {
         this.takeAction('selectLine', {
             line
         });
+    }
+
+    public selectColumn(column: number) {
+        if(!(this as any).checkAction('selectColumn')) {
+            return;
+        }
+
+        this.takeAction('selectColumn', {
+            column
+        });
+
+        this.onLeavingChooseColumn();
     }
 
     public takeTiles(id: number) {

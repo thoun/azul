@@ -61,6 +61,29 @@
             }
         }
 
+        .column {
+            display: inline-block;
+            position: absolute;
+            border: 3px dashed transparent;
+            height: 63px;
+            width: 63px;
+            pointer-events: none;
+
+            &.floor {
+                right: 209px;
+                top: 362px;
+                left: 1px;
+                height: 116px;
+                width: unset;
+            }
+
+            &.selectable {
+                border-color: red;
+                pointer-events: all;
+                cursor: pointer;
+            }
+        }
+
         .wall {
             position: absolute;
             top: 12px;

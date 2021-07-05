@@ -210,6 +210,14 @@ class Azul extends Table {
         self::DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
     }
 
+    function getSelectedColumn(int $playerId) {
+        return intval(self::getUniqueValueFromDB("SELECT selected_column FROM player WHERE player_id = $playerId"));
+    }
+
+    function setSelectedColumn(int $playerId, int $selectedColumn) {
+        self::DbQuery("UPDATE player SET selected_column = $selectedColumn WHERE player_id = $playerId");
+    }
+
     function getTileFromDb($dbTile) {
         if (!$dbTile || !array_key_exists('id', $dbTile)) {
             throw new Error('tile doesn\'t exists '.json_encode($dbTile));
@@ -264,7 +272,10 @@ class Azul extends Table {
             $this->tiles->moveCard($tile->id, 'line'.$playerId, $tile->line * 100 + $tile->column);
         }
 
-        $message = $tiles[0]->type == 0 ? '' : clienttranslate('${player_name} places ${number} ${color} on line ${line}');
+        $message = $tiles[0]->type == 0 ? '' : 
+            ($line == 0 ?
+                clienttranslate('${player_name} places ${number} ${color} on floor line') :
+                clienttranslate('${player_name} places ${number} ${color} on line ${line}'));
 
         self::notifyAllPlayers('tilesPlacedOnLine', $message, [
             'playerId' => $playerId,
@@ -416,8 +427,6 @@ class Azul extends Table {
     }
 
     function getColumnForTile(int $row, int $type) {
-        // TODO variant
-
         return ($row + $this->indexForDefaultWall[$type] - 1) % 5 + 1;
     }
 
@@ -428,7 +437,9 @@ class Azul extends Table {
             if (count($playerTiles) == $line) {
                 
                 $wallTile = $playerTiles[0];
-                $wallTile->column = $this->getColumnForTile($line, $wallTile->type);
+                $wallTile->column = $this->isVariant() ?
+                    $this->getSelectedColumn($playerId) : 
+                    $this->getColumnForTile($line, $wallTile->type);
                 $discardedTiles = array_slice($playerTiles, 1);
                 $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
                 $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
@@ -551,6 +562,24 @@ class Azul extends Table {
         }
     }
 
+    function getAvailableColumnForColor(int $playerId, int $color, int $line) {
+        $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+
+        $availableColumns = [];
+        for ($column = 1; $column <= 5; $column++) {
+
+            $tilesSameColorSameColumnOrSamePosition = array_values(array_filter(
+                $wall, function($tile) use ($column, $line, $color) { return $tile->column == $column && ($tile->type == $color || $tile->line == $line); })
+            );
+
+            if (count($tilesSameColorSameColumnOrSamePosition) == 0) {
+                $availableColumns[] = $column;
+            }
+        }
+
+        return $availableColumns;
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
 //////////// 
@@ -641,6 +670,21 @@ class Azul extends Table {
         $this->gamestate->nextState('nextPlayer');
     }
 
+    function selectColumn(int $column) {
+        $playerId = self::getCurrentPlayerId();
+
+        $this->setSelectedColumn($playerId, $column);
+
+        if ($column == 0) {
+            $line = intval(self::getGameStateValue(RESOLVING_LINE));
+            $tiles = $this->getTilesFromLine($playerId, $line);
+            $this->placeTilesOnLine($playerId, $tiles, 0);
+        }
+            
+        // Make this player unactive now (and tell the machine state to use transtion "placeTiles" if all players are now unactive
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'placeTiles');
+    }
+
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
@@ -657,6 +701,26 @@ class Azul extends Table {
 
         return [
             'lines' => $this->availableLines($playerId),
+        ];
+    }
+
+    function argChooseColumn() {
+        $playersIds = $this->getPlayersIds();
+        $line = intval(self::getGameStateValue(RESOLVING_LINE));
+
+        $playersIdsWithCompleteLine = [];
+
+        foreach ($playersIds as $playerId) {
+            $playerTiles = $this->getTilesFromLine($playerId, $line);
+            if (count($playerTiles) == $line) {
+                $columns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
+                $playersIdsWithCompleteLine[$playerId] = count($columns) > 0 ? $columns : [0];
+            }
+        }
+
+        return [
+            'line' => $line,
+            'columns' => $playersIdsWithCompleteLine,
         ];
     }
 
@@ -708,6 +772,26 @@ class Azul extends Table {
 
         if ($this->isVariant()) {
             $this->gamestate->nextState('chooseColumn');
+        } else {
+            $this->gamestate->nextState('placeTiles');
+        }
+    }
+
+    function stChooseColumn() {
+        $playersIds = $this->getPlayersIds();
+        $line = intval(self::getGameStateValue(RESOLVING_LINE));
+
+        $playersIdsWithCompleteLine = [];
+
+        foreach ($playersIds as $playerId) {
+            $playerTiles = $this->getTilesFromLine($playerId, $line);
+            if (count($playerTiles) == $line) {
+                $playersIdsWithCompleteLine[] = $playerId;
+            }
+        }
+
+        if (count($playersIdsWithCompleteLine) > 0) {
+            $this->gamestate->setPlayersMultiactive($playersIdsWithCompleteLine, 'placeTiles');
         } else {
             $this->gamestate->nextState('placeTiles');
         }

@@ -76,6 +76,26 @@
   pointer-events: all;
   cursor: pointer;
 }
+.player-table-wrapper .player-table .column {
+  display: inline-block;
+  position: absolute;
+  border: 3px dashed transparent;
+  height: 63px;
+  width: 63px;
+  pointer-events: none;
+}
+.player-table-wrapper .player-table .column.floor {
+  right: 209px;
+  top: 362px;
+  left: 1px;
+  height: 116px;
+  width: unset;
+}
+.player-table-wrapper .player-table .column.selectable {
+  border-color: red;
+  pointer-events: all;
+  cursor: pointer;
+}
 .player-table-wrapper .player-table .wall {
   position: absolute;
   top: 12px;
