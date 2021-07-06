@@ -23,7 +23,7 @@ var Factories = /** @class */ (function () {
         this.game = game;
         this.factoryNumber = factoryNumber;
         var factoriesDiv = document.getElementById('factories');
-        var radius = 40 + factoryNumber * 40;
+        var radius = 130 + factoryNumber * 30;
         var halfSize = radius + FACTORY_RADIUS;
         var size = halfSize * 2 + "px";
         factoriesDiv.style.width = size;
@@ -40,6 +40,11 @@ var Factories = /** @class */ (function () {
         dojo.place(html, 'factories');
         this.fillFactories(factories);
     }
+    Factories.prototype.getWidth = function () {
+        var radius = 130 + this.factoryNumber * 30;
+        var halfSize = radius + FACTORY_RADIUS;
+        return halfSize * 2;
+    };
     Factories.prototype.fillFactories = function (factories) {
         var _this = this;
         var _loop_1 = function (i) {
@@ -109,7 +114,7 @@ var PlayerTable = /** @class */ (function () {
             html += "<div id=\"player-table-" + this.playerId + "-column0\" class=\"floor column\"></div>";
         }
         html += "    </div>\n        \n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>\n        </div>";
-        dojo.place(html, 'players-tables');
+        dojo.place(html, 'table');
         var _loop_2 = function (i) {
             document.getElementById("player-table-" + this_1.playerId + "-line" + i).addEventListener('click', function () { return _this.game.selectLine(i); });
         };
@@ -162,11 +167,19 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
 };
 var ANIMATION_MS = 500;
 var SCORE_MS = 1500;
+var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
+var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
+var LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
 var isDebug = window.location.host == 'studio.boardgamearena.com';
 var log = isDebug ? console.log.bind(window.console) : function () { };
 var Azul = /** @class */ (function () {
     function Azul() {
         this.playersTables = [];
+        this.zoom = 1;
+        var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
+        if (zoomStr) {
+            this.zoom = Number(zoomStr);
+        }
     }
     /*
         setup:
@@ -181,6 +194,7 @@ var Azul = /** @class */ (function () {
         "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
     */
     Azul.prototype.setup = function (gamedatas) {
+        var _this = this;
         // ignore loading of some pictures
         /*(this as any).dontPreloadImage('eye-shadow.png');
         (this as any).dontPreloadImage('publisher.png');
@@ -193,6 +207,9 @@ var Azul = /** @class */ (function () {
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories);
         this.createPlayerTables(gamedatas);
         this.setupNotifications();
+        document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
+        document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
+        this.onScreenWidthChange = function () { return _this.setAutoZoom(); };
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -282,6 +299,48 @@ var Azul = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Azul.prototype.setAutoZoom = function () {
+        var zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
+        var factoryWidth = this.factories.getWidth();
+        var newZoom = this.zoom;
+        while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth / newZoom < factoryWidth) {
+            newZoom = ZOOM_LEVELS[ZOOM_LEVELS.indexOf(newZoom) - 1];
+        }
+        // zoom will also place player tables. we call setZoom even if this method didn't change it because it might have been changed by localStorage zoom
+        this.setZoom(newZoom);
+    };
+    Azul.prototype.setZoom = function (zoom) {
+        if (zoom === void 0) { zoom = 1; }
+        this.zoom = zoom;
+        localStorage.setItem(LOCAL_STORAGE_ZOOM_KEY, '' + this.zoom);
+        var newIndex = ZOOM_LEVELS.indexOf(this.zoom);
+        dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
+        dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
+        var div = document.getElementById('table');
+        if (zoom === 1) {
+            div.style.transform = '';
+            div.style.margin = '';
+        }
+        else {
+            div.style.transform = "scale(" + zoom + ")";
+            div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
+        }
+        // TODO this.placePlayerTable();
+    };
+    Azul.prototype.zoomIn = function () {
+        if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
+            return;
+        }
+        var newIndex = ZOOM_LEVELS.indexOf(this.zoom) + 1;
+        this.setZoom(ZOOM_LEVELS[newIndex]);
+    };
+    Azul.prototype.zoomOut = function () {
+        if (this.zoom === ZOOM_LEVELS[0]) {
+            return;
+        }
+        var newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
+        this.setZoom(ZOOM_LEVELS[newIndex]);
+    };
     Azul.prototype.isVariant = function () {
         return this.gamedatas.variant;
     };

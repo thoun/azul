@@ -1,9 +1,12 @@
 
-#players-tables {
+#table {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
     align-items: center;
+    overflow-x: auto;
+    position: relative;
+    transform-origin: left top;
 }
 
 .player-table-wrapper {

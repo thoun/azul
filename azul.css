@@ -8,6 +8,7 @@
   width: 250px;
   height: 250px;
   display: inline-block;
+  pointer-events: none;
 }
 #factories .factory-center {
   width: 100%;
@@ -20,11 +21,14 @@
   pointer-events: all;
 }
 
-#players-tables {
+#table {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
   align-items: center;
+  overflow-x: auto;
+  position: relative;
+  transform-origin: left top;
 }
 
 .player-table-wrapper {
@@ -174,9 +178,42 @@ html {
   background-blend-mode: multiply;
 }
 
+.mode_3d #game_play_area_background {
+  background: url("img/background.jpg") #00587a;
+  background-repeat: repeat;
+  background-blend-mode: multiply;
+}
+
 @font-face {
   font-family: "Algeria";
   src: url("img/algeria.woff2") format("woff2"), url("img/algeria.woff") format("woff");
   font-weight: normal;
   font-style: normal;
+}
+#zoom-wrapper {
+  position: relative;
+}
+#zoom-wrapper #zoom-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+#zoom-wrapper #zoom-controls button {
+  width: 32px;
+  height: 32px;
+  background: url("img/zoom.svg");
+  background-size: auto 220%;
+}
+#zoom-wrapper #zoom-controls button:not(.disabled) {
+  cursor: pointer;
+}
+#zoom-wrapper #zoom-controls button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+#zoom-wrapper #zoom-controls #zoom-in {
+  background-position: 6% 94%;
+}
+#zoom-wrapper #zoom-controls #zoom-out {
+  background-position: 82% 94%;
 }

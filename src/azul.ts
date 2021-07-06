@@ -10,6 +10,10 @@ declare const board: HTMLDivElement;
 const ANIMATION_MS = 500;
 const SCORE_MS = 1500;
 
+const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
+const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
+const LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
+
 const isDebug = window.location.host == 'studio.boardgamearena.com';
 const log = isDebug ? console.log.bind(window.console) : function () { };
 
@@ -19,7 +23,13 @@ class Azul implements AzulGame {
     private factories: Factories;
     private playersTables: PlayerTable[] = [];
 
-    constructor() {     
+    public zoom: number = 1;
+
+    constructor() {    
+        const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
+        if (zoomStr) {
+            this.zoom = Number(zoomStr);
+        } 
     }
     
     /*
@@ -52,6 +62,11 @@ class Azul implements AzulGame {
         this.createPlayerTables(gamedatas);
 
         this.setupNotifications();
+
+        document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
+        document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
+
+        (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
         log( "Ending game setup" );
     }
@@ -157,6 +172,52 @@ class Azul implements AzulGame {
 
 
     ///////////////////////////////////////////////////
+
+
+    public setAutoZoom() {
+        const zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
+        const factoryWidth = this.factories.getWidth();
+        let newZoom = this.zoom;
+        while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth/newZoom < factoryWidth) {
+            newZoom = ZOOM_LEVELS[ZOOM_LEVELS.indexOf(newZoom) - 1];
+        }
+        // zoom will also place player tables. we call setZoom even if this method didn't change it because it might have been changed by localStorage zoom
+        this.setZoom(newZoom);
+    }    
+
+    private setZoom(zoom: number = 1) {
+        this.zoom = zoom;
+        localStorage.setItem(LOCAL_STORAGE_ZOOM_KEY, ''+this.zoom);
+        const newIndex = ZOOM_LEVELS.indexOf(this.zoom);
+        dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
+        dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
+
+        const div = document.getElementById('table');
+        if (zoom === 1) {
+            div.style.transform = '';
+            div.style.margin = '';
+        } else {
+            div.style.transform = `scale(${zoom})`;
+            div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
+        }
+        // TODO this.placePlayerTable();
+    }
+
+    public zoomIn() {
+        if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
+            return;
+        }
+        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) + 1;
+        this.setZoom(ZOOM_LEVELS[newIndex]);
+    }
+
+    public zoomOut() {
+        if (this.zoom === ZOOM_LEVELS[0]) {
+            return;
+        }
+        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
+        this.setZoom(ZOOM_LEVELS[newIndex]);
+    }
 
     public isVariant(): boolean {
         return this.gamedatas.variant;

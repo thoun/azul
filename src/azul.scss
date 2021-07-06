@@ -11,6 +11,12 @@ html {
     background-blend-mode: multiply;
 }
 
+.mode_3d #game_play_area_background {
+    background: url('img/background.jpg') #00587a;
+    background-repeat: repeat;
+    background-blend-mode: multiply;
+}
+
 @font-face {
     font-family: 'Algeria';
     src: url('img/algeria.woff2') format('woff2'),
@@ -18,3 +24,36 @@ html {
     font-weight: normal;
     font-style: normal;
 }
+
+#zoom-wrapper {
+    position: relative;
+  
+    #zoom-controls {
+      position: absolute;
+      top: 0;
+      right: 0;
+  
+      button {
+        width: 32px;
+        height: 32px;
+        background: url('img/zoom.svg');
+        background-size: auto 220%;
+  
+        &:not(.disabled) {
+          cursor: pointer;
+        }
+  
+        &.disabled {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+      }
+  
+      #zoom-in {
+        background-position: 6% 94%;
+      }
+      #zoom-out {
+        background-position: 82% 94%;
+      }
+    }
+  }

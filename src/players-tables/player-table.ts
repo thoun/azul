@@ -26,7 +26,7 @@ class PlayerTable {
             <div class="player-name dark">${player.name}</div>
         </div>`;
 
-        dojo.place(html, 'players-tables');
+        dojo.place(html, 'table');
 
         for (let i=0; i<=5; i++) {
             document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));

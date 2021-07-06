@@ -9,7 +9,7 @@ class Factories {
     ) {
         const factoriesDiv = document.getElementById('factories');
 
-        const radius = 40 + factoryNumber*40;
+        const radius = 130 + factoryNumber*30;
         const halfSize = radius + FACTORY_RADIUS;
         const size = `${halfSize*2}px`;
         factoriesDiv.style.width = size;
@@ -29,6 +29,12 @@ class Factories {
         dojo.place(html, 'factories');
 
         this.fillFactories(factories);
+    }
+
+    public getWidth(): number {        
+        const radius = 130 + this.factoryNumber*30;
+        const halfSize = radius + FACTORY_RADIUS;
+        return halfSize*2;
     }
 
     public fillFactories(factories: { [factoryId: number]: Tile[]; }) {
