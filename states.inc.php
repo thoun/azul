@@ -114,8 +114,8 @@ $playerActionsGameStates = [
 
     ST_PLAYER_CHOOSE_LINE => [
         "name" => "chooseLine",
-        "description" => clienttranslate('${actplayer} must choose a line'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a line'),
+        "description" => clienttranslate('${actplayer} must choose a line to place ${number} ${color}'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a line to place ${number} ${color}'),
         "type" => "activeplayer",
         "args" => "argChooseLine",
         "possibleactions" => [ "selectLine" ],
@@ -137,7 +137,7 @@ $playerActionsGameStates = [
 
     ST_MULTIPLAYER_CHOOSE_COLUMN => [
         "name" => "chooseColumn",
-        "description" => clienttranslate('Players with  complete line ${line} must choose a column'),
+        "description" => clienttranslate('Players with complete line ${line} must choose a column'),
         "descriptionmyturn" => clienttranslate('${you} must choose a column'),
         "type" => "multipleactiveplayer",
         "action" => "stChooseColumn",

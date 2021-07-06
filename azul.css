@@ -165,7 +165,6 @@
 }
 
 #firstPlayerToken {
-  pointer-events: all;
   width: 32px;
   height: 32px;
   position: relative;
@@ -216,4 +215,20 @@ html {
 }
 #zoom-wrapper #zoom-controls #zoom-out {
   background-position: 82% 94%;
+}
+
+#page-title .tile {
+  margin: 5px 5px -10px 5px;
+  width: 32px;
+  height: 32px;
+  position: relative;
+  box-shadow: 1px 1px 1px 1px #00000099;
+}
+
+.log .tile {
+  margin: 2px 2px -2px 2px;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  box-shadow: none;
 }

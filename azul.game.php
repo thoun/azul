@@ -275,7 +275,7 @@ class Azul extends Table {
         $message = $tiles[0]->type == 0 ? '' : 
             ($line == 0 ?
                 clienttranslate('${player_name} places ${number} ${color} on floor line') :
-                clienttranslate('${player_name} places ${number} ${color} on line ${line}'));
+                clienttranslate('${player_name} places ${number} ${color} on line ${lineNumber}'));
 
         self::notifyAllPlayers('tilesPlacedOnLine', $message, [
             'playerId' => $playerId,
@@ -283,6 +283,7 @@ class Azul extends Table {
             'number' => count($tiles),
             'color' => $this->getColor($tiles[0]->type),
             'line' => $line,
+            'lineNumber' => $line,
             'placedTiles' => $placedTiles,
             'discardedTiles' => $discardedTiles,
         ]);
@@ -638,9 +639,11 @@ class Azul extends Table {
             $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'factory', 0);
         }
 
-        $message = clienttranslate('${player_name} takes ${number} ${color}');
+        
         if ($hasFirstPlayer) {
-            $message .= ' ' . clienttranslate('and First Player tile');
+            $message = clienttranslate('${player_name} takes ${number} ${color} and First Player tile');
+        } else {
+            $message = clienttranslate('${player_name} takes ${number} ${color}');
         }
 
         self::notifyAllPlayers('tilesSelected', $message, [
@@ -698,9 +701,12 @@ class Azul extends Table {
 
     function argChooseLine() {
         $playerId = self::getActivePlayerId();
+        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
         return [
             'lines' => $this->availableLines($playerId),
+            'number' => count($tiles),
+            'color' => $this->getColor($tiles[0]->type),
         ];
     }
 

@@ -520,6 +520,44 @@ var Azul = /** @class */ (function () {
     Azul.prototype.notif_firstPlayerToken = function (notif) {
         this.placeFirstPlayerToken(notif.args.playerId);
     };
+    Azul.prototype.getTypeFromColorString = function (color) {
+        switch (color) {
+            case 'Black': return 1;
+            case 'Cyan': return 2;
+            case 'Blue': return 3;
+            case 'Yellow': return 4;
+            case 'Red': return 5;
+        }
+        return null;
+    };
+    /* This enable to inject translatable styled things to logs or action bar */
+    /* @Override */
+    Azul.prototype.format_string_recursive = function (log, args) {
+        try {
+            if (log && args && !args.processed) {
+                /*if (args.guild !== undefined && args.guild_name !== undefined && args.guild_name[0] !== '<') {
+                    args.guild_name = `<span class='log-guild-name' style='color: ${LOG_GUILD_COLOR[args.guild]}'>${_(args.guild_name)}</span>`;
+                }*/
+                if (typeof args.lineNumber === 'number') {
+                    args.lineNumber = "<strong>" + args.line + "</strong>";
+                }
+                if (log.indexOf('${number} ${color}') !== -1) {
+                    var type = this.getTypeFromColorString(args.color);
+                    var number = args.number;
+                    var html = '';
+                    for (var i = 0; i < number; i++) {
+                        html += "<div class=\"tile tile" + type + "\"></div>";
+                    }
+                    log = log.replace('${number} ${color}', html);
+                }
+            }
+            //console.log()${number} ${color}
+        }
+        catch (e) {
+            console.error(log, args, "Exception thrown", e.stack);
+        }
+        return this.inherited(arguments);
+    };
     return Azul;
 }());
 define([

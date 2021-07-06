@@ -433,19 +433,45 @@ class Azul implements AzulGame {
         this.placeFirstPlayerToken(notif.args.playerId);
     }
 
+    private getTypeFromColorString(color: string) {
+        switch (color) {
+            case 'Black': return 1;
+            case 'Cyan': return 2;
+            case 'Blue': return 3;
+            case 'Yellow': return 4;
+            case 'Red': return 5;
+        }
+        return null;
+    }
+
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
-    /*public format_string_recursive(log: string, args: any) {
+    public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-                // Representation of the color of a card
-                if (args.guild !== undefined && args.guild_name !== undefined && args.guild_name[0] !== '<') {
+                /*if (args.guild !== undefined && args.guild_name !== undefined && args.guild_name[0] !== '<') {
                     args.guild_name = `<span class='log-guild-name' style='color: ${LOG_GUILD_COLOR[args.guild]}'>${_(args.guild_name)}</span>`;
+                }*/
+
+                if (typeof args.lineNumber === 'number') {
+                    args.lineNumber = `<strong>${args.line}</strong>`;
+                }
+
+                if (log.indexOf('${number} ${color}') !== -1) {
+                    const type = this.getTypeFromColorString(args.color);
+                    const number = args.number;
+                    let html = '';
+                    for (let i=0; i<number; i++) {
+                        html += `<div class="tile tile${type}"></div>`;
+                    }
+
+                    log = log.replace('${number} ${color}', html);
                 }
             }
+            //console.log()${number} ${color}
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);
         }
         return (this as any).inherited(arguments);
-    }*/
+    }
 }
