@@ -1,7 +1,12 @@
 const FACTORY_RADIUS = 125;
 const HALF_TILE_SIZE = 29;
+const CENTER_FACTORY_TILE_SHIFT = 12;
 
 class Factories {
+
+    // TODO temp
+    randomCenter: boolean = localStorage.getItem('Azul-factory-center') == 'random';
+
     constructor(
         private game: AzulGame, 
         private factoryNumber: number,
@@ -9,7 +14,7 @@ class Factories {
     ) {
         const factoriesDiv = document.getElementById('factories');
 
-        const radius = 130 + factoryNumber*30;
+        const radius = 175 + factoryNumber*25;
         const halfSize = radius + FACTORY_RADIUS;
         const size = `${halfSize*2}px`;
         factoriesDiv.style.width = size;
@@ -32,7 +37,7 @@ class Factories {
     }
 
     public getWidth(): number {        
-        const radius = 130 + this.factoryNumber*30;
+        const radius = 175 + this.factoryNumber*25;
         const halfSize = radius + FACTORY_RADIUS;
         return halfSize*2;
     }
@@ -49,8 +54,8 @@ class Factories {
                 } else {
                     if (tile.type == 0) {
                         const centerFactoryDiv = document.getElementById('factory0');
-                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE;
-                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
+                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE*2;
+                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE*2;
                     } else {
                         const coords = this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
@@ -74,8 +79,6 @@ class Factories {
         //discardedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), 'factory0'));
     }
 
-    
-
     private getDistance(p1: PlacedTile, p2: PlacedTile): number {
         return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
     }
@@ -88,7 +91,7 @@ class Factories {
     }
 
     private getFreePlaceCoordinatesForFactoryCenter(placedTiles: PlacedTile[], xCenter: number, yCenter: number, color: number): PlacedTile {
-        const radius = 130 + this.factoryNumber*30 - 165;
+        const radius = 175 + this.factoryNumber*25 - 165;
         
         const newPlace = { x: 0, y: 0};
         this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
@@ -102,7 +105,7 @@ class Factories {
         return newPlace;
     }
 
-    public getFreePlaceForFactoryCenter(color: number): {left: number, top: number} {
+    public getFreePlaceForFactoryCenterSemiRandomPosition(color: number): {left: number, top: number} {
         const div = document.getElementById('factory0');
         const xCenter = div.clientWidth / 2;
         const yCenter = div.clientHeight / 2;
@@ -121,5 +124,29 @@ class Factories {
             left: newPlace.x,
             top: newPlace.y,
         };
+    }
+
+    public getFreePlaceForFactoryCenterPile(color: number): {left: number, top: number} {
+        const div = document.getElementById('factory0');
+        const xCenter = div.clientWidth / 2;
+        const yCenter = div.clientHeight / 2;
+        const radius = 175 + this.factoryNumber*25 - 165;
+        
+        const angle = (0.5 + color/5)*Math.PI*2;
+        const distance = radius;
+        const existingTilesOfSameColor = div.getElementsByClassName(`tile${color}`).length;
+        const newPlace = {
+            x: xCenter - HALF_TILE_SIZE*2 - distance*Math.sin(angle) + existingTilesOfSameColor*CENTER_FACTORY_TILE_SHIFT,
+            y: yCenter - HALF_TILE_SIZE*2 - distance*Math.cos(angle) + existingTilesOfSameColor*CENTER_FACTORY_TILE_SHIFT,
+        }
+
+        return {
+            left: newPlace.x,
+            top: newPlace.y,
+        };
+    }
+
+    public getFreePlaceForFactoryCenter(color: number): {left: number, top: number} {
+        return this.randomCenter ? this.getFreePlaceForFactoryCenterSemiRandomPosition(color) : this.getFreePlaceForFactoryCenterPile(color);
     }
 }

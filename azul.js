@@ -18,12 +18,15 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
 }
 var FACTORY_RADIUS = 125;
 var HALF_TILE_SIZE = 29;
+var CENTER_FACTORY_TILE_SHIFT = 12;
 var Factories = /** @class */ (function () {
     function Factories(game, factoryNumber, factories) {
         this.game = game;
         this.factoryNumber = factoryNumber;
+        // TODO temp
+        this.randomCenter = localStorage.getItem('Azul-factory-center') == 'random';
         var factoriesDiv = document.getElementById('factories');
-        var radius = 130 + factoryNumber * 30;
+        var radius = 175 + factoryNumber * 25;
         var halfSize = radius + FACTORY_RADIUS;
         var size = halfSize * 2 + "px";
         factoriesDiv.style.width = size;
@@ -41,7 +44,7 @@ var Factories = /** @class */ (function () {
         this.fillFactories(factories);
     }
     Factories.prototype.getWidth = function () {
-        var radius = 130 + this.factoryNumber * 30;
+        var radius = 175 + this.factoryNumber * 25;
         var halfSize = radius + FACTORY_RADIUS;
         return halfSize * 2;
     };
@@ -59,8 +62,8 @@ var Factories = /** @class */ (function () {
                 else {
                     if (tile.type == 0) {
                         var centerFactoryDiv = document.getElementById('factory0');
-                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE;
-                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
+                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE * 2;
+                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE * 2;
                     }
                     else {
                         var coords = _this.getFreePlaceForFactoryCenter(tile.type);
@@ -97,7 +100,7 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.getFreePlaceCoordinatesForFactoryCenter = function (placedTiles, xCenter, yCenter, color) {
         var _this = this;
-        var radius = 130 + this.factoryNumber * 30 - 165;
+        var radius = 175 + this.factoryNumber * 25 - 165;
         var newPlace = { x: 0, y: 0 };
         this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
         var protection = 0;
@@ -108,7 +111,7 @@ var Factories = /** @class */ (function () {
         console.log('protection', protection);
         return newPlace;
     };
-    Factories.prototype.getFreePlaceForFactoryCenter = function (color) {
+    Factories.prototype.getFreePlaceForFactoryCenterSemiRandomPosition = function (color) {
         var div = document.getElementById('factory0');
         var xCenter = div.clientWidth / 2;
         var yCenter = div.clientHeight / 2;
@@ -123,6 +126,26 @@ var Factories = /** @class */ (function () {
             left: newPlace.x,
             top: newPlace.y,
         };
+    };
+    Factories.prototype.getFreePlaceForFactoryCenterPile = function (color) {
+        var div = document.getElementById('factory0');
+        var xCenter = div.clientWidth / 2;
+        var yCenter = div.clientHeight / 2;
+        var radius = 175 + this.factoryNumber * 25 - 165;
+        var angle = (0.5 + color / 5) * Math.PI * 2;
+        var distance = radius;
+        var existingTilesOfSameColor = div.getElementsByClassName("tile" + color).length;
+        var newPlace = {
+            x: xCenter - HALF_TILE_SIZE * 2 - distance * Math.sin(angle) + existingTilesOfSameColor * CENTER_FACTORY_TILE_SHIFT,
+            y: yCenter - HALF_TILE_SIZE * 2 - distance * Math.cos(angle) + existingTilesOfSameColor * CENTER_FACTORY_TILE_SHIFT,
+        };
+        return {
+            left: newPlace.x,
+            top: newPlace.y,
+        };
+    };
+    Factories.prototype.getFreePlaceForFactoryCenter = function (color) {
+        return this.randomCenter ? this.getFreePlaceForFactoryCenterSemiRandomPosition(color) : this.getFreePlaceForFactoryCenterPile(color);
     };
     return Factories;
 }());
@@ -240,12 +263,17 @@ var Azul = /** @class */ (function () {
         document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
         document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
         this.onScreenWidthChange = function () { return _this.setAutoZoom(); };
-        var tempButton = document.getElementById('background');
-        tempButton.style.position = 'absolute';
-        tempButton.style.top = '0px';
-        tempButton.style.left = '0px';
-        tempButton.style.width = 'auto';
-        tempButton.addEventListener('click', function () { return dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2'); });
+        // TODO remove
+        document.getElementById('background').addEventListener('click', function () { return dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2'); });
+        document.getElementById('factory-center').addEventListener('click', function () {
+            if (localStorage.getItem('Azul-factory-center') == 'random') {
+                localStorage.removeItem('Azul-factory-center');
+            }
+            else {
+                localStorage.setItem('Azul-factory-center', 'random');
+            }
+            window.location.reload();
+        });
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -425,6 +453,9 @@ var Azul = /** @class */ (function () {
             // hand
             dojo.place("<div id=\"player-hand-" + player.id + "-zoom-wrapper\">\n                <div id=\"player-hand-" + player.id + "\" class=\"hand\"></div>\n            </div>", "player_board_" + player.id);
             player.hand.forEach(function (tile) { return _this.placeTile(tile, "player-hand-" + playerId); });
+            if (!player.hand.length) {
+                dojo.addClass("player-hand-" + playerId, 'empty');
+            }
         });
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
         (this as any).addTooltipHtmlToClass('pearl-counter', _("Number of pearls"));
@@ -527,9 +558,13 @@ var Azul = /** @class */ (function () {
         this.factories.fillFactories(notif.args.factories);
     };
     Azul.prototype.notif_tilesSelected = function (notif) {
+        if (notif.args.selectedTiles.length) {
+            dojo.removeClass("player-hand-" + notif.args.playerId, 'empty');
+        }
         this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId);
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
+        setTimeout(function () { return dojo.addClass("player-hand-" + notif.args.playerId, 'empty'); }, ANIMATION_MS);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
     };

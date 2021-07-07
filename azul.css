@@ -131,6 +131,9 @@
 .player_board_content .hand {
   transform-origin: left top;
 }
+.player_board_content .hand.empty {
+  display: none;
+}
 
 .tile {
   width: 58px;
@@ -177,6 +180,8 @@
 html {
   background: url("img/background.jpg") #00587a;
   background-repeat: repeat;
+}
+html:not(.background2) {
   background-blend-mode: multiply;
 }
 html.background2 {

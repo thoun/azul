@@ -68,12 +68,16 @@ class Azul implements AzulGame {
 
         (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
-        const tempButton = document.getElementById('background');
-        tempButton.style.position = 'absolute';
-        tempButton.style.top = '0px';
-        tempButton.style.left = '0px';
-        tempButton.style.width = 'auto';
-        tempButton.addEventListener('click', () => dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2'));
+        // TODO remove
+        document.getElementById('background').addEventListener('click', () => dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2'));
+        document.getElementById('factory-center').addEventListener('click', () => {
+            if (localStorage.getItem('Azul-factory-center') == 'random') {
+                localStorage.removeItem('Azul-factory-center');
+            } else {
+                localStorage.setItem('Azul-factory-center', 'random');
+            }
+            window.location.reload();
+        });
 
         log( "Ending game setup" );
     }
@@ -285,6 +289,9 @@ class Azul implements AzulGame {
             </div>`, `player_board_${player.id}`);
 
             player.hand.forEach(tile => this.placeTile(tile, `player-hand-${playerId}`));
+            if (!player.hand.length) {
+                dojo.addClass(`player-hand-${playerId}`, 'empty');
+            }
         });
 
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
@@ -405,10 +412,14 @@ class Azul implements AzulGame {
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
+        if (notif.args.selectedTiles.length) {
+            dojo.removeClass(`player-hand-${notif.args.playerId}`, 'empty');
+        }
         this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId);
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
+        setTimeout(() => dojo.addClass(`player-hand-${notif.args.playerId}`, 'empty'), ANIMATION_MS);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
     }

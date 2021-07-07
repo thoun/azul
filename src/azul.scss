@@ -8,7 +8,10 @@
 html {
     background: url('img/background.jpg') #00587a;
     background-repeat: repeat;
-    background-blend-mode: multiply;
+
+    &:not(.background2) {      
+      background-blend-mode: multiply;
+    }
 
     &.background2 {      
       background: url('img/background2.jpg') #fce7d8;

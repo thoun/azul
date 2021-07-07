@@ -202,6 +202,10 @@ class Azul extends Table {
         return $this->factoriesByPlayers[$playerNumber];
     }
 
+    function getPlayerName(int $playerId) {
+        return self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = $playerId");
+    }
+
     function incPlayerScore(int $playerId, int $incScore) {
         self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
     }
@@ -459,9 +463,18 @@ class Azul extends Table {
         }
 
         if (count($completeLinesNotif) > 0) {
-            self::notifyAllPlayers('placeTileOnWall', 'place tile on wall', [
+            self::notifyAllPlayers('placeTileOnWall', '', [
                 'completeLines' => $completeLinesNotif,
             ]);
+
+        foreach ($completeLinesNotif as $playerId => $notif) {
+            self::notifyAllPlayers('placeTileOnWallTextLogDetails', clienttranslate('${player_name} places ${number} ${color} and wins ${points} point'), [
+                'player_name' => $this->getPlayerName($playerId),
+                'number' => 1,
+                'color' => $this->getColor($notif->placedTile->type),
+                'points' => $notif->pointsDetail->points,
+            ]);
+        }
         }
     }
 
@@ -482,9 +495,16 @@ class Azul extends Table {
                 $this->incPlayerScore($playerId, $points);
             } 
         }
-        self::notifyAllPlayers('emptyFloorLine', 'empty floor line', [
+        self::notifyAllPlayers('emptyFloorLine', '', [
             'floorLines' => $floorLinesNotif,
         ]);
+
+        foreach ($floorLinesNotif as $playerId => $notif) {
+            self::notifyAllPlayers('emptyFloorLineTextLogDetails', clienttranslate('${player_name} looses ${points} point with Floor line'), [
+                'player_name' => $this->getPlayerName($playerId),
+                'points' => abs($notif->points),
+            ]);
+        }
     }
 
     function notifCompleteLines(array $playersIds, array $walls, int $line) {        
@@ -751,7 +771,7 @@ class Azul extends Table {
             $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
         }
 
-        self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins"), [
+        self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins !"), [
             'factories' => $factories,
         ]);
 
