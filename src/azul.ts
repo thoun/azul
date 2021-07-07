@@ -193,12 +193,21 @@ class Azul implements AzulGame {
         dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
 
         const div = document.getElementById('table');
+        const hands: HTMLDivElement[] = Array.from(document.getElementsByClassName('hand')) as HTMLDivElement[];
         if (zoom === 1) {
             div.style.transform = '';
             div.style.margin = '';
+            hands.forEach(hand => {
+                hand.style.transform = '';
+                hand.style.margin = '';
+            });
         } else {
             div.style.transform = `scale(${zoom})`;
             div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
+            hands.forEach(hand => {
+                hand.style.transform = `scale(${zoom})`;
+                hand.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-32}% 0`;
+            });
         }
         // TODO this.placePlayerTable();
     }
@@ -256,14 +265,19 @@ class Azul implements AzulGame {
         Object.values(gamedatas.players).forEach(player => {
             const playerId = Number(player.id);     
 
-            // pearl master token
+            // first player token
             dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper"></div>`, `player_board_${player.id}`);
 
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
 
-            player.hand.forEach(tile => this.placeTile(tile, `player_board_${playerId}`));
+            // hand
+            dojo.place(`<div id="player-hand-${player.id}-zoom-wrapper">
+                <div id="player-hand-${player.id}" class="hand"></div>
+            </div>`, `player_board_${player.id}`);
+
+            player.hand.forEach(tile => this.placeTile(tile, `player-hand-${playerId}`));
         });
 
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));

@@ -74,7 +74,7 @@ class Factories {
     }
 
     public moveSelectedTiles(selectedTiles: Tile[], discardedTiles: Tile[], playerId: number) {
-        selectedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), `player_board_${playerId}`));
+        selectedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), `player-hand-${playerId}`));
         discardedTiles.forEach(tile => {
             const {left, top} = this.getFreePlaceForFactoryCenter();
             this.game.placeTile(tile, 'factory0', left, top);

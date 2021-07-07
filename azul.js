@@ -86,7 +86,7 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.moveSelectedTiles = function (selectedTiles, discardedTiles, playerId) {
         var _this = this;
-        selectedTiles.forEach(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), "player_board_" + playerId); });
+        selectedTiles.forEach(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), "player-hand-" + playerId); });
         discardedTiles.forEach(function (tile) {
             var _a = _this.getFreePlaceForFactoryCenter(), left = _a.left, top = _a.top;
             _this.game.placeTile(tile, 'factory0', left, top);
@@ -317,13 +317,22 @@ var Azul = /** @class */ (function () {
         dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
         dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
         var div = document.getElementById('table');
+        var hands = Array.from(document.getElementsByClassName('hand'));
         if (zoom === 1) {
             div.style.transform = '';
             div.style.margin = '';
+            hands.forEach(function (hand) {
+                hand.style.transform = '';
+                hand.style.margin = '';
+            });
         }
         else {
             div.style.transform = "scale(" + zoom + ")";
             div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
+            hands.forEach(function (hand) {
+                hand.style.transform = "scale(" + zoom + ")";
+                hand.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -32 + "% 0";
+            });
         }
         // TODO this.placePlayerTable();
     };
@@ -372,12 +381,14 @@ var Azul = /** @class */ (function () {
         var _this = this;
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
-            // pearl master token
+            // first player token
             dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\" class=\"firstPlayerWrapper\"></div>", "player_board_" + player.id);
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 _this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
-            player.hand.forEach(function (tile) { return _this.placeTile(tile, "player_board_" + playerId); });
+            // hand
+            dojo.place("<div id=\"player-hand-" + player.id + "-zoom-wrapper\">\n                <div id=\"player-hand-" + player.id + "\" class=\"hand\"></div>\n            </div>", "player_board_" + player.id);
+            player.hand.forEach(function (tile) { return _this.placeTile(tile, "player-hand-" + playerId); });
         });
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
         (this as any).addTooltipHtmlToClass('pearl-counter', _("Number of pearls"));
