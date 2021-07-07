@@ -109,3 +109,8 @@ interface EndScoreTiles {
 interface NotifEndScoreArgs {
     scores: { [playerId: number]: EndScoreTiles };
 }
+
+interface PlacedTile {
+    x: number;
+    y: number;
+}
