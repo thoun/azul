@@ -63,7 +63,7 @@ var Factories = /** @class */ (function () {
                         top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
                     }
                     else {
-                        var coords = _this.getFreePlaceForFactoryCenter();
+                        var coords = _this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
                         top = coords.top;
                     }
@@ -80,7 +80,7 @@ var Factories = /** @class */ (function () {
         var _this = this;
         selectedTiles.forEach(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), "player-hand-" + playerId); });
         discardedTiles.forEach(function (tile) {
-            var _a = _this.getFreePlaceForFactoryCenter(), left = _a.left, top = _a.top;
+            var _a = _this.getFreePlaceForFactoryCenter(tile.type), left = _a.left, top = _a.top;
             _this.game.placeTile(tile, 'factory0', left, top);
         });
         //selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
@@ -89,27 +89,26 @@ var Factories = /** @class */ (function () {
     Factories.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
     };
-    Factories.prototype.getFreePlaceCoordinatesForFactoryCenter = function (placedTiles, xCenter, yCenter) {
+    Factories.prototype.setRandomCoordinates = function (newPlace, xCenter, yCenter, radius, color) {
+        var angle = (0.3 + color / 5 + Math.random() / 4) * Math.PI * 2;
+        var distance = Math.random() * radius;
+        newPlace.x = xCenter - HALF_TILE_SIZE - distance * Math.sin(angle);
+        newPlace.y = yCenter - HALF_TILE_SIZE - distance * Math.cos(angle);
+    };
+    Factories.prototype.getFreePlaceCoordinatesForFactoryCenter = function (placedTiles, xCenter, yCenter, color) {
         var _this = this;
         var radius = 130 + this.factoryNumber * 30 - 165;
-        var angle = Math.random() * Math.PI * 2;
-        var distance = Math.random() * radius;
-        var newPlace = {
-            x: xCenter - HALF_TILE_SIZE + distance * Math.sin(angle),
-            y: yCenter - HALF_TILE_SIZE + distance * Math.cos(angle),
-        };
+        var newPlace = { x: 0, y: 0 };
+        this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
         var protection = 0;
         while (protection < 1000 && placedTiles.some(function (place) { return _this.getDistance(newPlace, place) < HALF_TILE_SIZE * 2; })) {
-            angle = Math.random() * Math.PI * 2;
-            distance = Math.random() * radius;
-            newPlace.x = xCenter - HALF_TILE_SIZE + distance * Math.sin(angle),
-                newPlace.y = yCenter - HALF_TILE_SIZE + distance * Math.cos(angle),
-                protection++;
+            this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
+            protection++;
         }
         console.log('protection', protection);
         return newPlace;
     };
-    Factories.prototype.getFreePlaceForFactoryCenter = function () {
+    Factories.prototype.getFreePlaceForFactoryCenter = function (color) {
         var div = document.getElementById('factory0');
         var xCenter = div.clientWidth / 2;
         var yCenter = div.clientHeight / 2;
@@ -117,7 +116,7 @@ var Factories = /** @class */ (function () {
                 x: xCenter - HALF_TILE_SIZE,
                 y: yCenter - HALF_TILE_SIZE,
             }];
-        var newPlace = this.getFreePlaceCoordinatesForFactoryCenter(placed, xCenter, yCenter);
+        var newPlace = this.getFreePlaceCoordinatesForFactoryCenter(placed, xCenter, yCenter, color);
         placed.push(newPlace);
         div.dataset.placed = JSON.stringify(placed);
         return {

@@ -52,7 +52,7 @@ class Factories {
                         left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE;
                         top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
                     } else {
-                        const coords = this.getFreePlaceForFactoryCenter();
+                        const coords = this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
                         top = coords.top;
                     }
@@ -67,7 +67,7 @@ class Factories {
     public moveSelectedTiles(selectedTiles: Tile[], discardedTiles: Tile[], playerId: number) {
         selectedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), `player-hand-${playerId}`));
         discardedTiles.forEach(tile => {
-            const {left, top} = this.getFreePlaceForFactoryCenter();
+            const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
             this.game.placeTile(tile, 'factory0', left, top);
         });
         //selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
@@ -80,21 +80,21 @@ class Factories {
         return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
     }
 
-    private getFreePlaceCoordinatesForFactoryCenter(placedTiles: PlacedTile[], xCenter: number, yCenter: number): PlacedTile {
+    private setRandomCoordinates(newPlace: PlacedTile, xCenter: number, yCenter: number, radius: number, color: number) {
+        const angle = (0.3 + color/5 + Math.random()/4)*Math.PI*2;
+        const distance = Math.random()*radius;
+        newPlace.x = xCenter - HALF_TILE_SIZE - distance*Math.sin(angle);
+        newPlace.y = yCenter - HALF_TILE_SIZE - distance*Math.cos(angle);
+    }
+
+    private getFreePlaceCoordinatesForFactoryCenter(placedTiles: PlacedTile[], xCenter: number, yCenter: number, color: number): PlacedTile {
         const radius = 130 + this.factoryNumber*30 - 165;
         
-        let angle = Math.random()*Math.PI*2;
-        let distance = Math.random()*radius;
-        const newPlace = {
-            x: xCenter - HALF_TILE_SIZE + distance*Math.sin(angle),
-            y: yCenter - HALF_TILE_SIZE + distance*Math.cos(angle),
-        };
+        const newPlace = { x: 0, y: 0};
+        this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
         let protection = 0;
         while (protection < 1000 && placedTiles.some(place => this.getDistance(newPlace, place) < HALF_TILE_SIZE*2)) {
-            angle = Math.random()*Math.PI*2;
-            distance = Math.random()*radius;
-            newPlace.x = xCenter - HALF_TILE_SIZE + distance*Math.sin(angle),
-            newPlace.y = yCenter - HALF_TILE_SIZE + distance*Math.cos(angle),
+            this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
             protection++;
         }
         console.log('protection', protection);
@@ -102,7 +102,7 @@ class Factories {
         return newPlace;
     }
 
-    public getFreePlaceForFactoryCenter(): {left: number, top: number} {
+    public getFreePlaceForFactoryCenter(color: number): {left: number, top: number} {
         const div = document.getElementById('factory0');
         const xCenter = div.clientWidth / 2;
         const yCenter = div.clientHeight / 2;
@@ -112,7 +112,7 @@ class Factories {
             y: yCenter - HALF_TILE_SIZE,
         }];
 
-        const newPlace = this.getFreePlaceCoordinatesForFactoryCenter(placed, xCenter, yCenter);
+        const newPlace = this.getFreePlaceCoordinatesForFactoryCenter(placed, xCenter, yCenter, color);
         placed.push(newPlace);
 
         div.dataset.placed = JSON.stringify(placed);
