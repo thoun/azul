@@ -240,6 +240,12 @@ var Azul = /** @class */ (function () {
         document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
         document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
         this.onScreenWidthChange = function () { return _this.setAutoZoom(); };
+        var tempButton = document.getElementById('background');
+        tempButton.style.position = 'absolute';
+        tempButton.style.top = '0px';
+        tempButton.style.left = '0px';
+        tempButton.style.width = 'auto';
+        tempButton.addEventListener('click', function () { return dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2'); });
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////

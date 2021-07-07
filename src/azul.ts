@@ -68,6 +68,13 @@ class Azul implements AzulGame {
 
         (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
+        const tempButton = document.getElementById('background');
+        tempButton.style.position = 'absolute';
+        tempButton.style.top = '0px';
+        tempButton.style.left = '0px';
+        tempButton.style.width = 'auto';
+        tempButton.addEventListener('click', () => dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2'));
+
         log( "Ending game setup" );
     }
 

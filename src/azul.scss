@@ -9,6 +9,10 @@ html {
     background: url('img/background.jpg') #00587a;
     background-repeat: repeat;
     background-blend-mode: multiply;
+
+    &.background2 {      
+      background: url('img/background2.jpg') #fce7d8;
+    }
 }
 
 .mode_3d #game_play_area_background {
