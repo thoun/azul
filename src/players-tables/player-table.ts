@@ -45,12 +45,12 @@ class PlayerTable {
         this.placeTilesOnWall(player.wall);
     }
 
-    public placeTilesOnLine(tiles: Tile[], line: number) {
+    public placeTilesOnLine(tiles: Tile[], line: number): Promise<any> {
         const top = line ? 0 : 45;
-        tiles.forEach(tile => {
+        return Promise.allSettled(tiles.map(tile => {
             const left = line ? (line - tile.column) * 69 : 5 + (tile.column-1) * 74;
-            this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top);
-        });
+            return this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top);
+        }));
     }
 
     public placeTilesOnWall(tiles: Tile[]) {

@@ -70,13 +70,11 @@ class Factories {
     }
 
     public moveSelectedTiles(selectedTiles: Tile[], discardedTiles: Tile[], playerId: number) {
-        selectedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), `player-hand-${playerId}`));
         discardedTiles.forEach(tile => {
             const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
             this.game.placeTile(tile, 'factory0', left, top);
         });
-        //selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
-        //discardedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), 'factory0'));
+        return Promise.allSettled(selectedTiles.map(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), `player-hand-${playerId}`)));
     }
 
     private getDistance(p1: PlacedTile, p2: PlacedTile): number {

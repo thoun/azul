@@ -1,27 +1,31 @@
 function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
     var destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
-        return;
+        return Promise.resolve(true);
     }
-    object.style.zIndex = '10';
-    var objectCR = object.getBoundingClientRect();
-    var destinationCR = destination.getBoundingClientRect();
-    var deltaX = destinationCR.left - objectCR.left + posX;
-    var deltaY = destinationCR.top - objectCR.top + posY;
-    object.style.transition = "transform 0.5s ease-in";
-    object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px)";
-    /*object.addEventListener('transitionend', () => {
-        console.log('Transition ended');
-    });*/
-    setTimeout(function () {
-        object.style.top = posY !== undefined ? posY + "px" : 'unset';
-        object.style.left = posX !== undefined ? posX + "px" : 'unset';
-        object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
-        object.style.zIndex = 'unset';
-        object.style.transform = 'unset';
-        object.style.transition = 'unset';
-        destination.appendChild(object);
-    }, ANIMATION_MS);
+    return new Promise(function (resolve) {
+        object.style.zIndex = '10';
+        var objectCR = object.getBoundingClientRect();
+        var destinationCR = destination.getBoundingClientRect();
+        var deltaX = destinationCR.left - objectCR.left + (posX !== null && posX !== void 0 ? posX : 0) * game.getZoom();
+        var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0) * game.getZoom();
+        //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
+        object.style.transition = "transform 0.5s ease-in";
+        object.style.transform = "translate(" + deltaX + "px, " + deltaY + "px)";
+        var transitionend = function () {
+            console.log('ontransitionend', object, destination);
+            object.style.top = posY !== undefined ? posY + "px" : 'unset';
+            object.style.left = posX !== undefined ? posX + "px" : 'unset';
+            object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
+            object.style.zIndex = 'unset';
+            object.style.transform = 'unset';
+            object.style.transition = 'unset';
+            destination.appendChild(object);
+            object.removeEventListener('transitionend', transitionend);
+            resolve(true);
+        };
+        object.addEventListener('transitionend', transitionend);
+    });
 }
 var FACTORY_RADIUS = 125;
 var HALF_TILE_SIZE = 29;
@@ -88,13 +92,11 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.moveSelectedTiles = function (selectedTiles, discardedTiles, playerId) {
         var _this = this;
-        selectedTiles.forEach(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), "player-hand-" + playerId); });
         discardedTiles.forEach(function (tile) {
             var _a = _this.getFreePlaceForFactoryCenter(tile.type), left = _a.left, top = _a.top;
             _this.game.placeTile(tile, 'factory0', left, top);
         });
-        //selectedTiles.forEach(tile => (this.game as any).slideToObjectAndDestroy($(`tile${tile.id}`), 'topbar'));
-        //discardedTiles.forEach(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), 'factory0'));
+        return Promise.allSettled(selectedTiles.map(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), "player-hand-" + playerId); }));
     };
     Factories.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
@@ -204,10 +206,10 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
         var _this = this;
         var top = line ? 0 : 45;
-        tiles.forEach(function (tile) {
+        return Promise.allSettled(tiles.map(function (tile) {
             var left = line ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74;
-            _this.game.placeTile(tile, "player-table-" + _this.playerId + "-line" + line, left, top);
-        });
+            return _this.game.placeTile(tile, "player-table-" + _this.playerId + "-line" + line, left, top);
+        }));
     };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
         var _this = this;
@@ -405,7 +407,7 @@ var Azul = /** @class */ (function () {
             div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
             hands.forEach(function (hand) {
                 hand.style.transform = "scale(" + zoom + ")";
-                hand.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -32 + "% 0";
+                hand.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% 0 0";
             });
         }
         document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
@@ -445,10 +447,11 @@ var Azul = /** @class */ (function () {
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         var tileDiv = document.getElementById("tile" + tile.id);
         if (tileDiv) {
-            slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
+            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
         }
         else {
             dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + (left !== undefined ? "left: " + left + "px;" : '') + (top !== undefined ? "top: " + top + "px;" : '') + "\"></div>", destinationId);
+            return Promise.resolve(true);
         }
     };
     Azul.prototype.createPlayerPanels = function (gamedatas) {
@@ -463,9 +466,7 @@ var Azul = /** @class */ (function () {
             // hand
             dojo.place("<div id=\"player-hand-" + player.id + "-zoom-wrapper\">\n                <div id=\"player-hand-" + player.id + "\" class=\"hand\"></div>\n            </div>", "player_board_" + player.id);
             player.hand.forEach(function (tile) { return _this.placeTile(tile, "player-hand-" + playerId); });
-            if (!player.hand.length) {
-                dojo.addClass("player-hand-" + playerId, 'empty');
-            }
+            setTimeout(function () { return _this.setHandHeight(playerId); }, 100);
         });
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
         (this as any).addTooltipHtmlToClass('pearl-counter', _("Number of pearls"));
@@ -536,6 +537,11 @@ var Azul = /** @class */ (function () {
             this.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
     };
+    Azul.prototype.setHandHeight = function (playerId) {
+        var playerHandDiv = document.getElementById("player-hand-" + playerId);
+        playerHandDiv.style.height = "unset";
+        playerHandDiv.style.height = playerHandDiv.getBoundingClientRect().height + "px";
+    };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
     /*
@@ -568,15 +574,13 @@ var Azul = /** @class */ (function () {
         this.factories.fillFactories(notif.args.factories);
     };
     Azul.prototype.notif_tilesSelected = function (notif) {
-        if (notif.args.selectedTiles.length) {
-            dojo.removeClass("player-hand-" + notif.args.playerId, 'empty');
-        }
-        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId);
+        var _this = this;
+        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId).then(function () { return _this.setHandHeight(notif.args.playerId); });
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
-        setTimeout(function () { return dojo.addClass("player-hand-" + notif.args.playerId, 'empty'); }, ANIMATION_MS);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
+        var _this = this;
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(function () { return _this.setHandHeight(notif.args.playerId); });
     };
     Azul.prototype.notif_placeTileOnWall = function (notif) {
         var _this = this;

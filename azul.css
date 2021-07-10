@@ -131,9 +131,6 @@
 .player_board_content .hand {
   transform-origin: left top;
 }
-.player_board_content .hand.empty {
-  display: none;
-}
 
 .tile {
   width: 58px;

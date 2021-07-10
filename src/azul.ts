@@ -220,7 +220,7 @@ class Azul implements AzulGame {
             div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
             hands.forEach(hand => {
                 hand.style.transform = `scale(${zoom})`;
-                hand.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-32}% 0`;
+                hand.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% 0 0`;
             });
         }
 
@@ -263,14 +263,15 @@ class Azul implements AzulGame {
         (this as any).scoreCtrl[playerId]?.incValue(incScore);
     }
 
-    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number) {
+    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number): Promise<boolean> {
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         const tileDiv = document.getElementById(`tile${tile.id}`);
         if (tileDiv) {
-            slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
+            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
         } else {
             dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}"></div>`, destinationId);
+            return Promise.resolve(true);
         }
         
     }
@@ -293,9 +294,7 @@ class Azul implements AzulGame {
             </div>`, `player_board_${player.id}`);
 
             player.hand.forEach(tile => this.placeTile(tile, `player-hand-${playerId}`));
-            if (!player.hand.length) {
-                dojo.addClass(`player-hand-${playerId}`, 'empty');
-            }
+            setTimeout(() => this.setHandHeight(playerId), 100);
         });
 
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
@@ -380,6 +379,13 @@ class Azul implements AzulGame {
         }
     }
 
+    
+    private setHandHeight(playerId: number) {
+        const playerHandDiv = document.getElementById(`player-hand-${playerId}`);
+        playerHandDiv.style.height = `unset`;
+        playerHandDiv.style.height = `${playerHandDiv.getBoundingClientRect().height}px`;
+    }
+
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
 
@@ -416,16 +422,16 @@ class Azul implements AzulGame {
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
-        if (notif.args.selectedTiles.length) {
-            dojo.removeClass(`player-hand-${notif.args.playerId}`, 'empty');
-        }
-        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId);
+        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId).then(
+            () => this.setHandHeight(notif.args.playerId)
+        );
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
-        setTimeout(() => dojo.addClass(`player-hand-${notif.args.playerId}`, 'empty'), ANIMATION_MS);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(
+            () => this.setHandHeight(notif.args.playerId)
+        );
     }
 
     notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {

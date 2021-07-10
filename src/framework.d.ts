@@ -31,6 +31,7 @@ interface Dojo {
     removeClass: (nodeId: string, className?: string) => void;
     toggleClass: (nodeId: string, className: string, forceValue?: boolean) => void;
     connect: Function;
+    disconnect: Function;
     query: Function;
     subscribe: Function;
     string: any;
