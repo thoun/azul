@@ -4,6 +4,7 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
         return Promise.resolve(true);
     }
     return new Promise(function (resolve) {
+        var originalZIndex = Number(object.style.zIndex);
         object.style.zIndex = '10';
         var objectCR = object.getBoundingClientRect();
         var destinationCR = destination.getBoundingClientRect();
@@ -17,7 +18,7 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
             object.style.top = posY !== undefined ? posY + "px" : 'unset';
             object.style.left = posX !== undefined ? posX + "px" : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
-            object.style.zIndex = 'unset';
+            object.style.zIndex = originalZIndex ? '' + originalZIndex : 'unset';
             object.style.transform = 'unset';
             object.style.transition = 'unset';
             destination.appendChild(object);
@@ -36,6 +37,7 @@ var Factories = /** @class */ (function () {
         this.factoryNumber = factoryNumber;
         // TODO temp
         this.randomCenter = localStorage.getItem('Azul-factory-center') == 'random';
+        this.tilesByColorInCenter = [0, 0, 0, 0, 0, 0];
         var factoriesDiv = document.getElementById('factories');
         var radius = 175 + factoryNumber * 25;
         var halfSize = radius + FACTORY_RADIUS;
@@ -59,6 +61,9 @@ var Factories = /** @class */ (function () {
         var halfSize = radius + FACTORY_RADIUS;
         return halfSize * 2;
     };
+    Factories.prototype.centerColorRemoved = function (color) {
+        this.tilesByColorInCenter[color] = 0;
+    };
     Factories.prototype.fillFactories = function (factories) {
         var _this = this;
         var _loop_1 = function (i) {
@@ -80,9 +85,10 @@ var Factories = /** @class */ (function () {
                         var coords = _this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
                         top = coords.top;
+                        _this.tilesByColorInCenter[tile.type]++;
                     }
                 }
-                _this.game.placeTile(tile, "factory" + i, left, top);
+                _this.game.placeTile(tile, "factory" + i, left, top, _this.tilesByColorInCenter[tile.type]);
                 document.getElementById("tile" + tile.id).addEventListener('click', function () { return _this.game.takeTiles(tile.id); });
             });
         };
@@ -94,7 +100,8 @@ var Factories = /** @class */ (function () {
         var _this = this;
         discardedTiles.forEach(function (tile) {
             var _a = _this.getFreePlaceForFactoryCenter(tile.type), left = _a.left, top = _a.top;
-            _this.game.placeTile(tile, 'factory0', left, top);
+            _this.tilesByColorInCenter[tile.type]++;
+            _this.game.placeTile(tile, 'factory0', left, top, _this.tilesByColorInCenter[tile.type]);
         });
         return Promise.allSettled(selectedTiles.map(function (tile) { return slideToObjectAndAttach(_this.game, $("tile" + tile.id), "player-hand-" + playerId); }));
     };
@@ -143,7 +150,7 @@ var Factories = /** @class */ (function () {
         var radius = 175 + this.factoryNumber * 25 - 165;
         var angle = (0.5 + color / 5) * Math.PI * 2;
         var distance = radius;
-        var existingTilesOfSameColor = div.getElementsByClassName("tile" + color).length;
+        var existingTilesOfSameColor = this.tilesByColorInCenter[color];
         var newPlace = {
             x: xCenter - HALF_TILE_SIZE * 2 - distance * Math.sin(angle) + existingTilesOfSameColor * CENTER_FACTORY_TILE_SHIFT,
             y: yCenter - HALF_TILE_SIZE * 2 - distance * Math.cos(angle) + existingTilesOfSameColor * CENTER_FACTORY_TILE_SHIFT,
@@ -442,15 +449,18 @@ var Azul = /** @class */ (function () {
         var _a;
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(incScore);
     };
-    Azul.prototype.placeTile = function (tile, destinationId, left, top) {
+    Azul.prototype.placeTile = function (tile, destinationId, left, top, zIndex) {
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         var tileDiv = document.getElementById("tile" + tile.id);
         if (tileDiv) {
+            if (zIndex) {
+                tileDiv.style.zIndex = '' + zIndex;
+            }
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
         }
         else {
-            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + (left !== undefined ? "left: " + left + "px;" : '') + (top !== undefined ? "top: " + top + "px;" : '') + "\"></div>", destinationId);
+            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + (left !== undefined ? "left: " + left + "px;" : '') + (top !== undefined ? "top: " + top + "px;" : '') + (zIndex ? "z-index: " + zIndex + "px;" : '') + "\"></div>", destinationId);
             return Promise.resolve(true);
         }
     };
@@ -575,6 +585,9 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.notif_tilesSelected = function (notif) {
         var _this = this;
+        if (notif.args.fromFactory) {
+            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+        }
         this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId).then(function () { return _this.setHandHeight(notif.args.playerId); });
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {

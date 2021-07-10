@@ -44,7 +44,7 @@ interface AzulGame extends Game {
     selectColumn(column: number): void;
     removeTile(tile: Tile): void;
     removeTiles(tiles: Tile[]): void;
-    placeTile(tile: Tile, destinationId: string, left: number, top: number): Promise<boolean>;
+    placeTile(tile: Tile, destinationId: string, left: number, top: number, zIndex?: number): Promise<boolean>;
 }
 
 interface EnteringChooseLineArgs {
@@ -68,6 +68,7 @@ interface NotifTilesSelectedArgs {
     playerId: number;
     selectedTiles: Tile[];
     discardedTiles: Tile[];
+    fromFactory: boolean;
 }
 
 interface NotifTilesPlacedOnLineArgs {

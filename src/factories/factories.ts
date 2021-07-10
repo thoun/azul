@@ -7,6 +7,8 @@ class Factories {
     // TODO temp
     randomCenter: boolean = localStorage.getItem('Azul-factory-center') == 'random';
 
+    private tilesByColorInCenter: number[] = [0, 0, 0, 0, 0, 0];
+
     constructor(
         private game: AzulGame, 
         private factoryNumber: number,
@@ -42,6 +44,10 @@ class Factories {
         return halfSize*2;
     }
 
+    public centerColorRemoved(color: number) {
+        this.tilesByColorInCenter[color] = 0;
+    }
+
     public fillFactories(factories: { [factoryId: number]: Tile[]; }) {
         for (let i=0; i<=this.factoryNumber; i++) {
             const factory = factories[i];
@@ -57,12 +63,13 @@ class Factories {
                         left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE*2;
                         top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE*2;
                     } else {
-                        const coords = this.getFreePlaceForFactoryCenter(tile.type);
+                        const coords = this.getFreePlaceForFactoryCenter(tile.type, );
                         left = coords.left;
                         top = coords.top;
+                        this.tilesByColorInCenter[tile.type]++;
                     }
                 }
-                this.game.placeTile(tile, `factory${i}`, left, top);
+                this.game.placeTile(tile, `factory${i}`, left, top, this.tilesByColorInCenter[tile.type]);
 
                 document.getElementById(`tile${tile.id}`).addEventListener('click', () => this.game.takeTiles(tile.id));
             });
@@ -72,7 +79,8 @@ class Factories {
     public moveSelectedTiles(selectedTiles: Tile[], discardedTiles: Tile[], playerId: number) {
         discardedTiles.forEach(tile => {
             const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
-            this.game.placeTile(tile, 'factory0', left, top);
+            this.tilesByColorInCenter[tile.type]++;
+            this.game.placeTile(tile, 'factory0', left, top, this.tilesByColorInCenter[tile.type]);
         });
         return Promise.allSettled(selectedTiles.map(tile => slideToObjectAndAttach(this.game, $(`tile${tile.id}`), `player-hand-${playerId}`)));
     }
@@ -132,7 +140,7 @@ class Factories {
         
         const angle = (0.5 + color/5)*Math.PI*2;
         const distance = radius;
-        const existingTilesOfSameColor = div.getElementsByClassName(`tile${color}`).length;
+        const existingTilesOfSameColor = this.tilesByColorInCenter[color];
         const newPlace = {
             x: xCenter - HALF_TILE_SIZE*2 - distance*Math.sin(angle) + existingTilesOfSameColor*CENTER_FACTORY_TILE_SHIFT,
             y: yCenter - HALF_TILE_SIZE*2 - distance*Math.cos(angle) + existingTilesOfSameColor*CENTER_FACTORY_TILE_SHIFT,

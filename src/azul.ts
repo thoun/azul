@@ -263,14 +263,17 @@ class Azul implements AzulGame {
         (this as any).scoreCtrl[playerId]?.incValue(incScore);
     }
 
-    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number): Promise<boolean> {
+    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, zIndex?: number): Promise<boolean> {
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         const tileDiv = document.getElementById(`tile${tile.id}`);
         if (tileDiv) {
+            if (zIndex) {
+                tileDiv.style.zIndex = ''+zIndex;
+            }
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
         } else {
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}"></div>`, destinationId);
+            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${zIndex ? `z-index: ${zIndex}px;` : ''}"></div>`, destinationId);
             return Promise.resolve(true);
         }
         
@@ -422,6 +425,9 @@ class Azul implements AzulGame {
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
+        if (notif.args.fromFactory) {
+            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+        }
         this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId).then(
             () => this.setHandHeight(notif.args.playerId)
         );

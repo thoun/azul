@@ -74,6 +74,7 @@
   top: 362px;
   left: 1px;
   height: 116px;
+  overflow: hidden;
 }
 .player-table-wrapper .player-table .line.selectable {
   border-color: red;

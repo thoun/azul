@@ -5,6 +5,7 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
     }
 
     return new Promise(resolve => {
+        const originalZIndex = Number(object.style.zIndex);
         object.style.zIndex = '10';
 
         const objectCR = object.getBoundingClientRect();
@@ -23,7 +24,7 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
             object.style.top = posY !== undefined ? `${posY}px` : 'unset';
             object.style.left = posX !== undefined ? `${posX}px` : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
-            object.style.zIndex = 'unset';
+            object.style.zIndex = originalZIndex ? ''+originalZIndex : 'unset';
             object.style.transform = 'unset';
             object.style.transition = 'unset';
             destination.appendChild(object);
