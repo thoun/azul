@@ -184,6 +184,9 @@ class Azul implements AzulGame {
 
     ///////////////////////////////////////////////////
 
+    public getZoom() {
+        return this.zoom;
+    }
 
     public setAutoZoom() {
         const zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
@@ -220,7 +223,8 @@ class Azul implements AzulGame {
                 hand.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-32}% 0`;
             });
         }
-        // TODO this.placePlayerTable();
+
+        document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
     }
 
     public zoomIn() {

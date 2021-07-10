@@ -4,17 +4,24 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
         return;
     }
     object.style.zIndex = '10';
-    var animation = (posX !== undefined || posY !== undefined) ?
-        game.slideToObjectPos(object, destinationId, posX, posY) :
-        game.slideToObject(object, destinationId);
-    dojo.connect(animation, 'onEnd', dojo.hitch(this, function () {
+    var objectCR = object.getBoundingClientRect();
+    var destinationCR = destination.getBoundingClientRect();
+    var deltaX = destinationCR.left - objectCR.left + posX;
+    var deltaY = destinationCR.top - objectCR.top + posY;
+    object.style.transition = "transform 0.5s ease-in";
+    object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px)";
+    /*object.addEventListener('transitionend', () => {
+        console.log('Transition ended');
+    });*/
+    setTimeout(function () {
         object.style.top = posY !== undefined ? posY + "px" : 'unset';
         object.style.left = posX !== undefined ? posX + "px" : 'unset';
         object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
         object.style.zIndex = 'unset';
+        object.style.transform = 'unset';
+        object.style.transition = 'unset';
         destination.appendChild(object);
-    }));
-    animation.play();
+    }, ANIMATION_MS);
 }
 var FACTORY_RADIUS = 125;
 var HALF_TILE_SIZE = 29;
@@ -363,6 +370,9 @@ var Azul = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Azul.prototype.getZoom = function () {
+        return this.zoom;
+    };
     Azul.prototype.setAutoZoom = function () {
         var zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
         var factoryWidth = this.factories.getWidth();
@@ -398,7 +408,7 @@ var Azul = /** @class */ (function () {
                 hand.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -32 + "% 0";
             });
         }
-        // TODO this.placePlayerTable();
+        document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
     };
     Azul.prototype.zoomIn = function () {
         if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
