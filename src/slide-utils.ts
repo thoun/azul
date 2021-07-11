@@ -17,7 +17,7 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
         //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
 
         object.style.transition = `transform 0.5s ease-in`;
-        object.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px)`;
 
         const transitionend = () => {
             console.log('ontransitionend', object, destination);

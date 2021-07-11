@@ -12,7 +12,7 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
         var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0) * game.getZoom();
         //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
         object.style.transition = "transform 0.5s ease-in";
-        object.style.transform = "translate(" + deltaX + "px, " + deltaY + "px)";
+        object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px)";
         var transitionend = function () {
             console.log('ontransitionend', object, destination);
             object.style.top = posY !== undefined ? posY + "px" : 'unset';
