@@ -49,7 +49,6 @@ class Azul implements AzulGame {
         // ignore loading of some pictures
         /*(this as any).dontPreloadImage('eye-shadow.png');
         (this as any).dontPreloadImage('publisher.png');
-        [1,2,3,4,5,6,7,8,9,10].filter(i => !Object.values(gamedatas.players).some(player => Number((player as any).mat) === i)).forEach(i => (this as any).dontPreloadImage(`playmat_${i}.jpg`));
 */
         log( "Starting game setup" );
         
@@ -100,13 +99,6 @@ class Azul implements AzulGame {
                 break;
         }
     }
-    
-    /*private setGamestateDescription(property: string = '') {
-        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
-        this.gamedatas.gamestate.description = `${originalState['description' + property]}`; 
-        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`; 
-        (this as any).updatePageTitle();        
-    }*/
 
     onEnteringChooseTile() {
         if ((this as any).isCurrentPlayerActive()) {
@@ -290,14 +282,6 @@ class Azul implements AzulGame {
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
-
-            // hand
-            dojo.place(`<div id="player-hand-${player.id}-zoom-wrapper">
-                <div id="player-hand-${player.id}" class="hand"></div>
-            </div>`, `player_board_${player.id}`);
-
-            player.hand.forEach(tile => this.placeTile(tile, `player-hand-${playerId}`));
-            setTimeout(() => this.setHandHeight(playerId), 100);
         });
 
         /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
@@ -382,13 +366,6 @@ class Azul implements AzulGame {
         }
     }
 
-    
-    private setHandHeight(playerId: number) {
-        const playerHandDiv = document.getElementById(`player-hand-${playerId}`);
-        playerHandDiv.style.height = `unset`;
-        playerHandDiv.style.height = `${playerHandDiv.getBoundingClientRect().height}px`;
-    }
-
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
 
@@ -428,15 +405,16 @@ class Azul implements AzulGame {
         if (notif.args.fromFactory) {
             this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
         }
-        this.factories.moveSelectedTiles(notif.args.selectedTiles, notif.args.discardedTiles, notif.args.playerId).then(
-            () => this.setHandHeight(notif.args.playerId)
-        );
+        const table = this.getPlayerTable(notif.args.playerId);
+        table.setHandVisible(notif.args.selectedTiles.length > 0);
+        table.placeTilesOnHand(notif.args.selectedTiles);
+        this.factories.discardTiles(notif.args.discardedTiles);
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(
-            () => this.setHandHeight(notif.args.playerId)
+            () => this.getPlayerTable(notif.args.playerId).setHandVisible(false)
         );
     }
 

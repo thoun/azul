@@ -2,9 +2,6 @@
     .tile {
         position: relative;
         margin: 5px;
-    }
-
-    .hand {
-        transform-origin: left top;
+        pointer-events: all;
     }
 }

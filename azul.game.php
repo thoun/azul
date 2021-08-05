@@ -613,7 +613,7 @@ class Azul extends Table {
     function takeTiles(int $id) {
         self::checkAction('takeTiles'); 
         
-        $playerId = self::getActivePlayerId();
+        $playerId = intval(self::getActivePlayerId());
 
         $tile = $this->getTileFromDb($this->tiles->getCard($id));
 

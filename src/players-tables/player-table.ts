@@ -1,3 +1,5 @@
+const HAND_CENTER = 327;
+
 class PlayerTable {
     public playerId: number;
 
@@ -8,7 +10,11 @@ class PlayerTable {
         this.playerId = Number(player.id);
 
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
-        <div id="player-table-${this.playerId}" class="player-table" style="border-color: #${player.color};">`;
+        <div id="player-hand-${this.playerId}" class="player-hand ${player.hand.length ? '' : 'empty'}">
+        </div>
+        <div id="player-table-${this.playerId}" class="player-table" style="border-color: #${player.color};">
+            <div class="player-name" style="color: #${player.color};">${player.name}</div>
+            <div class="player-name dark">${player.name}</div>`;
         for (let i=1; i<=5; i++) {
             html += `<div id="player-table-${this.playerId}-line${i}" class="line" style="top: ${10 + 70*(i-1)}px; width: ${69*i - 5}px;"></div>`;
         }
@@ -20,13 +26,13 @@ class PlayerTable {
             }
             html += `<div id="player-table-${this.playerId}-column0" class="floor column"></div>`;
         }
-        html += `    </div>
-        
-            <div class="player-name" style="color: #${player.color};">${player.name}</div>
-            <div class="player-name dark">${player.name}</div>
+        html += `        
+            </div>
         </div>`;
 
         dojo.place(html, 'table');
+
+        this.placeTilesOnHand(player.hand);
 
         for (let i=0; i<=5; i++) {
             document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
@@ -45,6 +51,11 @@ class PlayerTable {
         this.placeTilesOnWall(player.wall);
     }
 
+    public placeTilesOnHand(tiles: Tile[]) {
+        const startX = HAND_CENTER - tiles.length * (HALF_TILE_SIZE + 5);
+        tiles.forEach((tile, index) => this.game.placeTile(tile, `player-hand-${this.playerId}`, startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5));
+    }
+
     public placeTilesOnLine(tiles: Tile[], line: number): Promise<any> {
         const top = line ? 0 : 45;
         return Promise.allSettled(tiles.map(tile => {
@@ -61,5 +72,9 @@ class PlayerTable {
         for (let i=1; i<=5; i++) {
             document.getElementById(`player-table-${this.playerId}-column${i}`).style.top = `${10 + 70*(line-1)}px`;
         }
+    }
+    
+    public setHandVisible(visible: boolean) {
+        dojo.toggleClass(`player-hand-${this.playerId}`, 'empty', !visible);
     }
 }

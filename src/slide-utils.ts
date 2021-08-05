@@ -20,7 +20,7 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
         object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px)`;
 
         const transitionend = () => {
-            console.log('ontransitionend', object, destination);
+            //console.log('ontransitionend', object, destination);
             object.style.top = posY !== undefined ? `${posY}px` : 'unset';
             object.style.left = posX !== undefined ? `${posX}px` : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
