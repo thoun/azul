@@ -35,12 +35,11 @@
   position: relative;
 }
 .player-table-wrapper .player-hand {
-  height: 70px;
+  height: 75px;
   background: #FFFFFFDD;
   margin-bottom: -5px;
   margin-left: 15px;
   margin-right: 15px;
-  padding: 5px;
   box-shadow: 0 0 5px 5px #FFFFFFDD;
   opacity: 1;
   transition: opacity 0.5s;

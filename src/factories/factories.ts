@@ -49,12 +49,12 @@ class Factories {
     }
 
     public fillFactories(factories: { [factoryId: number]: Tile[]; }) {
-        for (let i=0; i<=this.factoryNumber; i++) {
-            const factory = factories[i];
+        for (let factoryIndex=0; factoryIndex<=this.factoryNumber; factoryIndex++) {
+            const factory = factories[factoryIndex];
             factory.forEach((tile, index) => {
                 let left = null;
                 let top = null;
-                if (i > 0) {
+                if (factoryIndex > 0) {
                     left = 50 + Math.floor(index / 2) * 90;
                     top = 50 + Math.floor(index % 2) * 90;
                 } else {
@@ -69,7 +69,8 @@ class Factories {
                         this.tilesByColorInCenter[tile.type]++;
                     }
                 }
-                this.game.placeTile(tile, `factory${i}`, left, top, this.tilesByColorInCenter[tile.type]);
+                //this.game.placeTile(tile, `factory${factoryIndex}`, left, top, this.tilesByColorInCenter[tile.type], factoryIndex > 0 ? Math.round(Math.random()*90 - 45) : undefined);
+                this.game.placeTile(tile, `factory${factoryIndex}`, left, top, this.tilesByColorInCenter[tile.type], tile.type != 0 ? Math.round(Math.random()*90 - 45) : undefined);
 
                 document.getElementById(`tile${tile.id}`).addEventListener('click', () => this.game.takeTiles(tile.id));
             });
@@ -80,7 +81,8 @@ class Factories {
         discardedTiles.forEach(tile => {
             const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
             this.tilesByColorInCenter[tile.type]++;
-            this.game.placeTile(tile, 'factory0', left, top, this.tilesByColorInCenter[tile.type]);
+            const rotation = Number(document.getElementById(`tile${tile.id}`).dataset.rotation);
+            this.game.placeTile(tile, 'factory0', left, top, this.tilesByColorInCenter[tile.type], rotation + Math.round(Math.random()*20 - 10));
         });
     }
 

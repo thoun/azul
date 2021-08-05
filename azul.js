@@ -1,4 +1,5 @@
-function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
+function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotation) {
+    if (rotation === void 0) { rotation = 0; }
     var destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
         return Promise.resolve(true);
@@ -12,14 +13,14 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
         var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0) * game.getZoom();
         //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
         object.style.transition = "transform 0.5s ease-in";
-        object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px)";
+        object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px) rotate(" + rotation + "deg)";
         var transitionend = function () {
             //console.log('ontransitionend', object, destination);
             object.style.top = posY !== undefined ? posY + "px" : 'unset';
             object.style.left = posX !== undefined ? posX + "px" : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? '' + originalZIndex : 'unset';
-            object.style.transform = 'unset';
+            object.style.transform = rotation ? "rotate(" + rotation + "deg)" : 'unset';
             object.style.transition = 'unset';
             destination.appendChild(object);
             object.removeEventListener('transitionend', transitionend);
@@ -66,12 +67,12 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.fillFactories = function (factories) {
         var _this = this;
-        var _loop_1 = function (i) {
-            var factory = factories[i];
+        var _loop_1 = function (factoryIndex) {
+            var factory = factories[factoryIndex];
             factory.forEach(function (tile, index) {
                 var left = null;
                 var top = null;
-                if (i > 0) {
+                if (factoryIndex > 0) {
                     left = 50 + Math.floor(index / 2) * 90;
                     top = 50 + Math.floor(index % 2) * 90;
                 }
@@ -88,12 +89,13 @@ var Factories = /** @class */ (function () {
                         _this.tilesByColorInCenter[tile.type]++;
                     }
                 }
-                _this.game.placeTile(tile, "factory" + i, left, top, _this.tilesByColorInCenter[tile.type]);
+                //this.game.placeTile(tile, `factory${factoryIndex}`, left, top, this.tilesByColorInCenter[tile.type], factoryIndex > 0 ? Math.round(Math.random()*90 - 45) : undefined);
+                _this.game.placeTile(tile, "factory" + factoryIndex, left, top, _this.tilesByColorInCenter[tile.type], tile.type != 0 ? Math.round(Math.random() * 90 - 45) : undefined);
                 document.getElementById("tile" + tile.id).addEventListener('click', function () { return _this.game.takeTiles(tile.id); });
             });
         };
-        for (var i = 0; i <= this.factoryNumber; i++) {
-            _loop_1(i);
+        for (var factoryIndex = 0; factoryIndex <= this.factoryNumber; factoryIndex++) {
+            _loop_1(factoryIndex);
         }
     };
     Factories.prototype.discardTiles = function (discardedTiles) {
@@ -101,7 +103,8 @@ var Factories = /** @class */ (function () {
         discardedTiles.forEach(function (tile) {
             var _a = _this.getFreePlaceForFactoryCenter(tile.type), left = _a.left, top = _a.top;
             _this.tilesByColorInCenter[tile.type]++;
-            _this.game.placeTile(tile, 'factory0', left, top, _this.tilesByColorInCenter[tile.type]);
+            var rotation = Number(document.getElementById("tile" + tile.id).dataset.rotation);
+            _this.game.placeTile(tile, 'factory0', left, top, _this.tilesByColorInCenter[tile.type], rotation + Math.round(Math.random() * 20 - 10));
         });
     };
     Factories.prototype.getDistance = function (p1, p2) {
@@ -451,7 +454,7 @@ var Azul = /** @class */ (function () {
         var _a;
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(incScore);
     };
-    Azul.prototype.placeTile = function (tile, destinationId, left, top, zIndex) {
+    Azul.prototype.placeTile = function (tile, destinationId, left, top, zIndex, rotation) {
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         var tileDiv = document.getElementById("tile" + tile.id);
@@ -459,10 +462,10 @@ var Azul = /** @class */ (function () {
             if (zIndex) {
                 tileDiv.style.zIndex = '' + zIndex;
             }
-            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top);
+            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
         }
         else {
-            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + (left !== undefined ? "left: " + left + "px;" : '') + (top !== undefined ? "top: " + top + "px;" : '') + (zIndex ? "z-index: " + zIndex + "px;" : '') + "\"></div>", destinationId);
+            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + (left !== undefined ? "left: " + left + "px;" : '') + (top !== undefined ? "top: " + top + "px;" : '') + (zIndex ? "z-index: " + zIndex + "px;" : '') + (rotation ? "transform: rotate(" + rotation + "deg)" : '') + "\" " + (rotation ? "data-rotation='" + rotation + "'" : '') + "></div>", destinationId);
             return Promise.resolve(true);
         }
     };

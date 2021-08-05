@@ -1,4 +1,4 @@
-function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destinationId: string, posX?: number, posY?: number): Promise<boolean> {
+function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destinationId: string, posX?: number, posY?: number, rotation: number = 0): Promise<boolean> {
     const destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
         return Promise.resolve(true);
@@ -17,7 +17,7 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
         //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
 
         object.style.transition = `transform 0.5s ease-in`;
-        object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px)`;
+        object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px) rotate(${rotation}deg)`;
 
         const transitionend = () => {
             //console.log('ontransitionend', object, destination);
@@ -25,7 +25,7 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
             object.style.left = posX !== undefined ? `${posX}px` : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? ''+originalZIndex : 'unset';
-            object.style.transform = 'unset';
+            object.style.transform = rotation ? `rotate(${rotation}deg)` : 'unset';
             object.style.transition = 'unset';
             destination.appendChild(object);
 
