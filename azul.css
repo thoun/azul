@@ -158,6 +158,7 @@
 .tile.tile0 {
   background: url("img/first-player.svg") white;
   border-color: white;
+  z-index: 8;
 }
 .tile.tile1 {
   background: url("img/black.svg");
@@ -187,7 +188,7 @@
   left: 0;
   opacity: 0.15;
   background: linear-gradient(110deg, transparent 15%, #FFFFFF 50%, transparent 85%);
-  animation: shimmer 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: shimmer 3s ease-in-out infinite;
   content: "";
 }
 @keyframes shimmer {

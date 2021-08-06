@@ -116,18 +116,34 @@ var Factories = /** @class */ (function () {
         newPlace.x = xCenter - HALF_TILE_SIZE - distance * Math.sin(angle);
         newPlace.y = yCenter - HALF_TILE_SIZE - distance * Math.cos(angle);
     };
-    Factories.prototype.getFreePlaceCoordinatesForFactoryCenter = function (placedTiles, xCenter, yCenter, color) {
+    Factories.prototype.getMinDistance = function (placedTiles, newPlace) {
         var _this = this;
+        if (!placedTiles.length) {
+            return 999;
+        }
+        var distances = placedTiles.map(function (place) { return _this.getDistance(newPlace, place); });
+        if (distances.length == 1) {
+            return distances[0];
+        }
+        return distances.reduce(function (a, b) { return a < b ? a : b; });
+    };
+    Factories.prototype.getFreePlaceCoordinatesForFactoryCenter = function (placedTiles, xCenter, yCenter, color) {
         var radius = 175 + this.factoryNumber * 25 - 165;
-        var newPlace = { x: 0, y: 0 };
-        this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
+        var place = { x: 0, y: 0 };
+        this.setRandomCoordinates(place, xCenter, yCenter, radius, color);
+        var minDistance = this.getMinDistance(placedTiles, place);
         var protection = 0;
-        while (protection < 1000 && placedTiles.some(function (place) { return _this.getDistance(newPlace, place) < HALF_TILE_SIZE * 2; })) {
+        while (protection < 1000 && minDistance < HALF_TILE_SIZE * 2) {
+            var newPlace = { x: 0, y: 0 };
             this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
+            var newMinDistance = this.getMinDistance(placedTiles, newPlace);
+            if (newMinDistance > minDistance) {
+                place = newPlace;
+                minDistance = newMinDistance;
+            }
             protection++;
         }
-        console.log('protection', protection);
-        return newPlace;
+        return place;
     };
     Factories.prototype.getFreePlaceForFactoryCenterSemiRandomPosition = function (color) {
         var div = document.getElementById('factory0');

@@ -97,19 +97,36 @@ class Factories {
         newPlace.y = yCenter - HALF_TILE_SIZE - distance*Math.cos(angle);
     }
 
+    private getMinDistance(placedTiles: PlacedTile[], newPlace: PlacedTile): number {
+        if (!placedTiles.length) {
+            return 999;
+        }
+        const distances = placedTiles.map(place => this.getDistance(newPlace, place));
+        if (distances.length == 1) {
+            return distances[0];
+        }
+        return distances.reduce((a, b) => a < b ? a : b);
+    }
+
     private getFreePlaceCoordinatesForFactoryCenter(placedTiles: PlacedTile[], xCenter: number, yCenter: number, color: number): PlacedTile {
         const radius = 175 + this.factoryNumber*25 - 165;
         
-        const newPlace = { x: 0, y: 0};
-        this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
+        let place = { x: 0, y: 0};
+        this.setRandomCoordinates(place, xCenter, yCenter, radius, color);
+        let minDistance = this.getMinDistance(placedTiles, place);
         let protection = 0;
-        while (protection < 1000 && placedTiles.some(place => this.getDistance(newPlace, place) < HALF_TILE_SIZE*2)) {
+        while (protection < 1000 && minDistance < HALF_TILE_SIZE*2) {
+            const newPlace = { x: 0, y: 0};
             this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
+            const newMinDistance = this.getMinDistance(placedTiles, newPlace);
+            if (newMinDistance > minDistance) {
+                place = newPlace;
+                minDistance = newMinDistance;
+            }
             protection++;
         }
-        console.log('protection', protection);
 
-        return newPlace;
+        return place;
     }
 
     public getFreePlaceForFactoryCenterSemiRandomPosition(color: number): {left: number, top: number} {
