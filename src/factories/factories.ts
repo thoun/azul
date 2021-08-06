@@ -5,7 +5,7 @@ const CENTER_FACTORY_TILE_SHIFT = 12;
 class Factories {
 
     // TODO temp
-    randomCenter: boolean = localStorage.getItem('Azul-factory-center') == 'random';
+    randomCenter: boolean = localStorage.getItem('Azul-factory-center') != 'pile';
 
     private tilesByColorInCenter: number[] = [0, 0, 0, 0, 0, 0];
 

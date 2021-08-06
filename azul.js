@@ -37,7 +37,7 @@ var Factories = /** @class */ (function () {
         this.game = game;
         this.factoryNumber = factoryNumber;
         // TODO temp
-        this.randomCenter = localStorage.getItem('Azul-factory-center') == 'random';
+        this.randomCenter = localStorage.getItem('Azul-factory-center') != 'pile';
         this.tilesByColorInCenter = [0, 0, 0, 0, 0, 0];
         var factoriesDiv = document.getElementById('factories');
         var radius = 175 + factoryNumber * 25;
@@ -173,12 +173,12 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table\" style=\"border-color: #" + player.color + ";\">\n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>";
+        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table " + (this.game.isVariant() ? 'variant' : '') + "\" style=\"border-color: #" + player.color + ";\">\n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>";
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
         }
         html += "<div id=\"player-table-" + this.playerId + "-line0\" class=\"floor line\"></div>";
-        html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall " + (this.game.isVariant() ? 'grayed-side' : 'colored-side') + "\"></div>";
+        html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall\"></div>";
         if (this.game.isVariant()) {
             for (var i = 1; i <= 5; i++) {
                 html += "<div id=\"player-table-" + this.playerId + "-column" + i + "\" class=\"column\" style=\"left: " + (384 + 69 * (i - 1)) + "px; width: " + 64 + "px;\"></div>";
@@ -277,9 +277,13 @@ var Azul = /** @class */ (function () {
     Azul.prototype.setup = function (gamedatas) {
         var _this = this;
         // ignore loading of some pictures
-        /*(this as any).dontPreloadImage('eye-shadow.png');
-        (this as any).dontPreloadImage('publisher.png');
-*/
+        if (this.isVariant()) {
+            this.dontPreloadImage('playerboard.jpg');
+        }
+        else {
+            this.dontPreloadImage('playerboard-variant.jpg');
+        }
+        this.dontPreloadImage('publisher.png');
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
@@ -293,11 +297,11 @@ var Azul = /** @class */ (function () {
         // TODO remove
         document.getElementById('background').addEventListener('click', function () { return dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2'); });
         document.getElementById('factory-center').addEventListener('click', function () {
-            if (localStorage.getItem('Azul-factory-center') == 'random') {
+            if (localStorage.getItem('Azul-factory-center') == 'pile') {
                 localStorage.removeItem('Azul-factory-center');
             }
             else {
-                localStorage.setItem('Azul-factory-center', 'random');
+                localStorage.setItem('Azul-factory-center', 'pile');
             }
             window.location.reload();
         });

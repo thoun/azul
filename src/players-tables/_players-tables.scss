@@ -58,6 +58,16 @@
         margin: 5px;
         z-index: 1;
 
+        &.variant {            
+            background: url('img/playerboard-variant.jpg');
+        }
+        &:not(.variant) {
+            .wall {
+                background: #ffffffb0;
+                box-shadow: 0 0 10px 5px #ffffffb0;
+            }
+        }
+
         .line {
             display: inline-block;
             position: absolute;
@@ -110,16 +120,6 @@
             left: 385px;
             width: 339px;
             height: 341px;
-
-            &.colored-side {
-                background: #ffffffb0;
-                box-shadow: 0 0 10px 5px #ffffffb0;
-            }
-
-            &.grayed-side { // TEMP
-                background: #b0b0b0f0;
-                box-shadow: 0 0 10px 5px #b0b0b0f0;
-            }
 
             .tile {
                 &.highlight {

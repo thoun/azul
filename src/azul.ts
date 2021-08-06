@@ -47,9 +47,13 @@ class Azul implements AzulGame {
 
     public setup(gamedatas: AzulGamedatas) {
         // ignore loading of some pictures
-        /*(this as any).dontPreloadImage('eye-shadow.png');
+        if (this.isVariant()) {
+            (this as any).dontPreloadImage('playerboard.jpg');
+        } else {
+            (this as any).dontPreloadImage('playerboard-variant.jpg');
+        }
         (this as any).dontPreloadImage('publisher.png');
-*/
+
         log( "Starting game setup" );
         
         this.gamedatas = gamedatas;
@@ -70,10 +74,10 @@ class Azul implements AzulGame {
         // TODO remove
         document.getElementById('background').addEventListener('click', () => dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2'));
         document.getElementById('factory-center').addEventListener('click', () => {
-            if (localStorage.getItem('Azul-factory-center') == 'random') {
+            if (localStorage.getItem('Azul-factory-center') == 'pile') {
                 localStorage.removeItem('Azul-factory-center');
             } else {
-                localStorage.setItem('Azul-factory-center', 'random');
+                localStorage.setItem('Azul-factory-center', 'pile');
             }
             window.location.reload();
         });

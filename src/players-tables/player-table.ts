@@ -12,14 +12,14 @@ class PlayerTable {
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
         <div id="player-hand-${this.playerId}" class="player-hand ${player.hand.length ? '' : 'empty'}">
         </div>
-        <div id="player-table-${this.playerId}" class="player-table" style="border-color: #${player.color};">
+        <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="border-color: #${player.color};">
             <div class="player-name" style="color: #${player.color};">${player.name}</div>
             <div class="player-name dark">${player.name}</div>`;
         for (let i=1; i<=5; i++) {
             html += `<div id="player-table-${this.playerId}-line${i}" class="line" style="top: ${10 + 70*(i-1)}px; width: ${69*i - 5}px;"></div>`;
         }
         html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
-        html += `<div id="player-table-${this.playerId}-wall" class="wall ${this.game.isVariant() ? 'grayed-side' : 'colored-side'}"></div>`;
+        html += `<div id="player-table-${this.playerId}-wall" class="wall"></div>`;
         if (this.game.isVariant()) {
             for (let i=1; i<=5; i++) {
                 html += `<div id="player-table-${this.playerId}-column${i}" class="column" style="left: ${384 + 69*(i-1)}px; width: ${64}px;"></div>`;
