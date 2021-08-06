@@ -25,6 +25,9 @@ class Azul implements AzulGame {
 
     public zoom: number = 1;
 
+    // TODO remove
+    private background = 0;
+
     constructor() {    
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
@@ -65,6 +68,7 @@ class Azul implements AzulGame {
         this.createPlayerTables(gamedatas);
 
         this.setupNotifications();
+        this.setupPreferences();
 
         document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
         document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
@@ -72,7 +76,11 @@ class Azul implements AzulGame {
         (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
         // TODO remove
-        document.getElementById('background').addEventListener('click', () => dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2'));
+        document.getElementById('background').addEventListener('click', () => {
+            this.background = (this.background + 1) % 3;
+            dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background1', this.background == 1);            
+            dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2', this.background == 2);
+        });
         document.getElementById('factory-center').addEventListener('click', () => {
             if (localStorage.getItem('Azul-factory-center') == 'pile') {
                 localStorage.removeItem('Azul-factory-center');
@@ -180,6 +188,38 @@ class Azul implements AzulGame {
 
     ///////////////////////////////////////////////////
 
+    private setupPreferences() {
+        // Extract the ID and value from the UI control
+        const onchange = (e) => {
+          var match = e.target.id.match(/^preference_control_(\d+)$/);
+          if (!match) {
+            return;
+          }
+          var prefId = +match[1];
+          var prefValue = +e.target.value;
+          (this as any).prefs[prefId].value = prefValue;
+          this.onPreferenceChange(prefId, prefValue);
+        }
+        
+        // Call onPreferenceChange() when any value changes
+        dojo.query(".preference_control").connect("onchange", onchange);
+        
+        // Call onPreferenceChange() now
+        dojo.forEach(
+          dojo.query("#ingame_menu_content .preference_control"),
+          el => onchange({ target: el })
+        );
+    }
+      
+    private onPreferenceChange(prefId: number, prefValue: number) {
+        switch (prefId) {
+            // KEEP
+            case 201: 
+                dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
+                break;
+        }
+    }
+
     public getZoom() {
         return this.zoom;
     }
@@ -281,7 +321,7 @@ class Azul implements AzulGame {
             const playerId = Number(player.id);     
 
             // first player token
-            dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper"></div>`, `player_board_${player.id}`);
+            dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper disabled-shimmer"></div>`, `player_board_${player.id}`);
 
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);

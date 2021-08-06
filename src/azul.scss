@@ -6,10 +6,12 @@
 @import 'tile';
 
 html {
-    background: url('img/background.jpg') #00587a;
+    background: url('img/background3.jpg') #fff8f0;
     background-repeat: repeat;
 
-    &:not(.background2) {      
+
+    &.background1 {  
+      background: url('img/background.jpg') #00587a;    
       background-blend-mode: multiply;
     }
 

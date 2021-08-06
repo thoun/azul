@@ -257,6 +257,8 @@ var Azul = /** @class */ (function () {
     function Azul() {
         this.playersTables = [];
         this.zoom = 1;
+        // TODO remove
+        this.background = 0;
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -291,11 +293,16 @@ var Azul = /** @class */ (function () {
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories);
         this.createPlayerTables(gamedatas);
         this.setupNotifications();
+        this.setupPreferences();
         document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
         document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
         this.onScreenWidthChange = function () { return _this.setAutoZoom(); };
         // TODO remove
-        document.getElementById('background').addEventListener('click', function () { return dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2'); });
+        document.getElementById('background').addEventListener('click', function () {
+            _this.background = (_this.background + 1) % 3;
+            dojo.toggleClass(document.getElementsByTagName('html')[0], 'background1', _this.background == 1);
+            dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2', _this.background == 2);
+        });
         document.getElementById('factory-center').addEventListener('click', function () {
             if (localStorage.getItem('Azul-factory-center') == 'pile') {
                 localStorage.removeItem('Azul-factory-center');
@@ -388,6 +395,32 @@ var Azul = /** @class */ (function () {
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
+    Azul.prototype.setupPreferences = function () {
+        var _this = this;
+        // Extract the ID and value from the UI control
+        var onchange = function (e) {
+            var match = e.target.id.match(/^preference_control_(\d+)$/);
+            if (!match) {
+                return;
+            }
+            var prefId = +match[1];
+            var prefValue = +e.target.value;
+            _this.prefs[prefId].value = prefValue;
+            _this.onPreferenceChange(prefId, prefValue);
+        };
+        // Call onPreferenceChange() when any value changes
+        dojo.query(".preference_control").connect("onchange", onchange);
+        // Call onPreferenceChange() now
+        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
+    };
+    Azul.prototype.onPreferenceChange = function (prefId, prefValue) {
+        switch (prefId) {
+            // KEEP
+            case 201:
+                dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
+                break;
+        }
+    };
     Azul.prototype.getZoom = function () {
         return this.zoom;
     };
@@ -478,7 +511,7 @@ var Azul = /** @class */ (function () {
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
             // first player token
-            dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\" class=\"firstPlayerWrapper\"></div>", "player_board_" + player.id);
+            dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\" class=\"firstPlayerWrapper disabled-shimmer\"></div>", "player_board_" + player.id);
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 _this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }

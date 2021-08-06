@@ -47,3 +47,17 @@ $game_options = [
 ];
 
 
+
+$game_preferences = [
+    201 => [
+        'name' => totranslate('Tile shimmer'),
+        'needReload' => false,
+        'values' => [
+            1 => [ 'name' => totranslate('Enabled')],
+            2 => [ 'name' => totranslate('Disabled')],
+        ],
+        'default' => 1
+    ],
+];
+
+

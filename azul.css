@@ -153,6 +153,7 @@
   border-radius: 5px;
   box-shadow: 1px 1px 2px 2px black;
   pointer-events: none;
+  overflow: hidden;
 }
 .tile.tile0 {
   background: url("img/first-player.svg") white;
@@ -178,6 +179,30 @@
   background: url("img/red.svg");
   border-color: #f5333f;
 }
+.tile::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  opacity: 0.15;
+  background: linear-gradient(110deg, transparent 15%, #FFFFFF 50%, transparent 85%);
+  animation: shimmer 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  content: "";
+}
+@keyframes shimmer {
+  0% {
+    transform: translateX(-200%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.disabled-shimmer .tile::after {
+  opacity: 0;
+  animation: none;
+}
 
 #firstPlayerToken {
   width: 32px;
@@ -187,10 +212,11 @@
 }
 
 html {
-  background: url("img/background.jpg") #00587a;
+  background: url("img/background3.jpg") #fff8f0;
   background-repeat: repeat;
 }
-html:not(.background2) {
+html.background1 {
+  background: url("img/background.jpg") #00587a;
   background-blend-mode: multiply;
 }
 html.background2 {

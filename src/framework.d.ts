@@ -41,6 +41,7 @@ interface Dojo {
     trim: Function;
     stopEvent: (evt) => void;
     destroy: (nodeId: string) => void;
+    forEach: Function;
 }
 
 type Gamestate = any; // TODO

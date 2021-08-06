@@ -32,6 +32,36 @@
         background: url('img/red.svg');
         border-color: #f5333f;
     }
+
+    overflow: hidden;
+    // shimmer animation
+    &::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        opacity: 0.15;
+        background: linear-gradient(110deg, transparent 15%, #FFFFFF 50%, transparent 85%);
+        animation: shimmer 3s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+        content: '';
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-200%);
+        }
+        100% {
+            transform: translateX(200%);
+        }
+    }
+}
+
+.disabled-shimmer {
+    .tile::after {
+        opacity: 0;
+        animation: none;
+    }
 }
 
 #firstPlayerToken {
