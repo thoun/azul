@@ -76,6 +76,7 @@ interface NotifTilesPlacedOnLineArgs {
     line: number;
     placedTiles: Tile[];
     discardedTiles: Tile[];
+    fromHand: boolean;
 }
 
 interface WallTilePointDetail {

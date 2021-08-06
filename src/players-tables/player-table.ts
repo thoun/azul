@@ -12,7 +12,7 @@ class PlayerTable {
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
         <div id="player-hand-${this.playerId}" class="player-hand ${player.hand.length ? '' : 'empty'}">
         </div>
-        <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="border-color: #${player.color};">
+        <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="border-color: #${player.color}; box-shadow: 0 0 5px 2px #${player.color};">
             <div class="player-name" style="color: #${player.color};">${player.name}</div>
             <div class="player-name dark">${player.name}</div>`;
         for (let i=1; i<=5; i++) {
@@ -54,6 +54,7 @@ class PlayerTable {
     public placeTilesOnHand(tiles: Tile[]) {
         const startX = HAND_CENTER - tiles.length * (HALF_TILE_SIZE + 5);
         tiles.forEach((tile, index) => this.game.placeTile(tile, `player-hand-${this.playerId}`, startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5));
+        this.setHandVisible(tiles.length > 0);
     }
 
     public placeTilesOnLine(tiles: Tile[], line: number): Promise<any> {

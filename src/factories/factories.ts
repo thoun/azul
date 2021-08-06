@@ -60,10 +60,10 @@ class Factories {
                 } else {
                     if (tile.type == 0) {
                         const centerFactoryDiv = document.getElementById('factory0');
-                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE*2;
-                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE*2;
+                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE;
+                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
                     } else {
-                        const coords = this.getFreePlaceForFactoryCenter(tile.type, );
+                        const coords = this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
                         top = coords.top;
                         this.tilesByColorInCenter[tile.type]++;

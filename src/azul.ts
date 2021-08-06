@@ -450,7 +450,6 @@ class Azul implements AzulGame {
             this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
         }
         const table = this.getPlayerTable(notif.args.playerId);
-        table.setHandVisible(notif.args.selectedTiles.length > 0);
         table.placeTilesOnHand(notif.args.selectedTiles);
         this.factories.discardTiles(notif.args.discardedTiles);
     }
@@ -458,7 +457,11 @@ class Azul implements AzulGame {
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(
-            () => this.getPlayerTable(notif.args.playerId).setHandVisible(false)
+            () => { 
+                if (notif.args.fromHand) {
+                    this.getPlayerTable(notif.args.playerId).setHandVisible(false);
+                }
+            }
         );
     }
 

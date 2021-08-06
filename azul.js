@@ -79,8 +79,8 @@ var Factories = /** @class */ (function () {
                 else {
                     if (tile.type == 0) {
                         var centerFactoryDiv = document.getElementById('factory0');
-                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE * 2;
-                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE * 2;
+                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE;
+                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
                     }
                     else {
                         var coords = _this.getFreePlaceForFactoryCenter(tile.type);
@@ -173,7 +173,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table " + (this.game.isVariant() ? 'variant' : '') + "\" style=\"border-color: #" + player.color + ";\">\n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>";
+        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table " + (this.game.isVariant() ? 'variant' : '') + "\" style=\"border-color: #" + player.color + "; box-shadow: 0 0 5px 2px #" + player.color + ";\">\n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>";
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
         }
@@ -218,6 +218,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         var startX = HAND_CENTER - tiles.length * (HALF_TILE_SIZE + 5);
         tiles.forEach(function (tile, index) { return _this.game.placeTile(tile, "player-hand-" + _this.playerId, startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5); });
+        this.setHandVisible(tiles.length > 0);
     };
     PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
         var _this = this;
@@ -621,14 +622,17 @@ var Azul = /** @class */ (function () {
             this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
         }
         var table = this.getPlayerTable(notif.args.playerId);
-        table.setHandVisible(notif.args.selectedTiles.length > 0);
         table.placeTilesOnHand(notif.args.selectedTiles);
         this.factories.discardTiles(notif.args.discardedTiles);
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
         var _this = this;
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(function () { return _this.getPlayerTable(notif.args.playerId).setHandVisible(false); });
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(function () {
+            if (notif.args.fromHand) {
+                _this.getPlayerTable(notif.args.playerId).setHandVisible(false);
+            }
+        });
     };
     Azul.prototype.notif_placeTileOnWall = function (notif) {
         var _this = this;

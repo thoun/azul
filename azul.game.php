@@ -246,7 +246,7 @@ class Azul extends Table {
     function putFirstPlayerTile(array $firstPlayerTokens, int $playerId) {
         self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
 
-        $this->placeTilesOnLine($playerId, $firstPlayerTokens, 0);
+        $this->placeTilesOnLine($playerId, $firstPlayerTokens, 0, false);
 
         self::notifyAllPlayers('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round'), [
             'playerId' => $playerId,
@@ -254,7 +254,7 @@ class Azul extends Table {
         ]);
     }
 
-    function placeTilesOnLine(int $playerId, array $tiles, int $line) {
+    function placeTilesOnLine(int $playerId, array $tiles, int $line, bool $fromHand) {
         $startIndex = count($this->getTilesFromLine($playerId, $line));
         $startIndexFloorLine = count($this->getTilesFromLine($playerId, 0));
 
@@ -290,6 +290,7 @@ class Azul extends Table {
             'lineNumber' => $line,
             'placedTiles' => $placedTiles,
             'discardedTiles' => $discardedTiles,
+            'fromHand' => $fromHand,
         ]);
     }
 
@@ -688,7 +689,7 @@ class Azul extends Table {
         }
 
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-        $this->placeTilesOnLine($playerId, $tiles, $line);
+        $this->placeTilesOnLine($playerId, $tiles, $line, true);
 
         $this->gamestate->nextState('nextPlayer');
     }
@@ -701,7 +702,7 @@ class Azul extends Table {
         if ($column == 0) {
             $line = intval(self::getGameStateValue(RESOLVING_LINE));
             $tiles = $this->getTilesFromLine($playerId, $line);
-            $this->placeTilesOnLine($playerId, $tiles, 0);
+            $this->placeTilesOnLine($playerId, $tiles, 0, false);
         }
             
         // Make this player unactive now (and tell the machine state to use transtion "placeTiles" if all players are now unactive
