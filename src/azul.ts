@@ -25,9 +25,6 @@ class Azul implements AzulGame {
 
     public zoom: number = 1;
 
-    // TODO remove
-    private background = 0;
-
     constructor() {    
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
@@ -75,12 +72,6 @@ class Azul implements AzulGame {
 
         (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
-        // TODO remove
-        document.getElementById('background').addEventListener('click', () => {
-            this.background = (this.background + 1) % 3;
-            dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background1', this.background == 1);            
-            dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2', this.background == 2);
-        });
         document.getElementById('factory-center').addEventListener('click', () => {
             if (localStorage.getItem('Azul-factory-center') == 'pile') {
                 localStorage.removeItem('Azul-factory-center');
@@ -216,6 +207,9 @@ class Azul implements AzulGame {
             // KEEP
             case 201: 
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
+                break;
+            case 202:
+                dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2', prefValue == 2);
                 break;
         }
     }

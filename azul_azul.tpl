@@ -9,7 +9,6 @@
         <button id="zoom-in" class="disabled"></button>
     </div>
     <div style="position: absolute; top: 0; left: 0" class="TODO DELETE">
-        <button id="background" class="bgabutton bgabutton_blue" style="width: auto">Toggle background</button><br>
         <button id="factory-center" class="bgabutton bgabutton_blue" style="width: auto; display: none;">Toggle factory center placement</button>
     </div>
 </div>

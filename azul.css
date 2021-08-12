@@ -47,24 +47,33 @@
 .player-table-wrapper .player-hand.empty {
   opacity: 0;
 }
-.player-table-wrapper .player-name {
+.player-table-wrapper .player-name-wrapper {
   position: absolute;
   font-size: 20px;
   font-family: "Algeria";
-  top: 74px;
+  top: 63px;
   left: 46px;
   width: 120px;
+  height: 38px;
   text-align: center;
-  overflow: hidden;
   vertical-align: middle;
   text-transform: uppercase;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.player-table-wrapper .player-name.dark {
+.player-table-wrapper .player-name-wrapper.shift {
+  top: 64px;
+  left: 47px;
+}
+.player-table-wrapper .player-name-wrapper .player-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.player-table-wrapper .player-name-wrapper .player-name.dark {
   color: #012c3c;
-  top: 73px;
-  left: 45px;
 }
 .player-table-wrapper .player-table {
   background: url("img/playerboard.jpg");
@@ -214,15 +223,12 @@
 }
 
 html {
-  background: url("img/background3.jpg") #fff8f0;
+  background: url("img/background.jpg") #fff8f0;
   background-repeat: repeat;
 }
-html.background1 {
-  background: url("img/background.jpg") #00587a;
-  background-blend-mode: multiply;
-}
 html.background2 {
-  background: url("img/background2.jpg") #fce7d8;
+  background: url("img/background2.jpg") #00587a;
+  background-blend-mode: multiply;
 }
 
 .mode_3d #game_play_area_background {

@@ -189,7 +189,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table " + (this.game.isVariant() ? 'variant' : '') + "\" style=\"border-color: #" + player.color + "; box-shadow: 0 0 5px 2px #" + player.color + ";\">\n           <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>";
+        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table " + (this.game.isVariant() ? 'variant' : '') + "\" style=\"border-color: #" + player.color + "; box-shadow: 0 0 5px 2px #" + player.color + ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div class=\"player-name color\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div class=\"player-name dark\">" + player.name + "</div>\n            </div>";
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
         }
@@ -274,8 +274,6 @@ var Azul = /** @class */ (function () {
     function Azul() {
         this.playersTables = [];
         this.zoom = 1;
-        // TODO remove
-        this.background = 0;
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -314,12 +312,6 @@ var Azul = /** @class */ (function () {
         document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
         document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
         this.onScreenWidthChange = function () { return _this.setAutoZoom(); };
-        // TODO remove
-        document.getElementById('background').addEventListener('click', function () {
-            _this.background = (_this.background + 1) % 3;
-            dojo.toggleClass(document.getElementsByTagName('html')[0], 'background1', _this.background == 1);
-            dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2', _this.background == 2);
-        });
         document.getElementById('factory-center').addEventListener('click', function () {
             if (localStorage.getItem('Azul-factory-center') == 'pile') {
                 localStorage.removeItem('Azul-factory-center');
@@ -435,6 +427,9 @@ var Azul = /** @class */ (function () {
             // KEEP
             case 201:
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
+                break;
+            case 202:
+                dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2', prefValue == 2);
                 break;
         }
     };
