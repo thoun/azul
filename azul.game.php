@@ -285,7 +285,8 @@ class Azul extends Table {
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'number' => count($tiles),
-            'color' => $this->getColor($tiles[0]->type),
+            'color' => $this->getColor($tiles[0]->type),            
+            'type' => $tiles[0]->type,
             'line' => $line,
             'lineNumber' => $line,
             'placedTiles' => $placedTiles,
@@ -472,7 +473,8 @@ class Azul extends Table {
             self::notifyAllPlayers('placeTileOnWallTextLogDetails', clienttranslate('${player_name} places ${number} ${color} and wins ${points} point'), [
                 'player_name' => $this->getPlayerName($playerId),
                 'number' => 1,
-                'color' => $this->getColor($notif->placedTile->type),
+                'color' => $this->getColor($notif->placedTile->type),                
+                'type' => $notif->placedTile->type,
                 'points' => $notif->pointsDetail->points,
             ]);
         }
@@ -671,7 +673,8 @@ class Azul extends Table {
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'number' => count($selectedTiles),
-            'color' => $this->getColor($tile->type),
+            'color' => $this->getColor($tile->type),              
+            'type' => $tile->type,
             'selectedTiles' => $selectedTiles,
             'discardedTiles' => $discardedTiles,
         ]);
@@ -728,6 +731,7 @@ class Azul extends Table {
             'lines' => $this->availableLines($playerId),
             'number' => count($tiles),
             'color' => $this->getColor($tiles[0]->type),
+            'type' => $tiles[0]->type,
         ];
     }
 

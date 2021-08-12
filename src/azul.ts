@@ -506,17 +506,6 @@ class Azul implements AzulGame {
         this.placeFirstPlayerToken(notif.args.playerId);
     }
 
-    private getTypeFromColorString(color: string) {
-        switch (color) {
-            case 'Black': return 1;
-            case 'Cyan': return 2;
-            case 'Blue': return 3;
-            case 'Yellow': return 4;
-            case 'Red': return 5;
-        }
-        return null;
-    }
-
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     public format_string_recursive(log: string, args: any) {
@@ -530,12 +519,11 @@ class Azul implements AzulGame {
                     args.lineNumber = `<strong>${args.line}</strong>`;
                 }
 
-                if (log.indexOf('${number} ${color}') !== -1) {
-                    const type = this.getTypeFromColorString(args.color);
+                if (log.indexOf('${number} ${color}') !== -1 && typeof args.type === 'number') {
                     const number = args.number;
                     let html = '';
                     for (let i=0; i<number; i++) {
-                        html += `<div class="tile tile${type}"></div>`;
+                        html += `<div class="tile tile${args.type}"></div>`;
                     }
 
                     log = log.replace('${number} ${color}', html);

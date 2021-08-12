@@ -189,7 +189,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table " + (this.game.isVariant() ? 'variant' : '') + "\" style=\"border-color: #" + player.color + "; box-shadow: 0 0 5px 2px #" + player.color + ";\">\n            <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>";
+        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table " + (this.game.isVariant() ? 'variant' : '') + "\" style=\"border-color: #" + player.color + "; box-shadow: 0 0 5px 2px #" + player.color + ";\">\n           <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            <div class=\"player-name dark\">" + player.name + "</div>";
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
         }
@@ -684,16 +684,6 @@ var Azul = /** @class */ (function () {
     Azul.prototype.notif_firstPlayerToken = function (notif) {
         this.placeFirstPlayerToken(notif.args.playerId);
     };
-    Azul.prototype.getTypeFromColorString = function (color) {
-        switch (color) {
-            case 'Black': return 1;
-            case 'Cyan': return 2;
-            case 'Blue': return 3;
-            case 'Yellow': return 4;
-            case 'Red': return 5;
-        }
-        return null;
-    };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     Azul.prototype.format_string_recursive = function (log, args) {
@@ -705,12 +695,11 @@ var Azul = /** @class */ (function () {
                 if (typeof args.lineNumber === 'number') {
                     args.lineNumber = "<strong>" + args.line + "</strong>";
                 }
-                if (log.indexOf('${number} ${color}') !== -1) {
-                    var type = this.getTypeFromColorString(args.color);
+                if (log.indexOf('${number} ${color}') !== -1 && typeof args.type === 'number') {
                     var number = args.number;
                     var html = '';
                     for (var i = 0; i < number; i++) {
-                        html += "<div class=\"tile tile" + type + "\"></div>";
+                        html += "<div class=\"tile tile" + args.type + "\"></div>";
                     }
                     log = log.replace('${number} ${color}', html);
                 }
