@@ -104,8 +104,20 @@ class Azul extends Table {
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+        self::initStat('table', 'roundsNumber', 0);
+        self::initStat('table', 'turnsNumber', 0);
+        self::initStat('player', 'turnsNumber', 0);
+        self::initStat('table', 'pointsWallTile', 0);
+        self::initStat('player', 'pointsWallTile', 0);
+        self::initStat('table', 'pointsLossFloorLine', 0);
+        self::initStat('player', 'pointsLossFloorLine', 0);
+        self::initStat('table', 'pointsCompleteLine', 0);
+        self::initStat('player', 'pointsCompleteLine', 0);
+        self::initStat('table', 'pointsCompleteColumn', 0);
+        self::initStat('player', 'pointsCompleteColumn', 0);
+        self::initStat('table', 'pointsCompleteColor', 0);
+        self::initStat('player', 'pointsCompleteColor', 0);
+        self::initStat('player', 'firstPlayer', 0);
 
         $this->setupTiles();
 
@@ -461,6 +473,9 @@ class Azul extends Table {
                 $completeLinesNotif[$playerId] = $obj;
 
                 $this->incPlayerScore($playerId, $pointsDetail->points);
+
+                self::incStat($pointsDetail->points, 'pointsWallTile');
+                self::incStat($pointsDetail->points, 'pointsWallTile', $playerId);
             }
         }
 
@@ -496,6 +511,9 @@ class Azul extends Table {
                 $floorLinesNotif[$playerId] = $obj;
 
                 $this->incPlayerScore($playerId, $points);
+
+                self::incStat(-$points, 'pointsLossFloorLine');
+                self::incStat(-$points, 'pointsLossFloorLine', $playerId);
             } 
         }
         self::notifyAllPlayers('emptyFloorLine', '', [
@@ -526,6 +544,9 @@ class Azul extends Table {
 
                 $this->incPlayerScore($playerId, $obj->points);
                 $this->incPlayerScoreAux($playerId, 1);
+
+                self::incStat($obj->points, 'pointsCompleteLine');
+                self::incStat($obj->points, 'pointsCompleteLine', $playerId);
             }
         }
 
@@ -551,6 +572,9 @@ class Azul extends Table {
                 $scoresNotif[$playerId] = $obj;
 
                 $this->incPlayerScore($playerId, $obj->points);
+
+                self::incStat($obj->points, 'pointsCompleteColumn');
+                self::incStat($obj->points, 'pointsCompleteColumn', $playerId);
             }
         }
 
@@ -576,6 +600,9 @@ class Azul extends Table {
                 $scoresNotif[$playerId] = $obj;
 
                 $this->incPlayerScore($playerId, $obj->points);
+
+                self::incStat($obj->points, 'pointsCompleteColor');
+                self::incStat($obj->points, 'pointsCompleteColor', $playerId);
             }
         }
 
@@ -780,11 +807,18 @@ class Azul extends Table {
             'factories' => $factories,
         ]);
 
+        self::incStat(1, 'roundsNumber');
+        self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
+
         $this->gamestate->nextState('next');
     }
 
     function stNextPlayer() {
         $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') == 0;
+        $playerId = self::getActivePlayerId();
+
+        self::incStat(1, 'turnsNumber');
+        self::incStat(1, 'turnsNumber', $playerId);
 
         if ($factoriesAllEmpty) {
             $this->gamestate->nextState('endRound');

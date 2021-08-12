@@ -47,49 +47,57 @@
     
 */
 
-$stats_type = array(
+$commonStats = [
+    "turnsNumber" => [
+        "id" => 10,
+        "name" => totranslate("Number of turns"),
+        "type" => "int"
+    ], 
+    "pointsWallTile" => [
+        "id" => 20,
+        "name" => totranslate("Point won with placed tiles"),
+        "type" => "int"
+    ], 
+    "pointsLossFloorLine" => [
+        "id" => 21,
+        "name" => totranslate("Point lost with floor line"),
+        "type" => "int"
+    ], 
+    "pointsCompleteLine" => [
+        "id" => 22,
+        "name" => totranslate("Point won with complete lines"),
+        "type" => "int"
+    ], 
+    "pointsCompleteColumn" => [
+        "id" => 23,
+        "name" => totranslate("Point won with complete columns"),
+        "type" => "int"
+    ], 
+    "pointsCompleteColor" => [
+        "id" => 24,
+        "name" => totranslate("Point won with complete color"),
+        "type" => "int"
+    ], 
+];
+
+$stats_type = [
 
     // Statistics global to table
-    "table" => array(
-
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
-
-/*
-        Examples:
-
-
-        "table_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("table test stat 1"), 
-                                "type" => "int" ),
-                                
-        "table_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("table test stat 2"), 
-                                "type" => "float" )
-*/  
-    ),
+    "table" => $commonStats + [
+        "roundsNumber" => [
+            "id" => 11,
+            "name" => totranslate("Number of rounds"),
+            "type" => "int"   
+        ],
+    ],
     
     // Statistics existing for each player
-    "player" => array(
+    "player" => $commonStats + [
+        "firstPlayer" => [
+            "id" => 30,
+            "name" => totranslate("Number of rounds as first player"),
+            "type" => "int"   
+        ],
+    ],
 
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
-    
-/*
-        Examples:    
-        
-        
-        "player_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("player test stat 1"), 
-                                "type" => "int" ),
-                                
-        "player_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("player test stat 2"), 
-                                "type" => "float" )
-
-*/    
-    )
-
-);
+];
