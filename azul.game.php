@@ -160,12 +160,21 @@ class Azul extends Table {
         }
         $result['factories'] = $factories;
 
+        $endRound = false;
         foreach($result['players'] as $playerId => &$player) {
             $player['lines'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
             $player['wall'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
             $player['playerNo'] = intval($player['playerNo']);
             $player['hand'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+
+            for ($line=1; $line<=5; $line++) {
+                if ($this->lineWillBeComplete($playerId, $line)) {
+                    $endRound = true;
+                }
+            }
         }
+
+        $result['endRound'] = $endRound;
   
         return $result;
     }
@@ -631,6 +640,21 @@ class Azul extends Table {
         return $availableColumns;
     }
 
+    function lineWillBeComplete(int $playerId, int $line) {
+        if (count($this->getTilesFromLine($playerId, $line)) == $line) {
+            // construction line is complete
+            
+            $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+            $playerWallTileLineCount = count(array_values(array_filter($playerWallTiles, function ($tile) use ($line) { return $tile->line == $line; })));
+            
+            // wall has only on spot left
+            if ($playerWallTileLineCount >= 4) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
 //////////// 
@@ -709,6 +733,8 @@ class Azul extends Table {
         $this->gamestate->nextState('placeTiles');
     }
 
+
+
     function selectLine(int $line) {
         self::checkAction('selectLine'); 
         
@@ -720,6 +746,13 @@ class Azul extends Table {
 
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $this->placeTilesOnLine($playerId, $tiles, $line, true);
+
+        if ($this->lineWillBeComplete($playerId, $line)) {
+            self::notifyAllPlayers('lastRound', clienttranslate('${player_name} will complete a line, it\'s last turn !'), [
+                'playerId' => $playerId,
+                'player_name' => self::getActivePlayerName(),
+            ]);
+        }
 
         $this->gamestate->nextState('nextPlayer');
     }

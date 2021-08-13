@@ -7,11 +7,11 @@ trait DebugUtilTrait {
 ////////////
 
     function debugSetup() {
-        //for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343492, $i); }
+        for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343492, $i); }
 
-        for ($i=1; $i<=5;$i++) { $this->addTilesInFactory($i, $i); }
+        //for ($i=1; $i<=5;$i++) { $this->addTilesInFactory($i, $i); }
 
-        //$this->gamestate->changeActivePlayer(2343492);
+        $this->gamestate->changeActivePlayer(2343492);
     }
 
     private function debugSetWallColumn(int $playerId, int $column) {

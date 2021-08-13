@@ -34,6 +34,7 @@ interface AzulGamedatas {
     factories: { [factoryId: number]: Tile[] };
     firstPlayerTokenPlayerId: number;
     variant: boolean;
+    endRound: boolean;
 }
 
 interface AzulGame extends Game {

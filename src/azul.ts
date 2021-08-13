@@ -67,6 +67,10 @@ class Azul implements AzulGame {
         this.setupNotifications();
         this.setupPreferences();
 
+        if (gamedatas.endRound) {
+            this.notif_lastRound();
+        }
+
         document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
         document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
 
@@ -90,6 +94,12 @@ class Azul implements AzulGame {
                 break;
             case 'chooseLine':
                 this.onEnteringChooseLine(args.args);
+                break;
+            case 'gameEnd':
+                const lastTurnBar = document.getElementById('last-round');
+                if (lastTurnBar) {
+                    lastTurnBar.style.display = 'none';
+                }
                 break;
         }
     }
@@ -432,6 +442,7 @@ class Azul implements AzulGame {
             ['emptyFloorLine', SCORE_MS],
             ['endScore', SCORE_MS],
             ['firstPlayerToken', 1],
+            ['lastRound', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -501,6 +512,16 @@ class Azul implements AzulGame {
 
     notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
         this.placeFirstPlayerToken(notif.args.playerId);
+    }
+
+    notif_lastRound() {
+        if (document.getElementById('last-round')) {
+            return;
+        }
+        
+        dojo.place(`<div id="last-round">
+            ${_("This is the last round of the game!")}
+        </div>`, 'page-title');
     }
 
     /* This enable to inject translatable styled things to logs or action bar */

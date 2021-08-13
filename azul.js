@@ -330,6 +330,9 @@ var Azul = /** @class */ (function () {
         this.createPlayerTables(gamedatas);
         this.setupNotifications();
         this.setupPreferences();
+        if (gamedatas.endRound) {
+            this.notif_lastRound();
+        }
         document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
         document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
         this.onScreenWidthChange = function () { return _this.setAutoZoom(); };
@@ -348,6 +351,12 @@ var Azul = /** @class */ (function () {
                 break;
             case 'chooseLine':
                 this.onEnteringChooseLine(args.args);
+                break;
+            case 'gameEnd':
+                var lastTurnBar = document.getElementById('last-round');
+                if (lastTurnBar) {
+                    lastTurnBar.style.display = 'none';
+                }
                 break;
         }
     };
@@ -639,6 +648,7 @@ var Azul = /** @class */ (function () {
             ['emptyFloorLine', SCORE_MS],
             ['endScore', SCORE_MS],
             ['firstPlayerToken', 1],
+            ['lastRound', 1],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -696,6 +706,12 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.notif_firstPlayerToken = function (notif) {
         this.placeFirstPlayerToken(notif.args.playerId);
+    };
+    Azul.prototype.notif_lastRound = function () {
+        if (document.getElementById('last-round')) {
+            return;
+        }
+        dojo.place("<div id=\"last-round\">\n            " + _("This is the last round of the game!") + "\n        </div>", 'page-title');
     };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
