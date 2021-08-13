@@ -227,8 +227,18 @@ class Azul extends Table {
         return self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = $playerId");
     }
 
+    function getPlayerScore(int $playerId) {
+        return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+    }
+
     function incPlayerScore(int $playerId, int $incScore) {
         self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+    }
+
+    function decPlayerScore(int $playerId, int $decScore) {
+        $newScore = max(0, $this->getPlayerScore($playerId) - $decScore);
+        self::DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
+        return $newScore;
     }
 
     function incPlayerScoreAux(int $playerId, int $incScoreAux) {
@@ -447,10 +457,10 @@ class Azul extends Table {
         
     function getPointsForFloorLine(int $tileNumber) {
         switch ($tileNumber) {
-            case 0: return 0;
-            case 1: case 2: return -1;
-            case 3: case 4: case 5: return -2;
-            default: return -3;
+            case 0: return null;
+            case 1: case 2: return 1;
+            case 3: case 4: case 5: return 2;
+            default: return 3;
         }
     }
 
@@ -511,18 +521,21 @@ class Azul extends Table {
             $playerTiles = $this->getTilesFromLine($playerId, 0);
             if (count($playerTiles) > 0) {                
                 $this->tiles->moveCards(array_map('getIdPredicate', $playerTiles), 'discard');
-                $points = $this->getPointsForFloorLine(count($playerTiles));
+                $points = 0;
+                for ($i = 0; $i < count($playerTiles); $i++) {
+                    $points += $this->getPointsForFloorLine($i + 1);
+                }
 
                 $obj = new stdClass();
                 $obj->tiles = $playerTiles;
-                $obj->points = $points;
+                $obj->points = -$points;
 
                 $floorLinesNotif[$playerId] = $obj;
 
-                $this->incPlayerScore($playerId, $points);
+                $this->decPlayerScore($playerId, $points);
 
-                self::incStat(-$points, 'pointsLossFloorLine');
-                self::incStat(-$points, 'pointsLossFloorLine', $playerId);
+                self::incStat($points, 'pointsLossFloorLine');
+                self::incStat($points, 'pointsLossFloorLine', $playerId);
             } 
         }
         self::notifyAllPlayers('emptyFloorLine', '', [
@@ -532,7 +545,7 @@ class Azul extends Table {
         foreach ($floorLinesNotif as $playerId => $notif) {
             self::notifyAllPlayers('emptyFloorLineTextLogDetails', clienttranslate('${player_name} looses ${points} point with Floor line'), [
                 'player_name' => $this->getPlayerName($playerId),
-                'points' => abs($notif->points),
+                'points' => -$notif->points,
             ]);
         }
     }

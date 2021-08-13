@@ -532,8 +532,13 @@ var Azul = /** @class */ (function () {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
     };
     Azul.prototype.incScore = function (playerId, incScore) {
-        var _a;
-        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(incScore);
+        var _a, _b, _c;
+        if (((_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) + incScore < 0) {
+            (_b = this.scoreCtrl[playerId]) === null || _b === void 0 ? void 0 : _b.toValue(0);
+        }
+        else {
+            (_c = this.scoreCtrl[playerId]) === null || _c === void 0 ? void 0 : _c.incValue(incScore);
+        }
     };
     Azul.prototype.placeTile = function (tile, destinationId, left, top, rotation) {
         //this.removeTile(tile);

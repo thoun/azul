@@ -308,7 +308,11 @@ class Azul implements AzulGame {
     }
 
     private incScore(playerId: number, incScore: number) {
-        (this as any).scoreCtrl[playerId]?.incValue(incScore);
+        if ((this as any).scoreCtrl[playerId]?.getValue() + incScore < 0) {
+            (this as any).scoreCtrl[playerId]?.toValue(0);
+        } else {
+            (this as any).scoreCtrl[playerId]?.incValue(incScore);
+        }
     }
 
     public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean> {
