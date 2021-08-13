@@ -194,14 +194,17 @@ var PlayerTable = /** @class */ (function () {
             html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
         }
         html += "<div id=\"player-table-" + this.playerId + "-line0\" class=\"floor line\"></div>";
-        html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall\"></div>";
-        if (this.game.isVariant()) {
-            for (var i = 1; i <= 5; i++) {
-                html += "<div id=\"player-table-" + this.playerId + "-column" + i + "\" class=\"column\" style=\"left: " + (384 + 69 * (i - 1)) + "px; width: " + 64 + "px;\"></div>";
+        html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall\">";
+        for (var line = 1; line <= 5; line++) {
+            for (var column = 1; column <= 5; column++) {
+                html += "<div id=\"player-table-" + this.playerId + "-wall-spot-" + line + "-" + column + "\" class=\"wall-spot\" style=\"left: " + (69 * (column - 1) - 1) + "px; top: " + (70 * (line - 1) - 1) + "px;\"></div>";
             }
+        }
+        html += "</div>";
+        if (this.game.isVariant()) {
             html += "<div id=\"player-table-" + this.playerId + "-column0\" class=\"floor column\"></div>";
         }
-        html += "        \n            </div>\n        </div>";
+        html += "    </div>\n        </div>";
         dojo.place(html, 'table');
         this.placeTilesOnHand(player.hand);
         var _loop_2 = function (i) {
@@ -212,13 +215,22 @@ var PlayerTable = /** @class */ (function () {
             _loop_2(i);
         }
         if (this.game.isVariant()) {
-            var _loop_3 = function (i) {
-                document.getElementById("player-table-" + this_2.playerId + "-column" + i).addEventListener('click', function () { return _this.game.selectColumn(i); });
+            var _loop_3 = function (line) {
+                var _loop_5 = function (column) {
+                    document.getElementById("player-table-" + this_2.playerId + "-wall-spot-" + line + "-" + column).addEventListener('click', function () {
+                        _this.game.selectColumn(column);
+                        _this.setGhostTile(line, column);
+                    });
+                };
+                for (var column = 1; column <= 5; column++) {
+                    _loop_5(column);
+                }
             };
             var this_2 = this;
-            for (var i = 0; i <= 5; i++) {
-                _loop_3(i);
+            for (var line = 1; line <= 5; line++) {
+                _loop_3(line);
             }
+            document.getElementById("player-table-" + this.playerId + "-column0").addEventListener('click', function () { return _this.game.selectColumn(0); });
         }
         var _loop_4 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
@@ -246,15 +258,13 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
         var _this = this;
-        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-table-" + _this.playerId + "-wall", (tile.column - 1) * 69, (tile.line - 1) * 69); });
-    };
-    PlayerTable.prototype.setColumnTop = function (line) {
-        for (var i = 1; i <= 5; i++) {
-            document.getElementById("player-table-" + this.playerId + "-column" + i).style.top = 10 + 70 * (line - 1) + "px";
-        }
+        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-table-" + _this.playerId + "-wall-spot-" + tile.line + "-" + tile.column); });
     };
     PlayerTable.prototype.setHandVisible = function (visible) {
         dojo.toggleClass("player-hand-" + this.playerId, 'empty', !visible);
+    };
+    PlayerTable.prototype.setGhostTile = function (line, column) {
+        dojo.place("<div class=\"tile tile" + this.handColor + " ghost\"></div>", "player-table-" + this.playerId + "-wall-spot-" + line + "-" + column);
     };
     return PlayerTable;
 }());
@@ -353,9 +363,11 @@ var Azul = /** @class */ (function () {
     Azul.prototype.onEnteringChooseColumn = function (args) {
         var _this = this;
         if (this.isCurrentPlayerActive()) {
-            var playerId = this.getPlayerId();
-            this.getPlayerTable(playerId).setColumnTop(args.line);
-            args.columns[playerId].forEach(function (i) { return dojo.addClass("player-table-" + _this.getPlayerId() + "-column" + i, 'selectable'); });
+            var playerId_1 = this.getPlayerId();
+            args.columns[playerId_1].forEach(function (column) {
+                _this.getPlayerTable(playerId_1).handColor = args.colors[playerId_1];
+                dojo.addClass(column == 0 ? "player-table-" + _this.getPlayerId() + "-column0" : "player-table-" + _this.getPlayerId() + "-wall-spot-" + args.line + "-" + column, 'selectable');
+            });
         }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -379,15 +391,24 @@ var Azul = /** @class */ (function () {
         dojo.removeClass('factories', 'selectable');
     };
     Azul.prototype.onLeavingChooseLine = function () {
+        if (!this.gamedatas.players[this.getPlayerId()]) {
+            return;
+        }
         for (var i = 0; i <= 5; i++) {
             dojo.removeClass("player-table-" + this.getPlayerId() + "-line" + i, 'selectable');
         }
     };
     Azul.prototype.onLeavingChooseColumn = function () {
-        for (var i = 1; i <= 5; i++) {
-            dojo.removeClass("player-table-" + this.getPlayerId() + "-column" + i, 'selectable');
+        if (!this.gamedatas.players[this.getPlayerId()]) {
+            return;
         }
-        dojo.removeClass("player-table-" + this.getPlayerId() + "-line0", 'selectable');
+        for (var line = 1; line <= 5; line++) {
+            for (var column = 1; column <= 5; column++) {
+                dojo.removeClass("player-table-" + this.getPlayerId() + "-wall-spot-" + line + "-" + column, 'selectable');
+            }
+        }
+        dojo.removeClass("player-table-" + this.getPlayerId() + "-column0", 'selectable');
+        Array.from(document.getElementsByClassName('ghost')).forEach(function (elem) { return elem.parentElement.removeChild(elem); });
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).

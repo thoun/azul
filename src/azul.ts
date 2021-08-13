@@ -118,8 +118,13 @@ class Azul implements AzulGame {
     onEnteringChooseColumn(args: EnteringChooseColumnArgs) {
         if ((this as any).isCurrentPlayerActive()) {
             const playerId = this.getPlayerId();
-            this.getPlayerTable(playerId).setColumnTop(args.line);
-            args.columns[playerId].forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-column${i}`, 'selectable'));
+            args.columns[playerId].forEach(column => {
+                this.getPlayerTable(playerId).handColor = args.colors[playerId];
+                dojo.addClass(
+                    column == 0 ? `player-table-${this.getPlayerId()}-column0` : `player-table-${this.getPlayerId()}-wall-spot-${args.line}-${column}`, 
+                    'selectable'
+                );
+            });
         }
     }
 
@@ -147,16 +152,28 @@ class Azul implements AzulGame {
     }
 
     onLeavingChooseLine() {
+        if (!this.gamedatas.players[this.getPlayerId()]) {
+            return;
+        }
+
         for (let i=0; i<=5; i++) {
             dojo.removeClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
         }
     }
 
     onLeavingChooseColumn() {
-        for (let i=1; i<=5; i++) {
-            dojo.removeClass(`player-table-${this.getPlayerId()}-column${i}`, 'selectable');
+        if (!this.gamedatas.players[this.getPlayerId()]) {
+            return;
         }
-        dojo.removeClass(`player-table-${this.getPlayerId()}-line0`, 'selectable');
+
+        for (let line=1; line<=5; line++) {
+            for (let column=1; column<=5; column++) {
+                dojo.removeClass(`player-table-${this.getPlayerId()}-wall-spot-${line}-${column}`, 'selectable');
+            }
+        }
+        dojo.removeClass(`player-table-${this.getPlayerId()}-column0`, 'selectable');
+        
+        Array.from(document.getElementsByClassName('ghost')).forEach(elem => elem.parentElement.removeChild(elem));
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the

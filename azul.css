@@ -112,7 +112,7 @@
   pointer-events: all;
   cursor: pointer;
 }
-.player-table-wrapper .player-table .column {
+.player-table-wrapper .player-table .wall-spot {
   display: inline-block;
   position: absolute;
   border: 3px dashed transparent;
@@ -120,17 +120,21 @@
   width: 63px;
   pointer-events: none;
 }
-.player-table-wrapper .player-table .column.floor {
+.player-table-wrapper .player-table .wall-spot.floor {
   right: 209px;
   top: 362px;
   left: 1px;
   height: 116px;
   width: unset;
 }
-.player-table-wrapper .player-table .column.selectable {
+.player-table-wrapper .player-table .wall-spot.selectable {
   border-color: red;
   pointer-events: all;
   cursor: pointer;
+}
+.player-table-wrapper .player-table .wall-spot .ghost {
+  box-shadow: none;
+  opacity: 0.5;
 }
 .player-table-wrapper .player-table .wall {
   position: absolute;

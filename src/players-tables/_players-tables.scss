@@ -106,7 +106,7 @@
             }
         }
 
-        .column {
+        .wall-spot {
             display: inline-block;
             position: absolute;
             border: 3px dashed transparent;
@@ -126,6 +126,11 @@
                 border-color: red;
                 pointer-events: all;
                 cursor: pointer;
+            }
+
+            .ghost {
+                box-shadow: none;
+                opacity: 0.5;
             }
         }
 

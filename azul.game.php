@@ -767,18 +767,21 @@ class Azul extends Table {
         $line = intval(self::getGameStateValue(RESOLVING_LINE));
 
         $playersIdsWithCompleteLine = [];
+        $playersIdsWithColor = [];
 
         foreach ($playersIds as $playerId) {
             $playerTiles = $this->getTilesFromLine($playerId, $line);
             if (count($playerTiles) == $line) {
                 $columns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
                 $playersIdsWithCompleteLine[$playerId] = count($columns) > 0 ? $columns : [0];
+                $playersIdsWithColor[$playerId] = $playerTiles[0]->type;
             }
         }
 
         return [
             'line' => $line,
             'columns' => $playersIdsWithCompleteLine,
+            'colors' => $playersIdsWithColor,
         ];
     }
 

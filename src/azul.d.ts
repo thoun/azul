@@ -54,6 +54,7 @@ interface EnteringChooseLineArgs {
 interface EnteringChooseColumnArgs {
     line: number;
     columns: { [playerId: number]: number[] };
+    colors: { [playerId: number]: number };
 }
 
 interface NotifFirstPlayerTokenArgs {

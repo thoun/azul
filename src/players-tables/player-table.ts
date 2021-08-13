@@ -3,6 +3,8 @@ const HAND_CENTER = 327;
 class PlayerTable {
     public playerId: number;
 
+    public handColor: number;
+
     constructor(
         private game: AzulGame, 
         player: AzulPlayer) {
@@ -24,15 +26,18 @@ class PlayerTable {
             html += `<div id="player-table-${this.playerId}-line${i}" class="line" style="top: ${10 + 70*(i-1)}px; width: ${69*i - 5}px;"></div>`;
         }
         html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
-        html += `<div id="player-table-${this.playerId}-wall" class="wall"></div>`;
-        if (this.game.isVariant()) {
-            for (let i=1; i<=5; i++) {
-                html += `<div id="player-table-${this.playerId}-column${i}" class="column" style="left: ${384 + 69*(i-1)}px; width: ${64}px;"></div>`;
+        html += `<div id="player-table-${this.playerId}-wall" class="wall">`;
+        for (let line=1; line<=5; line++) {
+            for (let column=1; column<=5; column++) {
+                html += `<div id="player-table-${this.playerId}-wall-spot-${line}-${column}" class="wall-spot" style="left: ${69*(column-1) - 1}px; top: ${70*(line-1) - 1}px;"></div>`;
             }
+        }
+        html += `</div>`;
+        if (this.game.isVariant()) {
             html += `<div id="player-table-${this.playerId}-column0" class="floor column"></div>`;
         }
-        html += `        
-            </div>
+        
+        html += `    </div>
         </div>`;
 
         dojo.place(html, 'table');
@@ -43,9 +48,15 @@ class PlayerTable {
             document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
         }
         if (this.game.isVariant()) {
-            for (let i=0; i<=5; i++) {
-                document.getElementById(`player-table-${this.playerId}-column${i}`).addEventListener('click', () => this.game.selectColumn(i));
+            for (let line=1; line<=5; line++) {
+                for (let column=1; column<=5; column++) {
+                    document.getElementById(`player-table-${this.playerId}-wall-spot-${line}-${column}`).addEventListener('click', () => {
+                        this.game.selectColumn(column);
+                        this.setGhostTile(line, column);
+                    });
+                }
             }
+            document.getElementById(`player-table-${this.playerId}-column0`).addEventListener('click', () => this.game.selectColumn(0));
         }
 
         for (let i=0; i<=5; i++) {
@@ -71,16 +82,14 @@ class PlayerTable {
     }
 
     public placeTilesOnWall(tiles: Tile[]) {
-        tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-wall`, (tile.column-1) * 69, (tile.line-1) * 69));
-    }
-
-    public setColumnTop(line: number) {
-        for (let i=1; i<=5; i++) {
-            document.getElementById(`player-table-${this.playerId}-column${i}`).style.top = `${10 + 70*(line-1)}px`;
-        }
+        tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-wall-spot-${tile.line}-${tile.column}`));
     }
     
     public setHandVisible(visible: boolean) {
         dojo.toggleClass(`player-hand-${this.playerId}`, 'empty', !visible);
+    }
+
+    public setGhostTile(line: number, column: number) {
+        dojo.place(`<div class="tile tile${this.handColor} ghost"></div>`, `player-table-${this.playerId}-wall-spot-${line}-${column}`);
     }
 }

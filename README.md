@@ -43,14 +43,3 @@ maybe just put a button near every player board (or player panel) and on click h
 or one button which will turn on scoring for all of the players
 
 +10 on scoring is cropped a bit
-
-I tried also the variant
-it is a bit confusing that nothing happens when you select the column for your tile
-maybe you should move it immediately and score later
-or maybe just put a ghost tile in its place (with opacity) and when everybody decides, remove it and score as ususal
-don't know which is easier
-anyway the game is ready for public alpha so we will ask the publisher for approval
-
-and some stats are needed
-at least for different scoring
-and additionally please check spectator mode as there are some js errors there
