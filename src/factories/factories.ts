@@ -3,11 +3,8 @@ const HALF_TILE_SIZE = 29;
 const CENTER_FACTORY_TILE_SHIFT = 12;
 
 class Factories {
-
-    // TODO temp
-    randomCenter: boolean = localStorage.getItem('Azul-factory-center') != 'pile';
-
-    private tilesByColorInCenter: number[] = [0, 0, 0, 0, 0, 0];
+    private tilesInCenter: Tile[][] = [[], [], [], [], [], []];
+    private tilesPositionsInCenter: PlacedTile[][] = [[], [], [], [], [], []];
 
     constructor(
         private game: AzulGame, 
@@ -45,13 +42,16 @@ class Factories {
     }
 
     public centerColorRemoved(color: number) {
-        this.tilesByColorInCenter[color] = 0;
+        this.tilesInCenter[color] = [];
+        this.tilesPositionsInCenter[color] = [];
+
+        this.updateDiscardedTilesNumbers();
     }
 
     public fillFactories(factories: { [factoryId: number]: Tile[]; }) {
         for (let factoryIndex=0; factoryIndex<=this.factoryNumber; factoryIndex++) {
-            const factory = factories[factoryIndex];
-            factory.forEach((tile, index) => {
+            const factoryTiles = factories[factoryIndex];
+            factoryTiles.forEach((tile, index) => {
                 let left = null;
                 let top = null;
                 if (factoryIndex > 0) {
@@ -66,24 +66,29 @@ class Factories {
                         const coords = this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
                         top = coords.top;
-                        this.tilesByColorInCenter[tile.type]++;
+                        this.tilesInCenter[tile.type].push(tile);
+                        this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
                     }
                 }
-                //this.game.placeTile(tile, `factory${factoryIndex}`, left, top, this.tilesByColorInCenter[tile.type], factoryIndex > 0 ? Math.round(Math.random()*90 - 45) : undefined);
-                this.game.placeTile(tile, `factory${factoryIndex}`, left, top, this.tilesByColorInCenter[tile.type], tile.type != 0 ? Math.round(Math.random()*90 - 45) : undefined);
+                this.game.placeTile(tile, `factory${factoryIndex}`, left, top, tile.type != 0 ? Math.round(Math.random()*90 - 45) : undefined);
 
                 document.getElementById(`tile${tile.id}`).addEventListener('click', () => this.game.takeTiles(tile.id));
             });
         }
+
+        this.updateDiscardedTilesNumbers();
     }
 
     public discardTiles(discardedTiles: Tile[]) {
         discardedTiles.forEach(tile => {
             const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
-            this.tilesByColorInCenter[tile.type]++;
+            this.tilesInCenter[tile.type].push(tile);
+            this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
             const rotation = Number(document.getElementById(`tile${tile.id}`).dataset.rotation);
-            this.game.placeTile(tile, 'factory0', left, top, this.tilesByColorInCenter[tile.type], rotation + Math.round(Math.random()*20 - 10));
+            this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random()*20 - 10));
         });
+
+        setTimeout(() => this.updateDiscardedTilesNumbers(), ANIMATION_MS);
     }
 
     private getDistance(p1: PlacedTile, p2: PlacedTile): number {
@@ -129,7 +134,7 @@ class Factories {
         return place;
     }
 
-    public getFreePlaceForFactoryCenterSemiRandomPosition(color: number): {left: number, top: number} {
+    public getFreePlaceForFactoryCenter(color: number): {left: number, top: number} {        
         const div = document.getElementById('factory0');
         const xCenter = div.clientWidth / 2;
         const yCenter = div.clientHeight / 2;
@@ -150,27 +155,31 @@ class Factories {
         };
     }
 
-    public getFreePlaceForFactoryCenterPile(color: number): {left: number, top: number} {
-        const div = document.getElementById('factory0');
-        const xCenter = div.clientWidth / 2;
-        const yCenter = div.clientHeight / 2;
-        const radius = 175 + this.factoryNumber*25 - 165;
-        
-        const angle = (0.5 + color/5)*Math.PI*2;
-        const distance = radius;
-        const existingTilesOfSameColor = this.tilesByColorInCenter[color];
-        const newPlace = {
-            x: xCenter - HALF_TILE_SIZE*2 - distance*Math.sin(angle) + existingTilesOfSameColor*CENTER_FACTORY_TILE_SHIFT,
-            y: yCenter - HALF_TILE_SIZE*2 - distance*Math.cos(angle) + existingTilesOfSameColor*CENTER_FACTORY_TILE_SHIFT,
+    private updateDiscardedTilesNumbers() {
+        for (let type=1; type<=5; type++) {
+            const number = this.tilesPositionsInCenter[type].length;
+
+            const numberDiv = document.getElementById(`tileCount${type}`);
+
+            if (!number) {
+                numberDiv?.parentElement.removeChild(numberDiv);
+                continue;
+            }
+
+            // TODO
+            const x = this.tilesPositionsInCenter[type].reduce((sum, place) => sum + place.x, 0) / number + 14;
+            const y = this.tilesPositionsInCenter[type].reduce((sum, place) => sum + place.y, 0) / number + 14;
+            if (numberDiv) {
+                numberDiv.style.left = `${x}px`;
+                numberDiv.style.top = `${y}px`;
+                numberDiv.innerHTML = ''+number;
+            } else {
+                dojo.place(`
+                <div id="tileCount${type}" class="tile-count tile${type}" style="left: ${x}px; top: ${y}px;">${number}</div>
+                `, 'factories');
+
+                document.getElementById(`tileCount${type}`).addEventListener('click', () => this.game.takeTiles(this.tilesInCenter[type][0].id))
+            }
         }
-
-        return {
-            left: newPlace.x,
-            top: newPlace.y,
-        };
-    }
-
-    public getFreePlaceForFactoryCenter(color: number): {left: number, top: number} {
-        return this.randomCenter ? this.getFreePlaceForFactoryCenterSemiRandomPosition(color) : this.getFreePlaceForFactoryCenterPile(color);
     }
 }

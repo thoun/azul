@@ -8,9 +8,6 @@
         <button id="zoom-out"></button>
         <button id="zoom-in" class="disabled"></button>
     </div>
-    <div style="position: absolute; top: 0; left: 0" class="TODO DELETE">
-        <button id="factory-center" class="bgabutton bgabutton_blue" style="width: auto; display: none;">Toggle factory center placement</button>
-    </div>
 </div>
 
 {OVERALL_GAME_FOOTER}

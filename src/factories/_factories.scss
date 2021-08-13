@@ -24,3 +24,32 @@
         }
     }
 }
+
+.tile-count {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    background: white;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    
+    &.tile1 {
+        color: #231f20;
+    }
+    &.tile2 {
+        color: #1dcad3;
+    }
+    &.tile3 {
+        color: #0083ad;
+    }
+    &.tile4 {
+        color: #ffbf3c;
+    }
+    &.tile5 {
+        color: #f5333f;
+    }
+}

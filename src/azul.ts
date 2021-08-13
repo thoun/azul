@@ -72,15 +72,6 @@ class Azul implements AzulGame {
 
         (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
-        document.getElementById('factory-center').addEventListener('click', () => {
-            if (localStorage.getItem('Azul-factory-center') == 'pile') {
-                localStorage.removeItem('Azul-factory-center');
-            } else {
-                localStorage.setItem('Azul-factory-center', 'pile');
-            }
-            window.location.reload();
-        });
-
         log( "Ending game setup" );
     }
 
@@ -310,17 +301,14 @@ class Azul implements AzulGame {
         (this as any).scoreCtrl[playerId]?.incValue(incScore);
     }
 
-    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, zIndex?: number, rotation?: number): Promise<boolean> {
+    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean> {
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         const tileDiv = document.getElementById(`tile${tile.id}`);
         if (tileDiv) {
-            if (zIndex) {
-                tileDiv.style.zIndex = ''+zIndex;
-            }
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
         } else {
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${zIndex ? `z-index: ${zIndex}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" ${rotation ? `data-rotation='${rotation}'` : ''}></div>`, destinationId);
+            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" ${rotation ? `data-rotation='${rotation}'` : ''}></div>`, destinationId);
             return Promise.resolve(true);
         }
         
@@ -457,9 +445,7 @@ class Azul implements AzulGame {
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
-        if (notif.args.fromFactory) {
-            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
-        }
+        this.factories.centerColorRemoved(notif.args.selectedTiles[0].type)
         const table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.selectedTiles);
         this.factories.discardTiles(notif.args.discardedTiles);
