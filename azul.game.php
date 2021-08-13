@@ -493,15 +493,15 @@ class Azul extends Table {
                 'completeLines' => $completeLinesNotif,
             ]);
 
-        foreach ($completeLinesNotif as $playerId => $notif) {
-            self::notifyAllPlayers('placeTileOnWallTextLogDetails', clienttranslate('${player_name} places ${number} ${color} and wins ${points} point'), [
-                'player_name' => $this->getPlayerName($playerId),
-                'number' => 1,
-                'color' => $this->getColor($notif->placedTile->type),                
-                'type' => $notif->placedTile->type,
-                'points' => $notif->pointsDetail->points,
-            ]);
-        }
+            foreach ($completeLinesNotif as $playerId => $notif) {
+                self::notifyAllPlayers('placeTileOnWallTextLogDetails', clienttranslate('${player_name} places ${number} ${color} and wins ${points} point'), [
+                    'player_name' => $this->getPlayerName($playerId),
+                    'number' => 1,
+                    'color' => $this->getColor($notif->placedTile->type),                
+                    'type' => $notif->placedTile->type,
+                    'points' => $notif->pointsDetail->points,
+                ]);
+            }
         }
     }
 
@@ -563,6 +563,14 @@ class Azul extends Table {
             self::notifyAllPlayers('endScore', '', [
                 'scores' => $scoresNotif,
             ]);
+
+            foreach ($scoresNotif as $playerId => $notif) {
+                self::notifyAllPlayers('completeLineLogDetails', clienttranslate('${player_name} wins ${points} point with complete line ${line}'), [
+                    'player_name' => $this->getPlayerName($playerId),
+                    'line' => $notif->tiles[0]->line,
+                    'points' => $notif->points,
+                ]);
+            }
         }
     }
 
@@ -591,6 +599,14 @@ class Azul extends Table {
             self::notifyAllPlayers('endScore', '', [
                 'scores' => $scoresNotif,
             ]);
+
+            foreach ($scoresNotif as $playerId => $notif) {
+                self::notifyAllPlayers('completeColumnLogDetails', clienttranslate('${player_name} wins ${points} point with complete column ${column}'), [
+                    'player_name' => $this->getPlayerName($playerId),
+                    'column' => $notif->tiles[0]->column,
+                    'points' => $notif->points,
+                ]);
+            }
         }
     }
 
@@ -619,6 +635,14 @@ class Azul extends Table {
             self::notifyAllPlayers('endScore', '', [
                 'scores' => $scoresNotif,
             ]);
+
+            foreach ($scoresNotif as $playerId => $notif) {
+                self::notifyAllPlayers('completeColorLogDetails', clienttranslate('${player_name} wins ${points} point with complete color ${color}'), [
+                    'player_name' => $this->getPlayerName($playerId),
+                    'color' => $this->getColor($notif->tiles[0]->type),
+                    'points' => $notif->points,
+                ]);
+            }
         }
     }
 
