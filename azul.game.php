@@ -455,11 +455,10 @@ class Azul extends Table {
         return $result;
     }
         
-    function getPointsForFloorLine(int $tileNumber) {
-        switch ($tileNumber) {
-            case 0: return null;
-            case 1: case 2: return 1;
-            case 3: case 4: case 5: return 2;
+    function getPointsForFloorLine(int $tileIndex) {
+        switch ($tileIndex) {
+            case 0: case 1: return 1;
+            case 2: case 3: case 4: return 2;
             default: return 3;
         }
     }
@@ -522,8 +521,8 @@ class Azul extends Table {
             if (count($playerTiles) > 0) {                
                 $this->tiles->moveCards(array_map('getIdPredicate', $playerTiles), 'discard');
                 $points = 0;
-                for ($i = 0; $i < count($playerTiles); $i++) {
-                    $points += $this->getPointsForFloorLine($i + 1);
+                for ($i = 0; $i < min(7, count($playerTiles)); $i++) {
+                    $points += $this->getPointsForFloorLine($i);
                 }
 
                 $obj = new stdClass();

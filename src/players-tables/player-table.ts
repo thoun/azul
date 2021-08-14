@@ -34,7 +34,7 @@ class PlayerTable {
         }
         html += `</div>`;
         if (this.game.isVariant()) {
-            html += `<div id="player-table-${this.playerId}-column0" class="floor column"></div>`;
+            html += `<div id="player-table-${this.playerId}-column0" class="floor wall-spot"></div>`;
         }
         
         html += `    </div>

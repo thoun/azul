@@ -77,7 +77,7 @@ $commonStats = [
         "id" => 24,
         "name" => totranslate("Point won with complete color"),
         "type" => "int"
-    ], 
+    ],
 ];
 
 $stats_type = [
