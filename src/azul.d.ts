@@ -70,7 +70,7 @@ interface NotifTilesSelectedArgs {
     playerId: number;
     selectedTiles: Tile[];
     discardedTiles: Tile[];
-    fromFactory: boolean;
+    fromFactory: number;
 }
 
 interface NotifTilesPlacedOnLineArgs {

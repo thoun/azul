@@ -323,6 +323,14 @@ class Azul implements AzulGame {
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
         } else {
             dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" ${rotation ? `data-rotation='${rotation}'` : ''}></div>`, destinationId);
+            const newTileDiv = document.getElementById(`tile${tile.id}`);
+            newTileDiv.addEventListener('click', () => {
+                this.takeTiles(tile.id);
+                this.factories.tileMouseLeave(tile.id);
+            });
+            newTileDiv.addEventListener('mouseenter', () => this.factories.tileMouseEnter(tile.id));
+            newTileDiv.addEventListener('mouseleave', () => this.factories.tileMouseLeave(tile.id));
+
             return Promise.resolve(true);
         }
         
@@ -460,7 +468,11 @@ class Azul implements AzulGame {
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
-        this.factories.centerColorRemoved(notif.args.selectedTiles[0].type)
+        if (notif.args.fromFactory == 0) {
+            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+        } else {
+            this.factories.factoryTilesRemoved(notif.args.fromFactory);
+        }
         const table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.selectedTiles);
         this.factories.discardTiles(notif.args.discardedTiles);

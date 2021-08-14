@@ -36,8 +36,8 @@ var Factories = /** @class */ (function () {
     function Factories(game, factoryNumber, factories) {
         this.game = game;
         this.factoryNumber = factoryNumber;
-        this.tilesInCenter = [[], [], [], [], [], []];
-        this.tilesPositionsInCenter = [[], [], [], [], [], []];
+        this.tilesPositionsInCenter = [[], [], [], [], [], []]; // color, tiles
+        this.tilesInFactories = []; // factory, color, tiles
         var factoriesDiv = document.getElementById('factories');
         var radius = 175 + factoryNumber * 25;
         var halfSize = radius + FACTORY_RADIUS;
@@ -62,13 +62,17 @@ var Factories = /** @class */ (function () {
         return halfSize * 2;
     };
     Factories.prototype.centerColorRemoved = function (color) {
-        this.tilesInCenter[color] = [];
+        this.tilesInFactories[0][color] = [];
         this.tilesPositionsInCenter[color] = [];
         this.updateDiscardedTilesNumbers();
+    };
+    Factories.prototype.factoryTilesRemoved = function (factory) {
+        this.tilesInFactories[factory] = [[], [], [], [], [], []];
     };
     Factories.prototype.fillFactories = function (factories) {
         var _this = this;
         var _loop_1 = function (factoryIndex) {
+            this_1.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
             var factoryTiles = factories[factoryIndex];
             factoryTiles.forEach(function (tile, index) {
                 var left = null;
@@ -87,14 +91,14 @@ var Factories = /** @class */ (function () {
                         var coords = _this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
                         top = coords.top;
-                        _this.tilesInCenter[tile.type].push(tile);
                         _this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
                     }
                 }
+                _this.tilesInFactories[factoryIndex][tile.type].push(tile);
                 _this.game.placeTile(tile, "factory" + factoryIndex, left, top, tile.type != 0 ? Math.round(Math.random() * 90 - 45) : undefined);
-                document.getElementById("tile" + tile.id).addEventListener('click', function () { return _this.game.takeTiles(tile.id); });
             });
         };
+        var this_1 = this;
         for (var factoryIndex = 0; factoryIndex <= this.factoryNumber; factoryIndex++) {
             _loop_1(factoryIndex);
         }
@@ -104,7 +108,7 @@ var Factories = /** @class */ (function () {
         var _this = this;
         discardedTiles.forEach(function (tile) {
             var _a = _this.getFreePlaceForFactoryCenter(tile.type), left = _a.left, top = _a.top;
-            _this.tilesInCenter[tile.type].push(tile);
+            _this.tilesInFactories[0][tile.type].push(tile);
             _this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
             var rotation = Number(document.getElementById("tile" + tile.id).dataset.rotation);
             _this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random() * 20 - 10));
@@ -168,15 +172,14 @@ var Factories = /** @class */ (function () {
     Factories.prototype.updateDiscardedTilesNumbers = function () {
         var _this = this;
         var _loop_2 = function (type) {
-            var number = this_1.tilesPositionsInCenter[type].length;
+            var number = this_2.tilesPositionsInCenter[type].length;
             var numberDiv = document.getElementById("tileCount" + type);
             if (!number) {
                 numberDiv === null || numberDiv === void 0 ? void 0 : numberDiv.parentElement.removeChild(numberDiv);
                 return "continue";
             }
-            // TODO
-            var x = this_1.tilesPositionsInCenter[type].reduce(function (sum, place) { return sum + place.x; }, 0) / number + 14;
-            var y = this_1.tilesPositionsInCenter[type].reduce(function (sum, place) { return sum + place.y; }, 0) / number + 14;
+            var x = this_2.tilesPositionsInCenter[type].reduce(function (sum, place) { return sum + place.x; }, 0) / number + 14;
+            var y = this_2.tilesPositionsInCenter[type].reduce(function (sum, place) { return sum + place.y; }, 0) / number + 14;
             if (numberDiv) {
                 numberDiv.style.left = x + "px";
                 numberDiv.style.top = y + "px";
@@ -184,13 +187,41 @@ var Factories = /** @class */ (function () {
             }
             else {
                 dojo.place("\n                <div id=\"tileCount" + type + "\" class=\"tile-count tile" + type + "\" style=\"left: " + x + "px; top: " + y + "px;\">" + number + "</div>\n                ", 'factories');
-                document.getElementById("tileCount" + type).addEventListener('click', function () { return _this.game.takeTiles(_this.tilesInCenter[type][0].id); });
+                var newNumberDiv = document.getElementById("tileCount" + type);
+                var firstTileId_1 = this_2.tilesInFactories[0][type][0].id;
+                newNumberDiv.addEventListener('click', function () { return _this.game.takeTiles(firstTileId_1); });
+                newNumberDiv.addEventListener('mouseenter', function () { return _this.tileMouseEnter(firstTileId_1); });
+                newNumberDiv.addEventListener('mouseleave', function () { return _this.tileMouseLeave(firstTileId_1); });
             }
         };
-        var this_1 = this;
+        var this_2 = this;
         for (var type = 1; type <= 5; type++) {
             _loop_2(type);
         }
+    };
+    Factories.prototype.getTilesOfSameColorInSameFactory = function (id) {
+        for (var _i = 0, _a = this.tilesInFactories; _i < _a.length; _i++) {
+            var tilesInFactory = _a[_i];
+            for (var _b = 0, tilesInFactory_1 = tilesInFactory; _b < tilesInFactory_1.length; _b++) {
+                var colorTilesInFactory = tilesInFactory_1[_b];
+                if (colorTilesInFactory.some(function (tile) { return tile.id === id; })) {
+                    return colorTilesInFactory;
+                }
+            }
+        }
+        return null;
+    };
+    Factories.prototype.tileMouseEnter = function (id) {
+        var _a;
+        (_a = this.getTilesOfSameColorInSameFactory(id)) === null || _a === void 0 ? void 0 : _a.forEach(function (tile) {
+            document.getElementById("tile" + tile.id).classList.add('hover');
+        });
+    };
+    Factories.prototype.tileMouseLeave = function (id) {
+        var _a;
+        (_a = this.getTilesOfSameColorInSameFactory(id)) === null || _a === void 0 ? void 0 : _a.forEach(function (tile) {
+            document.getElementById("tile" + tile.id).classList.remove('hover');
+        });
     };
     return Factories;
 }());
@@ -219,16 +250,16 @@ var PlayerTable = /** @class */ (function () {
         dojo.place(html, 'table');
         this.placeTilesOnHand(player.hand);
         var _loop_3 = function (i) {
-            document.getElementById("player-table-" + this_2.playerId + "-line" + i).addEventListener('click', function () { return _this.game.selectLine(i); });
+            document.getElementById("player-table-" + this_3.playerId + "-line" + i).addEventListener('click', function () { return _this.game.selectLine(i); });
         };
-        var this_2 = this;
+        var this_3 = this;
         for (var i = 0; i <= 5; i++) {
             _loop_3(i);
         }
         if (this.game.isVariant()) {
             var _loop_4 = function (line) {
                 var _loop_6 = function (column) {
-                    document.getElementById("player-table-" + this_3.playerId + "-wall-spot-" + line + "-" + column).addEventListener('click', function () {
+                    document.getElementById("player-table-" + this_4.playerId + "-wall-spot-" + line + "-" + column).addEventListener('click', function () {
                         _this.game.selectColumn(column);
                         _this.setGhostTile(line, column);
                     });
@@ -237,7 +268,7 @@ var PlayerTable = /** @class */ (function () {
                     _loop_6(column);
                 }
             };
-            var this_3 = this;
+            var this_4 = this;
             for (var line = 1; line <= 5; line++) {
                 _loop_4(line);
             }
@@ -245,9 +276,9 @@ var PlayerTable = /** @class */ (function () {
         }
         var _loop_5 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
-            this_4.placeTilesOnLine(tiles, i);
+            this_5.placeTilesOnLine(tiles, i);
         };
-        var this_4 = this;
+        var this_5 = this;
         for (var i = 0; i <= 5; i++) {
             _loop_5(i);
         }
@@ -541,6 +572,7 @@ var Azul = /** @class */ (function () {
         }
     };
     Azul.prototype.placeTile = function (tile, destinationId, left, top, rotation) {
+        var _this = this;
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         var tileDiv = document.getElementById("tile" + tile.id);
@@ -549,6 +581,13 @@ var Azul = /** @class */ (function () {
         }
         else {
             dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + (left !== undefined ? "left: " + left + "px;" : '') + (top !== undefined ? "top: " + top + "px;" : '') + (rotation ? "transform: rotate(" + rotation + "deg)" : '') + "\" " + (rotation ? "data-rotation='" + rotation + "'" : '') + "></div>", destinationId);
+            var newTileDiv = document.getElementById("tile" + tile.id);
+            newTileDiv.addEventListener('click', function () {
+                _this.takeTiles(tile.id);
+                _this.factories.tileMouseLeave(tile.id);
+            });
+            newTileDiv.addEventListener('mouseenter', function () { return _this.factories.tileMouseEnter(tile.id); });
+            newTileDiv.addEventListener('mouseleave', function () { return _this.factories.tileMouseLeave(tile.id); });
             return Promise.resolve(true);
         }
     };
@@ -664,7 +703,12 @@ var Azul = /** @class */ (function () {
         this.factories.fillFactories(notif.args.factories);
     };
     Azul.prototype.notif_tilesSelected = function (notif) {
-        this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+        if (notif.args.fromFactory == 0) {
+            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+        }
+        else {
+            this.factories.factoryTilesRemoved(notif.args.fromFactory);
+        }
         var table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.selectedTiles);
         this.factories.discardTiles(notif.args.discardedTiles);

@@ -764,6 +764,7 @@ class Azul extends Table {
             'type' => $tile->type,
             'selectedTiles' => $selectedTiles,
             'discardedTiles' => $discardedTiles,
+            'fromFactory' => $factory,
         ]);
 
         $this->gamestate->nextState('placeTiles');

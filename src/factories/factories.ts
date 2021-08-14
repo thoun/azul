@@ -3,8 +3,8 @@ const HALF_TILE_SIZE = 29;
 const CENTER_FACTORY_TILE_SHIFT = 12;
 
 class Factories {
-    private tilesInCenter: Tile[][] = [[], [], [], [], [], []];
-    private tilesPositionsInCenter: PlacedTile[][] = [[], [], [], [], [], []];
+    private tilesPositionsInCenter: PlacedTile[][] = [[], [], [], [], [], []]; // color, tiles
+    private tilesInFactories: Tile[][][] = []; // factory, color, tiles
 
     constructor(
         private game: AzulGame, 
@@ -42,14 +42,19 @@ class Factories {
     }
 
     public centerColorRemoved(color: number) {
-        this.tilesInCenter[color] = [];
+        this.tilesInFactories[0][color] = [];
         this.tilesPositionsInCenter[color] = [];
 
         this.updateDiscardedTilesNumbers();
     }
 
+    public factoryTilesRemoved(factory: number) {
+        this.tilesInFactories[factory] = [[], [], [], [], [], []];
+    }
+
     public fillFactories(factories: { [factoryId: number]: Tile[]; }) {
         for (let factoryIndex=0; factoryIndex<=this.factoryNumber; factoryIndex++) {
+            this.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
             const factoryTiles = factories[factoryIndex];
             factoryTiles.forEach((tile, index) => {
                 let left = null;
@@ -66,13 +71,12 @@ class Factories {
                         const coords = this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
                         top = coords.top;
-                        this.tilesInCenter[tile.type].push(tile);
+
                         this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
                     }
                 }
+                this.tilesInFactories[factoryIndex][tile.type].push(tile);
                 this.game.placeTile(tile, `factory${factoryIndex}`, left, top, tile.type != 0 ? Math.round(Math.random()*90 - 45) : undefined);
-
-                document.getElementById(`tile${tile.id}`).addEventListener('click', () => this.game.takeTiles(tile.id));
             });
         }
 
@@ -82,7 +86,7 @@ class Factories {
     public discardTiles(discardedTiles: Tile[]) {
         discardedTiles.forEach(tile => {
             const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
-            this.tilesInCenter[tile.type].push(tile);
+            this.tilesInFactories[0][tile.type].push(tile);
             this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
             const rotation = Number(document.getElementById(`tile${tile.id}`).dataset.rotation);
             this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random()*20 - 10));
@@ -166,7 +170,6 @@ class Factories {
                 continue;
             }
 
-            // TODO
             const x = this.tilesPositionsInCenter[type].reduce((sum, place) => sum + place.x, 0) / number + 14;
             const y = this.tilesPositionsInCenter[type].reduce((sum, place) => sum + place.y, 0) / number + 14;
             if (numberDiv) {
@@ -178,8 +181,35 @@ class Factories {
                 <div id="tileCount${type}" class="tile-count tile${type}" style="left: ${x}px; top: ${y}px;">${number}</div>
                 `, 'factories');
 
-                document.getElementById(`tileCount${type}`).addEventListener('click', () => this.game.takeTiles(this.tilesInCenter[type][0].id))
+                const newNumberDiv = document.getElementById(`tileCount${type}`);
+                const firstTileId = this.tilesInFactories[0][type][0].id;
+                newNumberDiv.addEventListener('click', () => this.game.takeTiles(firstTileId));
+                newNumberDiv.addEventListener('mouseenter', () => this.tileMouseEnter(firstTileId));
+                newNumberDiv.addEventListener('mouseleave', () => this.tileMouseLeave(firstTileId));
             }
         }
+    }
+
+    private getTilesOfSameColorInSameFactory(id: number): Tile[] {
+        for (const tilesInFactory of this.tilesInFactories) {
+            for (const colorTilesInFactory of tilesInFactory) {
+                if (colorTilesInFactory.some(tile => tile.id === id)) {
+                    return colorTilesInFactory;
+                }
+            }
+        }
+        return null;
+    }
+
+    public tileMouseEnter(id: number) {
+        this.getTilesOfSameColorInSameFactory(id)?.forEach(tile => {
+            document.getElementById(`tile${tile.id}`).classList.add('hover');
+        });
+    }
+
+    public tileMouseLeave(id: number) {
+        this.getTilesOfSameColorInSameFactory(id)?.forEach(tile => {
+            document.getElementById(`tile${tile.id}`).classList.remove('hover');
+        });
     }
 }
