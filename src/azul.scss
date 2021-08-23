@@ -13,6 +13,16 @@ html {
     &.background2 {  
       background: url('img/background2.jpg') #00587a;    
       background-blend-mode: multiply;
+
+      #zoom-wrapper {
+        #zoom-controls {  
+          button {
+            width: 32px;
+            height: 32px;
+            background-image: url('img/zoom-white.svg');
+          }
+        }
+      }
     }
 }
 

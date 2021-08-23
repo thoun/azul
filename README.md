@@ -33,8 +33,6 @@ Also add one auto-FTP upload extension (for example https://marketplace.visualst
 Make sure ftp-sync.json and node_modules are in .gitignore
 
 ## TODO
-fix background
-remove useless code on tile placement
 official variant art
 
 one thing I would like to have is some way to recap scoring for players
@@ -43,3 +41,5 @@ maybe just put a button near every player board (or player panel) and on click h
 or one button which will turn on scoring for all of the players
 
 +10 on scoring is cropped a bit
+
+auto select column on variant when only one spot
