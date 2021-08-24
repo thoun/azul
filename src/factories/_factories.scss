@@ -23,6 +23,10 @@
             pointer-events: all;
         }
     }
+
+    .tile.hover {
+        box-shadow: 0 0 5px 5px white;
+    }
 }
 
 .tile-count {

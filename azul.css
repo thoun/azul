@@ -20,6 +20,9 @@
   cursor: pointer;
   pointer-events: all;
 }
+#factories .tile.hover {
+  box-shadow: 0 0 5px 5px white;
+}
 
 .tile-count {
   position: absolute;
@@ -196,9 +199,6 @@
   box-shadow: 1px 1px 2px 2px black;
   pointer-events: none;
   overflow: hidden;
-}
-.tile.hover {
-  box-shadow: 0 0 5px 5px white;
 }
 .tile.tile0 {
   background: url("img/first-player.svg") white;
