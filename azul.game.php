@@ -684,7 +684,7 @@ class Azul extends Table {
             }
         }
 
-        return $availableColumns;
+        return count($availableColumns) > 0 ? $availableColumns : [0];
     }
 
     function lineWillBeComplete(int $playerId, int $line) {
@@ -805,9 +805,7 @@ class Azul extends Table {
         $this->gamestate->nextState('nextPlayer');
     }
 
-    function selectColumn(int $column) {
-        $playerId = self::getCurrentPlayerId();
-
+    function applySelectColumn(int $playerId, int $column) {
         if ($column > 0) {
             $this->setSelectedColumn($playerId, $column);
         } else {
@@ -815,6 +813,12 @@ class Azul extends Table {
             $tiles = $this->getTilesFromLine($playerId, $line);
             $this->placeTilesOnLine($playerId, $tiles, 0, false);
         }
+    }
+
+    function selectColumn(int $column) {
+        $playerId = self::getCurrentPlayerId();
+
+        $this->applySelectColumn($playerId, $column);
             
         // Make this player unactive now (and tell the machine state to use transtion "placeTiles" if all players are now unactive
         $this->gamestate->setPlayerNonMultiactive($playerId, 'placeTiles');
@@ -854,7 +858,7 @@ class Azul extends Table {
             $playerTiles = $this->getTilesFromLine($playerId, $line);
             if (count($playerTiles) == $line) {
                 $columns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
-                $playersIdsWithCompleteLine[$playerId] = count($columns) > 0 ? $columns : [0];
+                $playersIdsWithCompleteLine[$playerId] = $columns;
                 $playersIdsWithColor[$playerId] = $playerTiles[0]->type;
             }
         }
@@ -935,7 +939,14 @@ class Azul extends Table {
         foreach ($playersIds as $playerId) {
             $playerTiles = $this->getTilesFromLine($playerId, $line);
             if (count($playerTiles) == $line) {
-                $playersIdsWithCompleteLine[] = $playerId;
+                $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
+
+                if (count($availableColumns) > 1) {
+                    $playersIdsWithCompleteLine[] = $playerId;
+                } else {
+                    // if only one possibility, it's automaticaly selected
+                    $this->applySelectColumn($playerId, $availableColumns[0]);
+                }
             }
         }
 
