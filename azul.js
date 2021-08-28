@@ -676,6 +676,11 @@ var Azul = /** @class */ (function () {
             this.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
     };
+    Azul.prototype.displayScoringOnTile = function (tileId, playerId, points) {
+        // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
+        dojo.place("<div id=\"tile" + tileId + "-scoring\" class=\"scoring-tile\"></div>", "tile" + tileId, 'after');
+        this.displayScoring("tile" + tileId + "-scoring", this.getPlayerColor(Number(playerId)), points, SCORE_MS * 100000);
+    };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
     /*
@@ -736,7 +741,7 @@ var Azul = /** @class */ (function () {
             completeLine.pointsDetail.columnTiles.forEach(function (tile) { return dojo.addClass("tile" + tile.id, 'highlight'); });
             setTimeout(function () { return completeLine.pointsDetail.columnTiles.forEach(function (tile) { return dojo.removeClass("tile" + tile.id, 'highlight'); }); }, SCORE_MS - 50);
             _this.removeTiles(completeLine.discardedTiles, true);
-            _this.displayScoring("tile" + completeLine.placedTile.id, _this.getPlayerColor(Number(playerId)), completeLine.pointsDetail.points, SCORE_MS);
+            _this.displayScoringOnTile(completeLine.placedTile.id, playerId, completeLine.pointsDetail.points);
             _this.incScore(Number(playerId), completeLine.pointsDetail.points);
         });
     };
@@ -755,7 +760,7 @@ var Azul = /** @class */ (function () {
             var endScore = notif.args.scores[playerId];
             endScore.tiles.forEach(function (tile) { return dojo.addClass("tile" + tile.id, 'highlight'); });
             setTimeout(function () { return endScore.tiles.forEach(function (tile) { return dojo.removeClass("tile" + tile.id, 'highlight'); }); }, SCORE_MS - 50);
-            _this.displayScoring("tile" + endScore.tiles[2].id, _this.getPlayerColor(Number(playerId)), endScore.points, SCORE_MS);
+            _this.displayScoringOnTile(endScore.tiles[2].id, playerId, endScore.points);
             _this.incScore(Number(playerId), endScore.points);
         });
     };
@@ -773,9 +778,6 @@ var Azul = /** @class */ (function () {
     Azul.prototype.format_string_recursive = function (log, args) {
         try {
             if (log && args && !args.processed) {
-                /*if (args.guild !== undefined && args.guild_name !== undefined && args.guild_name[0] !== '<') {
-                    args.guild_name = `<span class='log-guild-name' style='color: ${LOG_GUILD_COLOR[args.guild]}'>${_(args.guild_name)}</span>`;
-                }*/
                 if (typeof args.lineNumber === 'number') {
                     args.lineNumber = "<strong>" + args.line + "</strong>";
                 }
@@ -788,7 +790,6 @@ var Azul = /** @class */ (function () {
                     log = log.replace('${number} ${color}', html);
                 }
             }
-            //console.log()${number} ${color}
         }
         catch (e) {
             console.error(log, args, "Exception thrown", e.stack);

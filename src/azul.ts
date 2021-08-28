@@ -54,7 +54,7 @@ class Azul implements AzulGame {
         }
         (this as any).dontPreloadImage('publisher.png');
 
-        log( "Starting game setup" );
+        log("Starting game setup");
         
         this.gamedatas = gamedatas;
 
@@ -76,7 +76,7 @@ class Azul implements AzulGame {
 
         (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
-        log( "Ending game setup" );
+        log("Ending game setup");
     }
 
     ///////////////////////////////////////////////////
@@ -428,6 +428,12 @@ class Azul implements AzulGame {
         }
     }
 
+    private displayScoringOnTile(tileId: number, playerId: string | number, points: number) {
+        // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
+        dojo.place(`<div id="tile${tileId}-scoring" class="scoring-tile"></div>`, `tile${tileId}`, 'after');
+        (this as any).displayScoring(`tile${tileId}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS * 100000);
+    }
+
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
 
@@ -496,7 +502,7 @@ class Azul implements AzulGame {
             setTimeout(() => completeLine.pointsDetail.columnTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
 
             this.removeTiles(completeLine.discardedTiles, true);
-            (this as any).displayScoring(`tile${completeLine.placedTile.id}`, this.getPlayerColor(Number(playerId)), completeLine.pointsDetail.points, SCORE_MS);
+            this.displayScoringOnTile(completeLine.placedTile.id, playerId, completeLine.pointsDetail.points);
             this.incScore(Number(playerId), completeLine.pointsDetail.points);
         });
     }
@@ -518,7 +524,7 @@ class Azul implements AzulGame {
             endScore.tiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
             setTimeout(() => endScore.tiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
 
-            (this as any).displayScoring(`tile${endScore.tiles[2].id}`, this.getPlayerColor(Number(playerId)), endScore.points, SCORE_MS);
+            this.displayScoringOnTile(endScore.tiles[2].id, playerId, endScore.points);
             this.incScore(Number(playerId), endScore.points);
         });
     }
@@ -542,10 +548,6 @@ class Azul implements AzulGame {
     public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-                /*if (args.guild !== undefined && args.guild_name !== undefined && args.guild_name[0] !== '<') {
-                    args.guild_name = `<span class='log-guild-name' style='color: ${LOG_GUILD_COLOR[args.guild]}'>${_(args.guild_name)}</span>`;
-                }*/
-
                 if (typeof args.lineNumber === 'number') {
                     args.lineNumber = `<strong>${args.line}</strong>`;
                 }
@@ -560,7 +562,6 @@ class Azul implements AzulGame {
                     log = log.replace('${number} ${color}', html);
                 }
             }
-            //console.log()${number} ${color}
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);
         }

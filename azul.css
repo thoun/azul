@@ -261,6 +261,14 @@
   background: url("img/red-cb.svg");
 }
 
+.scoring-tile {
+  width: 60px;
+  height: 60px;
+  display: inline-block;
+  position: absolute;
+  pointer-events: none;
+}
+
 html {
   background: url("img/background.jpg") #fff8f0;
   background-repeat: repeat;
