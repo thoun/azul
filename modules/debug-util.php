@@ -15,7 +15,13 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 1, 2, 2);
         $this->debugSetWallTile(2343492, 1, 4, 4);
         $this->debugSetWallTile(2343492, 1, 5, 5);
-        $this->debugSetWallTile(2343492, 2, 3, 3);
+        $this->debugSetLineTiles(2343492, 1, 1, 3);
+
+        $this->debugSetWallTile(2343492, 5, 2, 1);
+        $this->debugSetWallTile(2343492, 5, 1, 2);
+        $this->debugSetWallTile(2343492, 5, 5, 4);
+        $this->debugSetWallTile(2343492, 5, 4, 5);
+        $this->debugSetLineTiles(2343492, 5, 5, 3);
 
         $this->gamestate->changeActivePlayer(2343492);
     }
@@ -33,6 +39,11 @@ trait DebugUtilTrait {
         $tile = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation($color, null, 'deck'))[0];
 
         $this->tiles->moveCard($tile->id, 'wall'.$playerId, $line*100 + $column);
+    }
+
+    private function debugSetLineTiles(int $playerId, int $line, int $number, int $color) {
+        $tiles = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation($color, null, 'deck'));
+        $this->placeTilesOnLine($playerId, array_slice($tiles, 0, $number), $line, false);
     }
 
     private function addTilesInFactory(int $number, int $color, $factory = 0) {

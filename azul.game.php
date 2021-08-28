@@ -151,7 +151,8 @@ class Azul extends Table {
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
         $result['firstPlayerTokenPlayerId'] = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
-        $result['variant'] = $this->isVariant();
+        $isVariant = $this->isVariant();
+        $result['variant'] = $isVariant;
 
         $factories = [];
         $factoryNumber = $result['factoryNumber'];
@@ -170,6 +171,13 @@ class Azul extends Table {
             for ($line=1; $line<=5; $line++) {
                 if ($this->lineWillBeComplete($playerId, $line)) {
                     $endRound = true;
+                }
+            }
+
+            if ($isVariant) {
+                $player['selectedColumn'] = $this->getSelectedColumn($playerId);
+                if ($player['selectedColumn'] > 0) {                    
+                    $player['selectedLine'] = intval(self::getGameStateValue(RESOLVING_LINE));
                 }
             }
         }
@@ -474,9 +482,12 @@ class Azul extends Table {
             if (count($playerTiles) == $line) {
                 
                 $wallTile = $playerTiles[0];
-                $wallTile->column = $this->isVariant() ?
-                    $this->getSelectedColumn($playerId) : 
-                    $this->getColumnForTile($line, $wallTile->type);
+                if ($this->isVariant()) {
+                    $wallTile->column = $this->getSelectedColumn($playerId);
+                    $this->setSelectedColumn($playerId, 0);
+                } else {
+                    $wallTile->column = $this->getColumnForTile($line, $wallTile->type);
+                }
                 $discardedTiles = array_slice($playerTiles, 1);
                 $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
                 $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
@@ -797,9 +808,9 @@ class Azul extends Table {
     function selectColumn(int $column) {
         $playerId = self::getCurrentPlayerId();
 
-        $this->setSelectedColumn($playerId, $column);
-
-        if ($column == 0) {
+        if ($column > 0) {
+            $this->setSelectedColumn($playerId, $column);
+        } else {
             $line = intval(self::getGameStateValue(RESOLVING_LINE));
             $tiles = $this->getTilesFromLine($playerId, $line);
             $this->placeTilesOnLine($playerId, $tiles, 0, false);

@@ -283,6 +283,13 @@ var PlayerTable = /** @class */ (function () {
             _loop_5(i);
         }
         this.placeTilesOnWall(player.wall);
+        if (this.game.isVariant()) {
+            // if player hit refresh when column is selected but not yet applied, we reset ghost tile
+            if (player.selectedColumn) {
+                var tiles = player.lines.filter(function (tile) { return tile.line === player.selectedLine; });
+                this.setGhostTile(player.selectedLine, player.selectedColumn, tiles[0].type);
+            }
+        }
     }
     PlayerTable.prototype.placeTilesOnHand = function (tiles) {
         var _this = this;
@@ -305,8 +312,9 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.setHandVisible = function (visible) {
         dojo.toggleClass("player-hand-" + this.playerId, 'empty', !visible);
     };
-    PlayerTable.prototype.setGhostTile = function (line, column) {
-        dojo.place("<div class=\"tile tile" + this.handColor + " ghost\"></div>", "player-table-" + this.playerId + "-wall-spot-" + line + "-" + column);
+    PlayerTable.prototype.setGhostTile = function (line, column, color) {
+        if (color === void 0) { color = null; }
+        dojo.place("<div class=\"tile tile" + (color !== null && color !== void 0 ? color : this.handColor) + " ghost\"></div>", "player-table-" + this.playerId + "-wall-spot-" + line + "-" + column);
     };
     return PlayerTable;
 }());
@@ -601,11 +609,6 @@ var Azul = /** @class */ (function () {
                 _this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
         });
-        /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
-        (this as any).addTooltipHtmlToClass('pearl-counter', _("Number of pearls"));
-        (this as any).addTooltipHtmlToClass('silver-key-counter', _("Number of silver keys (surrounded if a silver key is available)"));
-        (this as any).addTooltipHtmlToClass('gold-key-counter', _("Number of gold keys (surrounded if a gold key is available)"));
-        GUILD_IDS.forEach(guild => (this as any).addTooltipHtmlToClass(`token-guild${guild}`, _("The Coat of Arms token indicates the most influential Lord of each color.")));*/
     };
     Azul.prototype.createPlayerTables = function (gamedatas) {
         var _this = this;
@@ -617,7 +620,7 @@ var Azul = /** @class */ (function () {
         });
     };
     Azul.prototype.createPlayerTable = function (gamedatas, playerId) {
-        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId] /*, gamedatas.playersTables[playerId]*/));
+        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId]));
     };
     Azul.prototype.removeTile = function (tile, fadeOut) {
         if (document.getElementById("tile" + tile.id)) {

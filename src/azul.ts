@@ -348,12 +348,6 @@ class Azul implements AzulGame {
                 this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
         });
-
-        /*(this as any).addTooltipHtmlToClass('lord-counter', _("Number of lords in player table"));
-        (this as any).addTooltipHtmlToClass('pearl-counter', _("Number of pearls"));
-        (this as any).addTooltipHtmlToClass('silver-key-counter', _("Number of silver keys (surrounded if a silver key is available)"));
-        (this as any).addTooltipHtmlToClass('gold-key-counter', _("Number of gold keys (surrounded if a gold key is available)"));
-        GUILD_IDS.forEach(guild => (this as any).addTooltipHtmlToClass(`token-guild${guild}`, _("The Coat of Arms token indicates the most influential Lord of each color.")));*/
     }
 
     private createPlayerTables(gamedatas: AzulGamedatas) {
@@ -367,7 +361,7 @@ class Azul implements AzulGame {
     }
 
     private createPlayerTable(gamedatas: AzulGamedatas, playerId: number) {
-        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId]/*, gamedatas.playersTables[playerId]*/));
+        this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId]));
     }
 
     public removeTile(tile: Tile, fadeOut?: boolean) {

@@ -65,6 +65,15 @@ class PlayerTable {
         }
 
         this.placeTilesOnWall(player.wall);
+
+        
+        if (this.game.isVariant()) {
+            // if player hit refresh when column is selected but not yet applied, we reset ghost tile
+            if (player.selectedColumn) {
+                const tiles = player.lines.filter(tile => tile.line === player.selectedLine);
+                this.setGhostTile(player.selectedLine, player.selectedColumn, tiles[0].type);
+            }
+        }
     }
 
     public placeTilesOnHand(tiles: Tile[]) {
@@ -89,7 +98,7 @@ class PlayerTable {
         dojo.toggleClass(`player-hand-${this.playerId}`, 'empty', !visible);
     }
 
-    public setGhostTile(line: number, column: number) {
-        dojo.place(`<div class="tile tile${this.handColor} ghost"></div>`, `player-table-${this.playerId}-wall-spot-${line}-${column}`);
+    public setGhostTile(line: number, column: number, color: number = null) {
+        dojo.place(`<div class="tile tile${color ?? this.handColor} ghost"></div>`, `player-table-${this.playerId}-wall-spot-${line}-${column}`);
     }
 }

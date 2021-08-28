@@ -11,6 +11,8 @@ interface AzulPlayer extends Player {
     wall: Tile[];
     hand: Tile[];
     playerNo: number;
+    selectedLine: number; // only used to place ghost tile with selectedColumn
+    selectedColumn: number;
 }
 
 /**
