@@ -229,6 +229,9 @@ class Azul implements AzulGame {
             case 202:
                 dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2', prefValue == 2);
                 break;
+            case 203:
+                dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'cb', prefValue == 1);
+                break;
         }
     }
 
