@@ -679,7 +679,7 @@ var Azul = /** @class */ (function () {
     Azul.prototype.displayScoringOnTile = function (tileId, playerId, points) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
         dojo.place("<div id=\"tile" + tileId + "-scoring\" class=\"scoring-tile\"></div>", "tile" + tileId, 'after');
-        this.displayScoring("tile" + tileId + "-scoring", this.getPlayerColor(Number(playerId)), points, SCORE_MS * 100000);
+        this.displayScoring("tile" + tileId + "-scoring", this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications

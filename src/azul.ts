@@ -431,7 +431,7 @@ class Azul implements AzulGame {
     private displayScoringOnTile(tileId: number, playerId: string | number, points: number) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
         dojo.place(`<div id="tile${tileId}-scoring" class="scoring-tile"></div>`, `tile${tileId}`, 'after');
-        (this as any).displayScoring(`tile${tileId}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS * 100000);
+        (this as any).displayScoring(`tile${tileId}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     }
 
     ///////////////////////////////////////////////////
