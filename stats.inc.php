@@ -55,27 +55,27 @@ $commonStats = [
     ], 
     "pointsWallTile" => [
         "id" => 20,
-        "name" => totranslate("Point won with placed tiles"),
+        "name" => totranslate("Points gained with placed tiles"),
         "type" => "int"
     ], 
     "pointsLossFloorLine" => [
         "id" => 21,
-        "name" => totranslate("Point lost with floor line"),
+        "name" => totranslate("Points lost with floor line"),
         "type" => "int"
     ], 
     "pointsCompleteLine" => [
         "id" => 22,
-        "name" => totranslate("Point won with complete lines"),
+        "name" => totranslate("Points gained with complete lines"),
         "type" => "int"
     ], 
     "pointsCompleteColumn" => [
         "id" => 23,
-        "name" => totranslate("Point won with complete columns"),
+        "name" => totranslate("Points gained with complete columns"),
         "type" => "int"
     ], 
     "pointsCompleteColor" => [
         "id" => 24,
-        "name" => totranslate("Point won with complete color"),
+        "name" => totranslate("Points gained with complete color"),
         "type" => "int"
     ],
 ];
