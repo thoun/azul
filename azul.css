@@ -1,6 +1,7 @@
 @import url(../../../css/csslayer.css);
 #factories {
   position: relative;
+  float: left;
 }
 #factories .factory {
   position: absolute;
@@ -53,10 +54,10 @@
 }
 
 #table {
-  display: flex;
+  /*display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
-  align-items: center;
+  align-items: center;*/
   overflow-x: auto;
   position: relative;
   transform-origin: left top;
@@ -64,6 +65,8 @@
 
 .player-table-wrapper {
   position: relative;
+  display: inline-block;
+  margin-right: 20px;
 }
 .player-table-wrapper .player-hand {
   height: 75px;
