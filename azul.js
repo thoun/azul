@@ -106,6 +106,7 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.discardTiles = function (discardedTiles) {
         var _this = this;
+        console.log('discardTiles', discardedTiles);
         discardedTiles.forEach(function (tile) {
             var _a = _this.getFreePlaceForFactoryCenter(tile.type), left = _a.left, top = _a.top;
             _this.tilesInFactories[0][tile.type].push(tile);
@@ -676,10 +677,10 @@ var Azul = /** @class */ (function () {
             this.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
     };
-    Azul.prototype.displayScoringOnTile = function (tileId, playerId, points) {
+    Azul.prototype.displayScoringOnTile = function (tile, playerId, points) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
-        dojo.place("<div id=\"tile" + tileId + "-scoring\" class=\"scoring-tile\"></div>", "tile" + tileId, 'after');
-        this.displayScoring("tile" + tileId + "-scoring", this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+        dojo.place("<div id=\"tile" + tile.id + "-scoring\" class=\"scoring-tile\"></div>", "player-table-" + playerId + "-wall-spot-" + tile.line + "-" + tile.column);
+        this.displayScoring("tile" + tile.id + "-scoring", this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
@@ -741,7 +742,7 @@ var Azul = /** @class */ (function () {
             completeLine.pointsDetail.columnTiles.forEach(function (tile) { return dojo.addClass("tile" + tile.id, 'highlight'); });
             setTimeout(function () { return completeLine.pointsDetail.columnTiles.forEach(function (tile) { return dojo.removeClass("tile" + tile.id, 'highlight'); }); }, SCORE_MS - 50);
             _this.removeTiles(completeLine.discardedTiles, true);
-            _this.displayScoringOnTile(completeLine.placedTile.id, playerId, completeLine.pointsDetail.points);
+            _this.displayScoringOnTile(completeLine.placedTile, playerId, completeLine.pointsDetail.points);
             _this.incScore(Number(playerId), completeLine.pointsDetail.points);
         });
     };
@@ -760,7 +761,7 @@ var Azul = /** @class */ (function () {
             var endScore = notif.args.scores[playerId];
             endScore.tiles.forEach(function (tile) { return dojo.addClass("tile" + tile.id, 'highlight'); });
             setTimeout(function () { return endScore.tiles.forEach(function (tile) { return dojo.removeClass("tile" + tile.id, 'highlight'); }); }, SCORE_MS - 50);
-            _this.displayScoringOnTile(endScore.tiles[2].id, playerId, endScore.points);
+            _this.displayScoringOnTile(endScore.tiles[2], playerId, endScore.points);
             _this.incScore(Number(playerId), endScore.points);
         });
     };

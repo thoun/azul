@@ -84,6 +84,7 @@ class Factories {
     }
 
     public discardTiles(discardedTiles: Tile[]) {
+        console.log('discardTiles', discardedTiles);
         discardedTiles.forEach(tile => {
             const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
             this.tilesInFactories[0][tile.type].push(tile);

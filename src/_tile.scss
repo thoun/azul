@@ -77,9 +77,12 @@
 }
 
 .scoring-tile {
-    width: 60px;
-    height: 60px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: inline-block;
     position: absolute;
     pointer-events: none;
+    z-index: 100;
 }

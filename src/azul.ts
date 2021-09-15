@@ -428,10 +428,10 @@ class Azul implements AzulGame {
         }
     }
 
-    private displayScoringOnTile(tileId: number, playerId: string | number, points: number) {
+    private displayScoringOnTile(tile: Tile, playerId: string | number, points: number) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
-        dojo.place(`<div id="tile${tileId}-scoring" class="scoring-tile"></div>`, `tile${tileId}`, 'after');
-        (this as any).displayScoring(`tile${tileId}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+        dojo.place(`<div id="tile${tile.id}-scoring" class="scoring-tile"></div>`, `player-table-${playerId}-wall-spot-${tile.line}-${tile.column}`);
+        (this as any).displayScoring(`tile${tile.id}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     }
 
     ///////////////////////////////////////////////////
@@ -502,7 +502,7 @@ class Azul implements AzulGame {
             setTimeout(() => completeLine.pointsDetail.columnTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
 
             this.removeTiles(completeLine.discardedTiles, true);
-            this.displayScoringOnTile(completeLine.placedTile.id, playerId, completeLine.pointsDetail.points);
+            this.displayScoringOnTile(completeLine.placedTile, playerId, completeLine.pointsDetail.points);
             this.incScore(Number(playerId), completeLine.pointsDetail.points);
         });
     }
@@ -524,7 +524,7 @@ class Azul implements AzulGame {
             endScore.tiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
             setTimeout(() => endScore.tiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
 
-            this.displayScoringOnTile(endScore.tiles[2].id, playerId, endScore.points);
+            this.displayScoringOnTile(endScore.tiles[2], playerId, endScore.points);
             this.incScore(Number(playerId), endScore.points);
         });
     }
