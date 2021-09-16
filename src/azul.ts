@@ -325,7 +325,7 @@ class Azul implements AzulGame {
         if (tileDiv) {
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
         } else {
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" ${rotation ? `data-rotation='${rotation}'` : ''}></div>`, destinationId);
+            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" data-rotation="${rotation ?? 0}"></div>`, destinationId);
             const newTileDiv = document.getElementById(`tile${tile.id}`);
             newTileDiv.addEventListener('click', () => {
                 this.takeTiles(tile.id);

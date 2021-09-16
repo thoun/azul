@@ -95,7 +95,7 @@ var Factories = /** @class */ (function () {
                     }
                 }
                 _this.tilesInFactories[factoryIndex][tile.type].push(tile);
-                _this.game.placeTile(tile, "factory" + factoryIndex, left, top, tile.type != 0 ? Math.round(Math.random() * 90 - 45) : undefined);
+                _this.game.placeTile(tile, "factory" + factoryIndex, left, top, tile.type !== 0 ? Math.round(Math.random() * 90 - 45) : undefined);
             });
         };
         var this_1 = this;
@@ -106,12 +106,11 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.discardTiles = function (discardedTiles) {
         var _this = this;
-        console.log('discardTiles', discardedTiles);
         discardedTiles.forEach(function (tile) {
             var _a = _this.getFreePlaceForFactoryCenter(tile.type), left = _a.left, top = _a.top;
             _this.tilesInFactories[0][tile.type].push(tile);
             _this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
-            var rotation = Number(document.getElementById("tile" + tile.id).dataset.rotation);
+            var rotation = Number(document.getElementById("tile" + tile.id).dataset.rotation || 0);
             _this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random() * 20 - 10));
         });
         setTimeout(function () { return _this.updateDiscardedTilesNumbers(); }, ANIMATION_MS);
@@ -592,7 +591,7 @@ var Azul = /** @class */ (function () {
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
         }
         else {
-            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + (left !== undefined ? "left: " + left + "px;" : '') + (top !== undefined ? "top: " + top + "px;" : '') + (rotation ? "transform: rotate(" + rotation + "deg)" : '') + "\" " + (rotation ? "data-rotation='" + rotation + "'" : '') + "></div>", destinationId);
+            dojo.place("<div id=\"tile" + tile.id + "\" class=\"tile tile" + tile.type + "\" style=\"" + (left !== undefined ? "left: " + left + "px;" : '') + (top !== undefined ? "top: " + top + "px;" : '') + (rotation ? "transform: rotate(" + rotation + "deg)" : '') + "\" data-rotation=\"" + (rotation !== null && rotation !== void 0 ? rotation : 0) + "\"></div>", destinationId);
             var newTileDiv = document.getElementById("tile" + tile.id);
             newTileDiv.addEventListener('click', function () {
                 _this.takeTiles(tile.id);

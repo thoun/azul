@@ -76,7 +76,7 @@ class Factories {
                     }
                 }
                 this.tilesInFactories[factoryIndex][tile.type].push(tile);
-                this.game.placeTile(tile, `factory${factoryIndex}`, left, top, tile.type != 0 ? Math.round(Math.random()*90 - 45) : undefined);
+                this.game.placeTile(tile, `factory${factoryIndex}`, left, top, tile.type !== 0 ? Math.round(Math.random()*90 - 45) : undefined);
             });
         }
 
@@ -84,12 +84,11 @@ class Factories {
     }
 
     public discardTiles(discardedTiles: Tile[]) {
-        console.log('discardTiles', discardedTiles);
         discardedTiles.forEach(tile => {
             const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
             this.tilesInFactories[0][tile.type].push(tile);
             this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
-            const rotation = Number(document.getElementById(`tile${tile.id}`).dataset.rotation);
+            const rotation = Number(document.getElementById(`tile${tile.id}`).dataset.rotation || 0);
             this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random()*20 - 10));
         });
 
