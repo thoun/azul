@@ -82,7 +82,7 @@ interface UndoSelect {
     previousFirstPlayer: number;
 }
 
-interface NotifUndoTakeTilesArgs {
+interface NotifUndoArgs {
     playerId: number;
     undo: UndoSelect;
 }

@@ -8,7 +8,7 @@ declare const g_gamethemeurl;
 declare const board: HTMLDivElement;
 
 const ANIMATION_MS = 500;
-const SCORE_MS = 1500;
+const SCORE_MS = 2000;
 
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
@@ -187,7 +187,12 @@ class Azul implements AzulGame {
                     if (this.gamedatas.undo) {
                         (this as any).addActionButton('undoTakeTiles_button', _("Undo tile selection"), () => this.undoTakeTiles());
                     }
-                    break;        
+                    break;     
+                case 'confirmLine':
+                    (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmLine());
+                    (this as any).addActionButton('undoSelectLine_button', _("Undo line selection"), () => this.undoSelectLine(), null, null, 'gray');
+                    this.startActionTimer('confirmLine_button', 5);
+                    break;
                 case 'chooseColumn': // for multiplayer states we have to do it here
                     this.onEnteringChooseColumn(args);
                     break;
@@ -237,7 +242,35 @@ class Azul implements AzulGame {
             case 203:
                 dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'cb', prefValue == 1);
                 break;
+            case 205:
+                dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'hide-tile-count', prefValue == 2);
+                break;
         }
+    }
+
+    private startActionTimer(buttonId: string, time: number) {
+        if ((this as any).prefs[204]?.value === 2) {
+            return;
+        }
+
+        const button = document.getElementById(buttonId);
+ 
+        let actionTimerId = null;
+        const _actionTimerLabel = button.innerHTML;
+        let _actionTimerSeconds = time;
+        const actionTimerFunction = () => {
+            const button = document.getElementById(buttonId);
+            if (button == null) {
+                window.clearInterval(actionTimerId);
+            } else if (_actionTimerSeconds-- > 1) {
+                button.innerHTML = _actionTimerLabel + ' (' + _actionTimerSeconds + ')';
+            } else {
+                window.clearInterval(actionTimerId);
+                button.click();
+            }
+        };
+        actionTimerFunction();
+        actionTimerId = window.setInterval(() => actionTimerFunction(), 1000);
     }
 
     public getZoom() {
@@ -412,6 +445,22 @@ class Azul implements AzulGame {
         });
     }
 
+    public confirmLine() {
+        if(!(this as any).checkAction('confirmLine')) {
+            return;
+        }
+
+        this.takeAction('confirmLine');
+    }
+
+    public undoSelectLine() {
+        if(!(this as any).checkAction('undoSelectLine')) {
+            return;
+        }
+
+        this.takeAction('undoSelectLine');
+    }
+
     public selectColumn(column: number) {
         if(!(this as any).checkAction('selectColumn')) {
             return;
@@ -467,6 +516,7 @@ class Azul implements AzulGame {
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
+            ['undoSelectLine', ANIMATION_MS],
             ['placeTileOnWall', SCORE_MS],
             ['emptyFloorLine', SCORE_MS],
             ['endScore', SCORE_MS],
@@ -495,7 +545,7 @@ class Azul implements AzulGame {
         this.factories.discardTiles(notif.args.discardedTiles);
     }
 
-    notif_undoTakeTiles(notif: Notif<NotifUndoTakeTilesArgs>) {
+    notif_undoTakeTiles(notif: Notif<NotifUndoArgs>) {
         this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
 
         this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from).then(
@@ -512,6 +562,11 @@ class Azul implements AzulGame {
                 }
             }
         );
+    }
+
+    notif_undoSelectLine(notif: Notif<NotifUndoArgs>) {
+        const table = this.getPlayerTable(notif.args.playerId);
+        table.placeTilesOnHand(notif.args.undo.tiles);
     }
 
     notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {

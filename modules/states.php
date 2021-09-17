@@ -33,6 +33,12 @@ trait StateTrait {
         $this->gamestate->nextState('next');
     }
 
+    function stConfirmLine() {
+        if (!$this->allowUndo()) {
+            $this->gamestate->nextState('nextPlayer');;
+        }
+    }
+
     function stNextPlayer() {
         $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') == 0;
         $playerId = self::getActivePlayerId();

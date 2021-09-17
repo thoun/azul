@@ -91,6 +91,26 @@ $game_preferences = [
         ],
         'default' => 2
     ],
+
+    204 => [
+        'name' => totranslate('Countdown timer for confirm button'),
+        'needReload' => false,
+        'values' => [
+            1 => ['name' => totranslate('Enabled')],
+            2 => ['name' => totranslate('Disabled')],
+        ],
+        'default' => 1
+    ],
+
+    205 => [
+        'name' => totranslate('Display tile count in factory center'),
+        'needReload' => false,
+        'values' => [
+            1 => ['name' => totranslate('Enabled')],
+            2 => ['name' => totranslate('Disabled')],
+        ],
+        'default' => 1
+    ],
 ];
 
 

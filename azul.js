@@ -368,7 +368,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     return to;
 };
 var ANIMATION_MS = 500;
-var SCORE_MS = 1500;
+var SCORE_MS = 2000;
 var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 var LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
@@ -516,6 +516,11 @@ var Azul = /** @class */ (function () {
                         this.addActionButton('undoTakeTiles_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); });
                     }
                     break;
+                case 'confirmLine':
+                    this.addActionButton('confirmLine_button', _("Confirm"), function () { return _this.confirmLine(); });
+                    this.addActionButton('undoSelectLine_button', _("Undo line selection"), function () { return _this.undoSelectLine(); }, null, null, 'gray');
+                    this.startActionTimer('confirmLine_button', 5);
+                    break;
                 case 'chooseColumn': // for multiplayer states we have to do it here
                     this.onEnteringChooseColumn(args);
                     break;
@@ -555,7 +560,35 @@ var Azul = /** @class */ (function () {
             case 203:
                 dojo.toggleClass(document.getElementsByTagName('html')[0], 'cb', prefValue == 1);
                 break;
+            case 205:
+                dojo.toggleClass(document.getElementsByTagName('html')[0], 'hide-tile-count', prefValue == 2);
+                break;
         }
+    };
+    Azul.prototype.startActionTimer = function (buttonId, time) {
+        var _a;
+        if (((_a = this.prefs[204]) === null || _a === void 0 ? void 0 : _a.value) === 2) {
+            return;
+        }
+        var button = document.getElementById(buttonId);
+        var actionTimerId = null;
+        var _actionTimerLabel = button.innerHTML;
+        var _actionTimerSeconds = time;
+        var actionTimerFunction = function () {
+            var button = document.getElementById(buttonId);
+            if (button == null) {
+                window.clearInterval(actionTimerId);
+            }
+            else if (_actionTimerSeconds-- > 1) {
+                button.innerHTML = _actionTimerLabel + ' (' + _actionTimerSeconds + ')';
+            }
+            else {
+                window.clearInterval(actionTimerId);
+                button.click();
+            }
+        };
+        actionTimerFunction();
+        actionTimerId = window.setInterval(function () { return actionTimerFunction(); }, 1000);
     };
     Azul.prototype.getZoom = function () {
         return this.zoom;
@@ -708,6 +741,18 @@ var Azul = /** @class */ (function () {
             line: line
         });
     };
+    Azul.prototype.confirmLine = function () {
+        if (!this.checkAction('confirmLine')) {
+            return;
+        }
+        this.takeAction('confirmLine');
+    };
+    Azul.prototype.undoSelectLine = function () {
+        if (!this.checkAction('undoSelectLine')) {
+            return;
+        }
+        this.takeAction('undoSelectLine');
+    };
     Azul.prototype.selectColumn = function (column) {
         if (!this.checkAction('selectColumn')) {
             return;
@@ -756,6 +801,7 @@ var Azul = /** @class */ (function () {
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
+            ['undoSelectLine', ANIMATION_MS],
             ['placeTileOnWall', SCORE_MS],
             ['emptyFloorLine', SCORE_MS],
             ['endScore', SCORE_MS],
@@ -794,6 +840,10 @@ var Azul = /** @class */ (function () {
                 _this.getPlayerTable(notif.args.playerId).setHandVisible(false);
             }
         });
+    };
+    Azul.prototype.notif_undoSelectLine = function (notif) {
+        var table = this.getPlayerTable(notif.args.playerId);
+        table.placeTilesOnHand(notif.args.undo.tiles);
     };
     Azul.prototype.notif_placeTileOnWall = function (notif) {
         var _this = this;

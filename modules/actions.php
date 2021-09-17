@@ -82,9 +82,9 @@ trait ActionTrait {
             'fromFactory' => $factory,
         ]);
 
-        $this->setGlobalVariable(UNDO_SELECT, new UndoSelect(
-            $factory, 
+        $this->setGlobalVariable(UNDO_SELECT, new Undo(
             array_merge($selectedTiles, $discardedTiles, $firstPlayerTokens),
+            $factory, 
             $previousFirstPlayer
         ));
 
@@ -133,7 +133,41 @@ trait ActionTrait {
             ]);
         }
 
+        $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles));
+
+        if ($this->allowUndo()) {
+            $this->gamestate->nextState('confirm');
+        } else {
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
+    function confirmLine() {
+        self::checkAction('confirmLine'); 
+        
         $this->gamestate->nextState('nextPlayer');
+    }
+    
+    function undoSelectLine() {
+        self::checkAction('undoSelectLine'); 
+
+        if (!$this->allowUndo()) {
+            throw new BgaUserException('Undo is disabled');
+        }
+        
+        $playerId = intval(self::getActivePlayerId());       
+
+        $undo = $this->getGlobalVariable(UNDO_PLACE);
+
+        $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'hand', $playerId);
+
+        self::notifyAllPlayers('undoSelectLine', clienttranslate('${player_name} cancels tile placement'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'undo' => $undo,
+        ]);
+        
+        $this->gamestate->nextState('undo');
     }
 
     function applySelectColumn(int $playerId, int $column) {

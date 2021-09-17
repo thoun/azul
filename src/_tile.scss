@@ -14,23 +14,23 @@
         z-index: 8;
     }
     &.tile1 {
-        background: url('img/black.svg');
+        background: url('img/black.svg') #231f20;
         border-color: #231f20;
     }
     &.tile2 {
-        background: url('img/cyan.svg');
+        background: url('img/cyan.svg') #1dcad3;
         border-color: #1dcad3;
     }
     &.tile3 {
-        background: url('img/blue.svg');
+        background: url('img/blue.svg') #0083ad;
         border-color: #0083ad;
     }
     &.tile4 {
-        background: url('img/yellow.svg');
+        background: url('img/yellow.svg') #ffbf3c;
         border-color: #ffbf3c;
     }
     &.tile5 {
-        background: url('img/red.svg');
+        background: url('img/red.svg') #f5333f;
         border-color: #f5333f;
     }
 
@@ -85,4 +85,10 @@
     position: absolute;
     pointer-events: none;
     z-index: 100;
+}
+
+.hide-scoring-tile {
+    .scoring-tile {
+        display: none;
+    }
 }

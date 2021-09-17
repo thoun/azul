@@ -64,6 +64,22 @@
       self::ajaxResponse();
     }
 
+    public function confirmLine() {
+      self::setAjaxMode();
+
+      $this->game->confirmLine();
+
+      self::ajaxResponse();
+    }
+
+    public function undoSelectLine() {
+      self::setAjaxMode();
+
+      $this->game->undoSelectLine();
+
+      self::ajaxResponse();
+    }
+
     public function selectColumn() {
       self::setAjaxMode();
 

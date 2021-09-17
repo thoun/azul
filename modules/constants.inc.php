@@ -10,6 +10,7 @@ define('ST_FILL_FACTORIES', 10);
 define('ST_PLAYER_CHOOSE_TILE', 20);
 
 define('ST_PLAYER_CHOOSE_LINE', 30);
+define('ST_PLAYER_CONFIRM_LINE', 31);
 
 //define('ST_PLAYER_CHOOSE_COLUMN', 40);
 
@@ -43,5 +44,6 @@ define('RESOLVING_LINE', 'ResolvingLine');
  */
 
 define('UNDO_SELECT', 'UndoSelect');
+define('UNDO_PLACE', 'UndoPlace');
 
 ?>

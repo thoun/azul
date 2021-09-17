@@ -60,6 +60,11 @@
     }
 }
 
+
+.hide-tile-count .tile-count {
+    display: none;
+  }
+
 .touch-device {
     .tile-count {
         width: 48px;

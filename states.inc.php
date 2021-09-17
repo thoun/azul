@@ -123,8 +123,24 @@ $playerActionsGameStates = [
             "undoTakeTiles",
          ],
         "transitions" => [
+            "confirm" => ST_PLAYER_CONFIRM_LINE,
             "nextPlayer" => ST_NEXT_PLAYER,
             "undo" => ST_PLAYER_CHOOSE_TILE,
+        ],
+    ],
+
+    ST_PLAYER_CONFIRM_LINE => [
+        "name" => "confirmLine",
+        "description" => clienttranslate('${actplayer} must confirm line choice'),
+        "descriptionmyturn" => clienttranslate('${you} must confirm line choice'),
+        "type" => "activeplayer",
+        "possibleactions" => [ 
+            "confirmLine",
+            "undoSelectLine",
+         ],
+        "transitions" => [
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "undo" => ST_PLAYER_CHOOSE_LINE,
         ],
     ],
 
