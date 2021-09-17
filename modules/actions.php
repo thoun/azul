@@ -77,6 +77,7 @@ trait ActionTrait {
             'number' => count($selectedTiles),
             'color' => $this->getColor($tile->type),              
             'type' => $tile->type,
+            'preserve' => [ 2 => 'type' ],
             'selectedTiles' => $selectedTiles,
             'discardedTiles' => $discardedTiles,
             'fromFactory' => $factory,

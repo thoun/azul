@@ -901,6 +901,7 @@ var Azul = /** @class */ (function () {
                 if (typeof args.lineNumber === 'number') {
                     args.lineNumber = "<strong>" + args.line + "</strong>";
                 }
+                console.log(log, args.type);
                 if (log.indexOf('${number} ${color}') !== -1 && typeof args.type === 'number') {
                     var number = args.number;
                     var html = '';
@@ -908,6 +909,7 @@ var Azul = /** @class */ (function () {
                         html += "<div class=\"tile tile" + args.type + "\"></div>";
                     }
                     log = log.replace('${number} ${color}', html);
+                    console.log('log after', log);
                 }
             }
         }

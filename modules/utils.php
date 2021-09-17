@@ -153,6 +153,7 @@ trait UtilTrait {
             'number' => count($tiles),
             'color' => $this->getColor($tiles[0]->type),            
             'type' => $tiles[0]->type,
+            'preserve' => [ 2 => 'type' ],
             'line' => $line,
             'lineNumber' => $line,
             'placedTiles' => $placedTiles,
@@ -346,6 +347,7 @@ trait UtilTrait {
                     'number' => 1,
                     'color' => $this->getColor($notif->placedTile->type),                
                     'type' => $notif->placedTile->type,
+                    'preserve' => [ 2 => 'type' ],
                     'points' => $notif->pointsDetail->points,
                 ]);
             }
