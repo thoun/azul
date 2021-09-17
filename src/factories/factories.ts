@@ -52,6 +52,21 @@ class Factories {
         this.tilesInFactories[factory] = [[], [], [], [], [], []];
     }
 
+    private getCoordinatesInFactory(tileIndex: number) {
+        return {
+            left: 50 + Math.floor(tileIndex / 2) * 90,
+            top: 50 + Math.floor(tileIndex % 2) * 90,
+        };
+    }
+
+    private getCoordinatesForTile0() {
+        const centerFactoryDiv = document.getElementById('factory0');
+        return {
+            left: centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE,
+            top: centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE,
+        };
+    }
+
     public fillFactories(factories: { [factoryId: number]: Tile[]; }) {
         for (let factoryIndex=0; factoryIndex<=this.factoryNumber; factoryIndex++) {
             this.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
@@ -60,19 +75,20 @@ class Factories {
                 let left = null;
                 let top = null;
                 if (factoryIndex > 0) {
-                    left = 50 + Math.floor(index / 2) * 90;
-                    top = 50 + Math.floor(index % 2) * 90;
+                    const coordinates = this.getCoordinatesInFactory(index);
+                    left = coordinates.left;
+                    top = coordinates.top;
                 } else {
                     if (tile.type == 0) {
-                        const centerFactoryDiv = document.getElementById('factory0');
-                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE;
-                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
+                        const coordinates = this.getCoordinatesForTile0();
+                        left = coordinates.left;
+                        top = coordinates.top;
                     } else {
                         const coords = this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
                         top = coords.top;
 
-                        this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
+                        this.tilesPositionsInCenter[tile.type].push({ id: tile.id, x: left, y: top });
                     }
                 }
                 this.tilesInFactories[factoryIndex][tile.type].push(tile);
@@ -84,15 +100,17 @@ class Factories {
     }
 
     public discardTiles(discardedTiles: Tile[]) {
-        discardedTiles.forEach(tile => {
+        const promise = discardedTiles.map(tile => {
             const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
             this.tilesInFactories[0][tile.type].push(tile);
-            this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
+            this.tilesPositionsInCenter[tile.type].push({ id: tile.id, x: left, y: top });
             const rotation = Number(document.getElementById(`tile${tile.id}`).dataset.rotation || 0);
-            this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random()*20 - 10));
+            return this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random()*20 - 10));
         });
 
         setTimeout(() => this.updateDiscardedTilesNumbers(), ANIMATION_MS);
+
+        return promise;
     }
 
     private getDistance(p1: PlacedTile, p2: PlacedTile): number {
@@ -211,5 +229,41 @@ class Factories {
         this.getTilesOfSameColorInSameFactory(id)?.forEach(tile => {
             document.getElementById(`tile${tile.id}`).classList.remove('hover');
         });
+    }
+
+    public undoTakeTiles(tiles: Tile[], from: number): Promise<any> {
+        let promise;
+        if (from > 0) {
+            promise = Promise.allSettled(tiles.map((tile, index) => {
+                const coordinates = this.getCoordinatesInFactory(index);
+                this.tilesInFactories[from][tile.type].push(tile);
+
+
+                const centerIndex = this.tilesInFactories[0][tile.type].findIndex(t => tile.id == t.id);
+                if (centerIndex !== -1) {
+                    this.tilesInFactories[0][tile.type].splice(centerIndex, 1);
+                }
+                const centerCoordIndex = this.tilesPositionsInCenter[tile.type].findIndex(t => tile.id == t.id);
+                if (centerCoordIndex !== -1) {
+                    this.tilesPositionsInCenter[tile.type].splice(centerCoordIndex, 1);
+                }
+
+                return this.game.placeTile(tile, `factory${from}`, coordinates.left, coordinates.top, Math.round(Math.random()*90 - 45));
+            }));
+        } else {
+            const promises = this.discardTiles(tiles.filter(tile => tile.type > 0));
+            const tile0 = tiles.find(tile => tile.type == 0);
+            if (tile0) {
+                const coordinates = this.getCoordinatesForTile0();
+                promises.push(
+                    this.game.placeTile(tile0, `factory0`, coordinates.left, coordinates.top)
+                ); 
+            }
+            promise = Promise.allSettled(promises);
+            
+        }
+
+        setTimeout(() => this.updateDiscardedTilesNumbers(), ANIMATION_MS);
+        return promise;
     }
 }

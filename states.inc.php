@@ -118,9 +118,13 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} must choose a line to place ${number} ${color}'),
         "type" => "activeplayer",
         "args" => "argChooseLine",
-        "possibleactions" => [ "selectLine" ],
+        "possibleactions" => [ 
+            "selectLine",
+            "undoTakeTiles",
+         ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER,
+            "undo" => ST_PLAYER_CHOOSE_TILE,
         ],
     ],
 

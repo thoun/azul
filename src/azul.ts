@@ -182,7 +182,12 @@ class Azul implements AzulGame {
     //
     public onUpdateActionButtons(stateName: string, args: any) {
         if((this as any).isCurrentPlayerActive()) {
-            switch (stateName) {                
+            switch (stateName) {    
+                case 'chooseLine':
+                    if (this.gamedatas.undo) {
+                        (this as any).addActionButton('undoTakeTiles_button', _("Undo tile selection"), () => this.undoTakeTiles());
+                    }
+                    break;        
                 case 'chooseColumn': // for multiplayer states we have to do it here
                     this.onEnteringChooseColumn(args);
                     break;
@@ -379,6 +384,24 @@ class Azul implements AzulGame {
         tiles.forEach(tile => this.removeTile(tile, fadeOut));
     }
 
+    public takeTiles(id: number) {
+        if(!(this as any).checkAction('takeTiles')) {
+            return;
+        }
+
+        this.takeAction('takeTiles', {
+            id
+        });
+    }
+
+    public undoTakeTiles() {
+        if(!(this as any).checkAction('undoTakeTiles')) {
+            return;
+        }
+
+        this.takeAction('undoTakeTiles');
+    }
+
     public selectLine(line: number) {
         if(!(this as any).checkAction('selectLine')) {
             return;
@@ -399,16 +422,6 @@ class Azul implements AzulGame {
         });
 
         this.onLeavingChooseColumn();
-    }
-
-    public takeTiles(id: number) {
-        if(!(this as any).checkAction('takeTiles')) {
-            return;
-        }
-
-        this.takeAction('takeTiles', {
-            id
-        });
     }
 
     public takeAction(action: string, data?: any) {
@@ -452,6 +465,7 @@ class Azul implements AzulGame {
         const notifs = [
             ['factoriesFilled', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
+            ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
             ['placeTileOnWall', SCORE_MS],
             ['emptyFloorLine', SCORE_MS],
@@ -479,6 +493,14 @@ class Azul implements AzulGame {
         const table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.selectedTiles);
         this.factories.discardTiles(notif.args.discardedTiles);
+    }
+
+    notif_undoTakeTiles(notif: Notif<NotifUndoTakeTilesArgs>) {
+        this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
+
+        this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from).then(
+            () => this.getPlayerTable(notif.args.playerId).setHandVisible(false)
+        );
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {

@@ -37,6 +37,7 @@ interface AzulGamedatas {
     firstPlayerTokenPlayerId: number;
     variant: boolean;
     endRound: boolean;
+    undo: boolean;
 }
 
 interface AzulGame extends Game {
@@ -73,6 +74,17 @@ interface NotifTilesSelectedArgs {
     selectedTiles: Tile[];
     discardedTiles: Tile[];
     fromFactory: number;
+}
+
+interface UndoSelect {
+    from: number;
+    tiles: Tile[];
+    previousFirstPlayer: number;
+}
+
+interface NotifUndoTakeTilesArgs {
+    playerId: number;
+    undo: UndoSelect;
 }
 
 interface NotifTilesPlacedOnLineArgs {
@@ -118,6 +130,7 @@ interface NotifEndScoreArgs {
 }
 
 interface PlacedTile {
+    id?: number;
     x: number;
     y: number;
 }

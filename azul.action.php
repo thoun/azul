@@ -45,6 +45,14 @@
       self::ajaxResponse();
     }
 
+    public function undoTakeTiles() {
+      self::setAjaxMode();
+
+      $this->game->undoTakeTiles();
+
+      self::ajaxResponse();
+    }
+
     public function selectLine() {
       self::setAjaxMode();
 

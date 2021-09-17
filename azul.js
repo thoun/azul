@@ -69,6 +69,19 @@ var Factories = /** @class */ (function () {
     Factories.prototype.factoryTilesRemoved = function (factory) {
         this.tilesInFactories[factory] = [[], [], [], [], [], []];
     };
+    Factories.prototype.getCoordinatesInFactory = function (tileIndex) {
+        return {
+            left: 50 + Math.floor(tileIndex / 2) * 90,
+            top: 50 + Math.floor(tileIndex % 2) * 90,
+        };
+    };
+    Factories.prototype.getCoordinatesForTile0 = function () {
+        var centerFactoryDiv = document.getElementById('factory0');
+        return {
+            left: centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE,
+            top: centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE,
+        };
+    };
     Factories.prototype.fillFactories = function (factories) {
         var _this = this;
         var _loop_1 = function (factoryIndex) {
@@ -78,20 +91,21 @@ var Factories = /** @class */ (function () {
                 var left = null;
                 var top = null;
                 if (factoryIndex > 0) {
-                    left = 50 + Math.floor(index / 2) * 90;
-                    top = 50 + Math.floor(index % 2) * 90;
+                    var coordinates = _this.getCoordinatesInFactory(index);
+                    left = coordinates.left;
+                    top = coordinates.top;
                 }
                 else {
                     if (tile.type == 0) {
-                        var centerFactoryDiv = document.getElementById('factory0');
-                        left = centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE;
-                        top = centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE;
+                        var coordinates = _this.getCoordinatesForTile0();
+                        left = coordinates.left;
+                        top = coordinates.top;
                     }
                     else {
                         var coords = _this.getFreePlaceForFactoryCenter(tile.type);
                         left = coords.left;
                         top = coords.top;
-                        _this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
+                        _this.tilesPositionsInCenter[tile.type].push({ id: tile.id, x: left, y: top });
                     }
                 }
                 _this.tilesInFactories[factoryIndex][tile.type].push(tile);
@@ -106,14 +120,15 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.discardTiles = function (discardedTiles) {
         var _this = this;
-        discardedTiles.forEach(function (tile) {
+        var promise = discardedTiles.map(function (tile) {
             var _a = _this.getFreePlaceForFactoryCenter(tile.type), left = _a.left, top = _a.top;
             _this.tilesInFactories[0][tile.type].push(tile);
-            _this.tilesPositionsInCenter[tile.type].push({ x: left, y: top });
+            _this.tilesPositionsInCenter[tile.type].push({ id: tile.id, x: left, y: top });
             var rotation = Number(document.getElementById("tile" + tile.id).dataset.rotation || 0);
-            _this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random() * 20 - 10));
+            return _this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random() * 20 - 10));
         });
         setTimeout(function () { return _this.updateDiscardedTilesNumbers(); }, ANIMATION_MS);
+        return promise;
     };
     Factories.prototype.getDistance = function (p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
@@ -223,6 +238,36 @@ var Factories = /** @class */ (function () {
             document.getElementById("tile" + tile.id).classList.remove('hover');
         });
     };
+    Factories.prototype.undoTakeTiles = function (tiles, from) {
+        var _this = this;
+        var promise;
+        if (from > 0) {
+            promise = Promise.allSettled(tiles.map(function (tile, index) {
+                var coordinates = _this.getCoordinatesInFactory(index);
+                _this.tilesInFactories[from][tile.type].push(tile);
+                var centerIndex = _this.tilesInFactories[0][tile.type].findIndex(function (t) { return tile.id == t.id; });
+                if (centerIndex !== -1) {
+                    _this.tilesInFactories[0][tile.type].splice(centerIndex, 1);
+                }
+                var centerCoordIndex = _this.tilesPositionsInCenter[tile.type].findIndex(function (t) { return tile.id == t.id; });
+                if (centerCoordIndex !== -1) {
+                    _this.tilesPositionsInCenter[tile.type].splice(centerCoordIndex, 1);
+                }
+                return _this.game.placeTile(tile, "factory" + from, coordinates.left, coordinates.top, Math.round(Math.random() * 90 - 45));
+            }));
+        }
+        else {
+            var promises = this.discardTiles(tiles.filter(function (tile) { return tile.type > 0; }));
+            var tile0 = tiles.find(function (tile) { return tile.type == 0; });
+            if (tile0) {
+                var coordinates = this.getCoordinatesForTile0();
+                promises.push(this.game.placeTile(tile0, "factory0", coordinates.left, coordinates.top));
+            }
+            promise = Promise.allSettled(promises);
+        }
+        setTimeout(function () { return _this.updateDiscardedTilesNumbers(); }, ANIMATION_MS);
+        return promise;
+    };
     return Factories;
 }());
 var HAND_CENTER = 327;
@@ -299,10 +344,9 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
         var _this = this;
-        var top = line ? 0 : 45;
         return Promise.allSettled(tiles.map(function (tile) {
             var left = line ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74;
-            return _this.game.placeTile(tile, "player-table-" + _this.playerId + "-line" + line, left, top);
+            return _this.game.placeTile(tile, "player-table-" + _this.playerId + "-line" + line, left, 0);
         }));
     };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
@@ -464,8 +508,14 @@ var Azul = /** @class */ (function () {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     Azul.prototype.onUpdateActionButtons = function (stateName, args) {
+        var _this = this;
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
+                case 'chooseLine':
+                    if (this.gamedatas.undo) {
+                        this.addActionButton('undoTakeTiles_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); });
+                    }
+                    break;
                 case 'chooseColumn': // for multiplayer states we have to do it here
                     this.onEnteringChooseColumn(args);
                     break;
@@ -636,6 +686,20 @@ var Azul = /** @class */ (function () {
         var _this = this;
         tiles.forEach(function (tile) { return _this.removeTile(tile, fadeOut); });
     };
+    Azul.prototype.takeTiles = function (id) {
+        if (!this.checkAction('takeTiles')) {
+            return;
+        }
+        this.takeAction('takeTiles', {
+            id: id
+        });
+    };
+    Azul.prototype.undoTakeTiles = function () {
+        if (!this.checkAction('undoTakeTiles')) {
+            return;
+        }
+        this.takeAction('undoTakeTiles');
+    };
     Azul.prototype.selectLine = function (line) {
         if (!this.checkAction('selectLine')) {
             return;
@@ -652,14 +716,6 @@ var Azul = /** @class */ (function () {
             column: column
         });
         this.onLeavingChooseColumn();
-    };
-    Azul.prototype.takeTiles = function (id) {
-        if (!this.checkAction('takeTiles')) {
-            return;
-        }
-        this.takeAction('takeTiles', {
-            id: id
-        });
     };
     Azul.prototype.takeAction = function (action, data) {
         data = data || {};
@@ -698,6 +754,7 @@ var Azul = /** @class */ (function () {
         var notifs = [
             ['factoriesFilled', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
+            ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
             ['placeTileOnWall', SCORE_MS],
             ['emptyFloorLine', SCORE_MS],
@@ -723,6 +780,11 @@ var Azul = /** @class */ (function () {
         var table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.selectedTiles);
         this.factories.discardTiles(notif.args.discardedTiles);
+    };
+    Azul.prototype.notif_undoTakeTiles = function (notif) {
+        var _this = this;
+        this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
+        this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from).then(function () { return _this.getPlayerTable(notif.args.playerId).setHandVisible(false); });
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
         var _this = this;

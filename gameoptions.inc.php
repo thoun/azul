@@ -44,6 +44,19 @@ $game_options = [
         'default' => 1
     ],
 
+    101 => [
+        'name' => totranslate('Allow Undo/confirm'),    
+        'values' => [
+                1 => [
+                    'name' => totranslate('Enabled'),
+                ],
+                2 => [
+                    'name' => totranslate('Disabled'),
+                ]
+            ],
+        'default' => 1
+    ],
+
 ];
 
 

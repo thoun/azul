@@ -83,10 +83,9 @@ class PlayerTable {
     }
 
     public placeTilesOnLine(tiles: Tile[], line: number): Promise<any> {
-        const top = line ? 0 : 45;
         return Promise.allSettled(tiles.map(tile => {
             const left = line ? (line - tile.column) * 69 : 5 + (tile.column-1) * 74;
-            return this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top);
+            return this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, 0);
         }));
     }
 

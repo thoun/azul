@@ -29,6 +29,7 @@ define('END_SCORE', 100);
  */
 
 define('VARIANT_OPTION', 'VariantOption');
+define('UNDO', 'Undo');
 
 /*
  * Variables
@@ -36,5 +37,11 @@ define('VARIANT_OPTION', 'VariantOption');
 
 define('FIRST_PLAYER_FOR_NEXT_TURN', 'FirstPlayerForNextTurn');
 define('RESOLVING_LINE', 'ResolvingLine');
+
+/*
+ * Global variables
+ */
+
+define('UNDO_SELECT', 'UndoSelect');
 
 ?>
