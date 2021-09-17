@@ -40,17 +40,32 @@
 .tile-count.tile1 {
   color: #231f20;
 }
+.tile-count.tile1.hover {
+  box-shadow: 0 0 5px 5px #231f20;
+}
 .tile-count.tile2 {
   color: #1dcad3;
+}
+.tile-count.tile2.hover {
+  box-shadow: 0 0 5px 5px #1dcad3;
 }
 .tile-count.tile3 {
   color: #0083ad;
 }
+.tile-count.tile3.hover {
+  box-shadow: 0 0 5px 5px #0083ad;
+}
 .tile-count.tile4 {
   color: #ffbf3c;
 }
+.tile-count.tile4.hover {
+  box-shadow: 0 0 5px 5px #ffbf3c;
+}
 .tile-count.tile5 {
   color: #f5333f;
+}
+.tile-count.tile5.hover {
+  box-shadow: 0 0 5px 5px #f5333f;
 }
 
 .hide-tile-count .tile-count {

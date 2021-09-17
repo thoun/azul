@@ -220,13 +220,21 @@ class Factories {
     }
 
     public tileMouseEnter(id: number) {
-        this.getTilesOfSameColorInSameFactory(id)?.forEach(tile => {
+        const tiles = this.getTilesOfSameColorInSameFactory(id);
+        if (tiles?.length) {
+            document.getElementById(`tileCount${tiles[0].type}`)?.classList.add('hover');
+        }
+        tiles?.forEach(tile => {
             document.getElementById(`tile${tile.id}`).classList.add('hover');
         });
     }
 
     public tileMouseLeave(id: number) {
-        this.getTilesOfSameColorInSameFactory(id)?.forEach(tile => {
+        const tiles = this.getTilesOfSameColorInSameFactory(id);
+        if (tiles?.length) {
+            document.getElementById(`tileCount${tiles[0].type}`)?.classList.remove('hover');
+        }
+        tiles?.forEach(tile => {
             document.getElementById(`tile${tile.id}`).classList.remove('hover');
         });
     }

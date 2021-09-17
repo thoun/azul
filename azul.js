@@ -228,13 +228,21 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.tileMouseEnter = function (id) {
         var _a;
-        (_a = this.getTilesOfSameColorInSameFactory(id)) === null || _a === void 0 ? void 0 : _a.forEach(function (tile) {
+        var tiles = this.getTilesOfSameColorInSameFactory(id);
+        if (tiles === null || tiles === void 0 ? void 0 : tiles.length) {
+            (_a = document.getElementById("tileCount" + tiles[0].type)) === null || _a === void 0 ? void 0 : _a.classList.add('hover');
+        }
+        tiles === null || tiles === void 0 ? void 0 : tiles.forEach(function (tile) {
             document.getElementById("tile" + tile.id).classList.add('hover');
         });
     };
     Factories.prototype.tileMouseLeave = function (id) {
         var _a;
-        (_a = this.getTilesOfSameColorInSameFactory(id)) === null || _a === void 0 ? void 0 : _a.forEach(function (tile) {
+        var tiles = this.getTilesOfSameColorInSameFactory(id);
+        if (tiles === null || tiles === void 0 ? void 0 : tiles.length) {
+            (_a = document.getElementById("tileCount" + tiles[0].type)) === null || _a === void 0 ? void 0 : _a.classList.remove('hover');
+        }
+        tiles === null || tiles === void 0 ? void 0 : tiles.forEach(function (tile) {
             document.getElementById("tile" + tile.id).classList.remove('hover');
         });
     };
