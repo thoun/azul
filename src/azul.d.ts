@@ -41,6 +41,7 @@ interface AzulGamedatas {
 }
 
 interface AzulGame extends Game {
+    getPlayerId(): number;
     getZoom(): number;
     isVariant(): boolean;
     takeTiles(id: number): void;

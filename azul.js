@@ -338,7 +338,7 @@ var PlayerTable = /** @class */ (function () {
         this.placeTilesOnWall(player.wall);
         if (this.game.isVariant()) {
             // if player hit refresh when column is selected but not yet applied, we reset ghost tile
-            if (player.selectedColumn) {
+            if (player.selectedColumn && this.playerId === this.game.getPlayerId()) {
                 var tiles = player.lines.filter(function (tile) { return tile.line === player.selectedLine; });
                 this.setGhostTile(player.selectedLine, player.selectedColumn, tiles[0].type);
             }

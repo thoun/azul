@@ -69,7 +69,7 @@ class PlayerTable {
         
         if (this.game.isVariant()) {
             // if player hit refresh when column is selected but not yet applied, we reset ghost tile
-            if (player.selectedColumn) {
+            if (player.selectedColumn && this.playerId === this.game.getPlayerId()) {
                 const tiles = player.lines.filter(tile => tile.line === player.selectedLine);
                 this.setGhostTile(player.selectedLine, player.selectedColumn, tiles[0].type);
             }

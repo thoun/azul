@@ -38,6 +38,7 @@ define('UNDO', 'Undo');
 
 define('FIRST_PLAYER_FOR_NEXT_TURN', 'FirstPlayerForNextTurn');
 define('RESOLVING_LINE', 'ResolvingLine');
+define('END_TURN_LOGGED', 'EndTurnLogged');
 
 /*
  * Global variables

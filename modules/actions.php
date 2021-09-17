@@ -126,11 +126,12 @@ trait ActionTrait {
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $this->placeTilesOnLine($playerId, $tiles, $line, true);
 
-        if ($this->lineWillBeComplete($playerId, $line)) {
+        if ($this->lineWillBeComplete($playerId, $line) && intval(self::getGameStateValue(END_TURN_LOGGED)) === 0) {
             self::notifyAllPlayers('lastRound', clienttranslate('${player_name} will complete a line, it\'s last turn !'), [
                 'playerId' => $playerId,
                 'player_name' => self::getActivePlayerName(),
             ]);
+            self::setGameStateValue(END_TURN_LOGGED, 1);
         }
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles));

@@ -48,6 +48,7 @@ class Azul extends Table {
         self::initGameStateLabels([
             FIRST_PLAYER_FOR_NEXT_TURN => 10,
             RESOLVING_LINE => 11,
+            END_TURN_LOGGED => 12,
 
             VARIANT_OPTION => 100,
             UNDO => 101,
