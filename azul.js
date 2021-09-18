@@ -250,7 +250,7 @@ var Factories = /** @class */ (function () {
         var _this = this;
         var promise;
         if (from > 0) {
-            promise = Promise.allSettled(tiles.map(function (tile, index) {
+            promise = Promise.all(tiles.map(function (tile, index) {
                 var coordinates = _this.getCoordinatesInFactory(index);
                 _this.tilesInFactories[from][tile.type].push(tile);
                 var centerIndex = _this.tilesInFactories[0][tile.type].findIndex(function (t) { return tile.id == t.id; });
@@ -271,7 +271,7 @@ var Factories = /** @class */ (function () {
                 var coordinates = this.getCoordinatesForTile0();
                 promises.push(this.game.placeTile(tile0, "factory0", coordinates.left, coordinates.top));
             }
-            promise = Promise.allSettled(promises);
+            promise = Promise.all(promises);
         }
         setTimeout(function () { return _this.updateDiscardedTilesNumbers(); }, ANIMATION_MS);
         return promise;
@@ -352,7 +352,7 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
         var _this = this;
-        return Promise.allSettled(tiles.map(function (tile) {
+        return Promise.all(tiles.map(function (tile) {
             var left = line ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74;
             return _this.game.placeTile(tile, "player-table-" + _this.playerId + "-line" + line, left, 0);
         }));
@@ -901,7 +901,6 @@ var Azul = /** @class */ (function () {
                 if (typeof args.lineNumber === 'number') {
                     args.lineNumber = "<strong>" + args.line + "</strong>";
                 }
-                console.log(log, args.type);
                 if (log.indexOf('${number} ${color}') !== -1 && typeof args.type === 'number') {
                     var number = args.number;
                     var html = '';
@@ -909,7 +908,6 @@ var Azul = /** @class */ (function () {
                         html += "<div class=\"tile tile" + args.type + "\"></div>";
                     }
                     log = log.replace('${number} ${color}', html);
-                    console.log('log after', log);
                 }
             }
         }

@@ -242,7 +242,7 @@ class Factories {
     public undoTakeTiles(tiles: Tile[], from: number): Promise<any> {
         let promise;
         if (from > 0) {
-            promise = Promise.allSettled(tiles.map((tile, index) => {
+            promise = Promise.all(tiles.map((tile, index) => {
                 const coordinates = this.getCoordinatesInFactory(index);
                 this.tilesInFactories[from][tile.type].push(tile);
 
@@ -267,7 +267,7 @@ class Factories {
                     this.game.placeTile(tile0, `factory0`, coordinates.left, coordinates.top)
                 ); 
             }
-            promise = Promise.allSettled(promises);
+            promise = Promise.all(promises);
             
         }
 

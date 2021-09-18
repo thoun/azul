@@ -35,7 +35,7 @@ trait StateTrait {
 
     function stConfirmLine() {
         if (!$this->allowUndo()) {
-            $this->gamestate->nextState('nextPlayer');;
+            $this->gamestate->nextState('nextPlayer');
         }
     }
 

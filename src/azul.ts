@@ -629,7 +629,6 @@ class Azul implements AzulGame {
                     args.lineNumber = `<strong>${args.line}</strong>`;
                 }
 
-                console.log(log, args.type);
                 if (log.indexOf('${number} ${color}') !== -1 && typeof args.type === 'number') {
 
                     const number = args.number;
@@ -639,8 +638,6 @@ class Azul implements AzulGame {
                     }
 
                     log = log.replace('${number} ${color}', html);
-
-                    console.log('log after', log);
                 }
             }
         } catch (e) {
