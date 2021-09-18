@@ -57,6 +57,19 @@ $game_options = [
         'default' => 1
     ],
 
+    102 => [
+        'name' => totranslate('Fast scoring'),    
+        'values' => [
+                1 => [
+                    'name' => totranslate('Enabled'),
+                ],
+                2 => [
+                    'name' => totranslate('Disabled'),
+                ]
+            ],
+        'default' => 2
+    ],
+
 ];
 
 

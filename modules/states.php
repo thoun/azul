@@ -100,7 +100,14 @@ trait StateTrait {
         $line = intval(self::getGameStateValue(RESOLVING_LINE));
 
         if ($line > 0) {
-            $this->notifPlaceLine($playersIds, $line);
+            $fastScoring = $this->isFastScoring();
+            if ($fastScoring) {
+                $this->notifPlaceLine($playersIds, $line);
+            } else {
+                foreach($playersIds as $playerId) {
+                    $this->notifPlaceLine([$playerId], $line);
+                }
+            }
 
             if ($line < 5) {
                 $line++;
@@ -116,7 +123,14 @@ trait StateTrait {
                 $this->gamestate->nextState('nextLine');
             }
         } else {
-            $this->notifFloorLine($playersIds);
+            $fastScoring = $this->isFastScoring();
+            if ($fastScoring) {
+                $this->notifFloorLine($playersIds, $line);
+            } else {
+                foreach($playersIds as $playerId) {
+                    $this->notifFloorLine([$playerId], $line);
+                }
+            }
         
             $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
             $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
@@ -133,14 +147,7 @@ trait StateTrait {
         }
     }
 
-    function stEndScore() {
-        $playersIds = $this->getPlayersIds();
-
-        $walls = [];
-        foreach ($playersIds as $playerId) {
-            $walls[$playerId] = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
-        }
-
+    private function endScoreNotifs(array $playersIds, array $walls) {
         // Gain 2 points for each complete horizontal line of 5 consecutive tiles on your wall.
         for ($line = 1; $line <= 5; $line++) {
             $this->notifCompleteLines($playersIds, $walls, $line);
@@ -152,6 +159,24 @@ trait StateTrait {
         // Gain 10 points for each color of which you have placed all 5 tiles on your wall.
         for ($color = 1; $color <= 5; $color++) {
             $this->notifCompleteColors($playersIds, $walls, $color);
+        }
+    }
+
+    function stEndScore() {
+        $playersIds = $this->getPlayersIds();
+
+        $walls = [];
+        foreach ($playersIds as $playerId) {
+            $walls[$playerId] = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+        }
+        
+        $fastScoring = $this->isFastScoring();
+        if ($fastScoring) {
+            $this->endScoreNotifs($playersIds, $walls);
+        } else {
+            foreach($playersIds as $playerId) {
+                $this->endScoreNotifs([$playerId], $walls);
+            }
         }
 
         //$this->gamestate->jumpToState(ST_FILL_FACTORIES);

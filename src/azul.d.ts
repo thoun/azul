@@ -38,6 +38,7 @@ interface AzulGamedatas {
     variant: boolean;
     endRound: boolean;
     undo: boolean;
+    fastScoring: boolean;
 }
 
 interface AzulGame extends Game {

@@ -8,7 +8,8 @@ declare const g_gamethemeurl;
 declare const board: HTMLDivElement;
 
 const ANIMATION_MS = 500;
-const SCORE_MS = 2000;
+const SCORE_MS = 1500;
+const SLOW_SCORE_MS = 2500;
 
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
@@ -517,9 +518,9 @@ class Azul implements AzulGame {
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
             ['undoSelectLine', ANIMATION_MS],
-            ['placeTileOnWall', SCORE_MS],
-            ['emptyFloorLine', SCORE_MS],
-            ['endScore', SCORE_MS],
+            ['placeTileOnWall', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
+            ['emptyFloorLine', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
+            ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
         ];

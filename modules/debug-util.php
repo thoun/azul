@@ -13,6 +13,7 @@ trait DebugUtilTrait {
         } 
 
         for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343492, $i); }
+        for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343493, $i); }
 
         //for ($i=1; $i<=5;$i++) { $this->addTilesInFactory(10, $i); }
 

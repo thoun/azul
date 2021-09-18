@@ -376,7 +376,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     return to;
 };
 var ANIMATION_MS = 500;
-var SCORE_MS = 2000;
+var SCORE_MS = 1500;
+var SLOW_SCORE_MS = 2500;
 var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 var LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
@@ -810,9 +811,9 @@ var Azul = /** @class */ (function () {
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
             ['undoSelectLine', ANIMATION_MS],
-            ['placeTileOnWall', SCORE_MS],
-            ['emptyFloorLine', SCORE_MS],
-            ['endScore', SCORE_MS],
+            ['placeTileOnWall', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
+            ['emptyFloorLine', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
+            ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
         ];

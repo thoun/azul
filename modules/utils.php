@@ -50,6 +50,10 @@ trait UtilTrait {
         return intval(self::getGameStateValue(UNDO)) === 1;
     }
 
+    function isFastScoring() {
+        return intval(self::getGameStateValue(FAST_SCORING)) === 1;
+    }
+
     function getFactoryNumber($playerNumber = null) {
         if ($playerNumber == null) {
             $playerNumber = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player "));

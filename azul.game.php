@@ -52,6 +52,7 @@ class Azul extends Table {
 
             VARIANT_OPTION => 100,
             UNDO => 101,
+            FAST_SCORING => 102,
         ]);
 
         $this->tiles = self::getNew("module.common.deck");
@@ -177,7 +178,8 @@ class Azul extends Table {
         }
 
         $result['endRound'] = $endRound;
-        $result['undo'] = intval(self::getGameStateValue(UNDO)) == 1;
+        $result['undo'] = $this->allowUndo();
+        $result['fastScoring'] = $this->isFastScoring();
   
         return $result;
     }
