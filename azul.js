@@ -11,7 +11,6 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
         var destinationCR = destination.getBoundingClientRect();
         var deltaX = destinationCR.left - objectCR.left + (posX !== null && posX !== void 0 ? posX : 0) * game.getZoom();
         var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0) * game.getZoom();
-        //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
         object.style.transition = "transform 0.5s ease-in";
         object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px) rotate(" + rotation + "deg)";
         var transitionend = function () {
@@ -54,7 +53,7 @@ var Factories = /** @class */ (function () {
         }
         html += "</div>";
         dojo.place(html, 'factories');
-        this.fillFactories(factories, remainingTiles);
+        this.fillFactories(factories, remainingTiles, false);
     }
     Factories.prototype.getWidth = function () {
         var radius = 175 + this.factoryNumber * 25;
@@ -82,8 +81,10 @@ var Factories = /** @class */ (function () {
             top: centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE,
         };
     };
-    Factories.prototype.fillFactories = function (factories, remainingTiles) {
+    Factories.prototype.fillFactories = function (factories, remainingTiles, animation) {
         var _this = this;
+        if (animation === void 0) { animation = true; }
+        var tileIndex = 0;
         var _loop_1 = function (factoryIndex) {
             this_1.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
             var factoryTiles = factories[factoryIndex];
@@ -109,7 +110,17 @@ var Factories = /** @class */ (function () {
                     }
                 }
                 _this.tilesInFactories[factoryIndex][tile.type].push(tile);
-                _this.game.placeTile(tile, "factory" + factoryIndex, left, top, tile.type !== 0 ? Math.round(Math.random() * 90 - 45) : undefined);
+                if (tile.type == 0) {
+                    _this.game.placeTile(tile, "factory" + factoryIndex, left, top, tile.type !== 0 ? Math.round(Math.random() * 90 - 45) : undefined);
+                }
+                else {
+                    var delay = animation ? tileIndex * 80 : 0;
+                    setTimeout(function () {
+                        _this.game.placeTile(tile, "bag-empty", 20, 20, 0);
+                        slideToObjectAndAttach(_this.game, document.getElementById("tile" + tile.id), "factory" + factoryIndex, left, top, Math.round(Math.random() * 90 - 45));
+                    }, delay);
+                    tileIndex++;
+                }
             });
         };
         var this_1 = this;

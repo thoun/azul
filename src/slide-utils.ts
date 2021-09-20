@@ -14,8 +14,6 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
         const deltaX = destinationCR.left - objectCR.left + (posX ?? 0) * game.getZoom();
         const deltaY = destinationCR.top - objectCR.top + (posY ?? 0) * game.getZoom();
 
-        //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
-
         object.style.transition = `transform 0.5s ease-in`;
         object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px) rotate(${rotation}deg)`;
 

@@ -33,7 +33,7 @@ class Factories {
 
         dojo.place(html, 'factories');
 
-        this.fillFactories(factories, remainingTiles);
+        this.fillFactories(factories, remainingTiles, false);
     }
 
     public getWidth(): number {        
@@ -68,7 +68,8 @@ class Factories {
         };
     }
 
-    public fillFactories(factories: { [factoryId: number]: Tile[]; }, remainingTiles: number) {
+    public fillFactories(factories: { [factoryId: number]: Tile[]; }, remainingTiles: number, animation: boolean = true) {
+        let tileIndex = 0;
         for (let factoryIndex=0; factoryIndex<=this.factoryNumber; factoryIndex++) {
             this.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
             const factoryTiles = factories[factoryIndex];
@@ -93,7 +94,16 @@ class Factories {
                     }
                 }
                 this.tilesInFactories[factoryIndex][tile.type].push(tile);
-                this.game.placeTile(tile, `factory${factoryIndex}`, left, top, tile.type !== 0 ? Math.round(Math.random()*90 - 45) : undefined);
+                if (tile.type == 0) {
+                    this.game.placeTile(tile, `factory${factoryIndex}`, left, top, tile.type !== 0 ? Math.round(Math.random()*90 - 45) : undefined);
+                } else {
+                    const delay = animation ? tileIndex * 80 : 0;
+                    setTimeout(() => {
+                        this.game.placeTile(tile, `bag-empty`, 20, 20, 0);
+                        slideToObjectAndAttach(this.game, document.getElementById(`tile${tile.id}`), `factory${factoryIndex}`, left, top, Math.round(Math.random()*90 - 45));
+                    }, delay);
+                    tileIndex++;
+                }
             });
         }
 
