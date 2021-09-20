@@ -9,7 +9,7 @@ declare const board: HTMLDivElement;
 
 const ANIMATION_MS = 500;
 const SCORE_MS = 1500;
-const SLOW_SCORE_MS = 2500;
+const SLOW_SCORE_MS = 2000;
 
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
@@ -62,7 +62,7 @@ class Azul implements AzulGame {
         log('gamedatas', gamedatas);
 
         this.createPlayerPanels(gamedatas);
-        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories);
+        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
         this.createPlayerTables(gamedatas);
 
         this.setupNotifications();
@@ -532,7 +532,7 @@ class Azul implements AzulGame {
     }
 
     notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
-        this.factories.fillFactories(notif.args.factories);
+        this.factories.fillFactories(notif.args.factories, notif.args.remainingTiles);
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {

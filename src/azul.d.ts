@@ -39,6 +39,7 @@ interface AzulGamedatas {
     endRound: boolean;
     undo: boolean;
     fastScoring: boolean;
+    remainingTiles: number;
 }
 
 interface AzulGame extends Game {
@@ -69,6 +70,7 @@ interface NotifFirstPlayerTokenArgs {
 
 interface NotifFactoriesFilledArgs {
     factories: { [factoryId: number]: Tile[] };
+    remainingTiles: number;
 }
 
 interface NotifTilesSelectedArgs {

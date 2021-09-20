@@ -33,7 +33,7 @@ var FACTORY_RADIUS = 125;
 var HALF_TILE_SIZE = 29;
 var CENTER_FACTORY_TILE_SHIFT = 12;
 var Factories = /** @class */ (function () {
-    function Factories(game, factoryNumber, factories) {
+    function Factories(game, factoryNumber, factories, remainingTiles) {
         this.game = game;
         this.factoryNumber = factoryNumber;
         this.tilesPositionsInCenter = [[], [], [], [], [], []]; // color, tiles
@@ -54,7 +54,7 @@ var Factories = /** @class */ (function () {
         }
         html += "</div>";
         dojo.place(html, 'factories');
-        this.fillFactories(factories);
+        this.fillFactories(factories, remainingTiles);
     }
     Factories.prototype.getWidth = function () {
         var radius = 175 + this.factoryNumber * 25;
@@ -82,7 +82,7 @@ var Factories = /** @class */ (function () {
             top: centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE,
         };
     };
-    Factories.prototype.fillFactories = function (factories) {
+    Factories.prototype.fillFactories = function (factories, remainingTiles) {
         var _this = this;
         var _loop_1 = function (factoryIndex) {
             this_1.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
@@ -117,6 +117,7 @@ var Factories = /** @class */ (function () {
             _loop_1(factoryIndex);
         }
         this.updateDiscardedTilesNumbers();
+        this.setRemainingTiles(remainingTiles);
     };
     Factories.prototype.discardTiles = function (discardedTiles) {
         var _this = this;
@@ -276,6 +277,9 @@ var Factories = /** @class */ (function () {
         setTimeout(function () { return _this.updateDiscardedTilesNumbers(); }, ANIMATION_MS);
         return promise;
     };
+    Factories.prototype.setRemainingTiles = function (remainingTiles) {
+        document.getElementById("bag-empty").style.height = 100 - remainingTiles + "%";
+    };
     return Factories;
 }());
 var HAND_CENTER = 327;
@@ -377,7 +381,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
 };
 var ANIMATION_MS = 500;
 var SCORE_MS = 1500;
-var SLOW_SCORE_MS = 2500;
+var SLOW_SCORE_MS = 2000;
 var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 var LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
@@ -418,7 +422,7 @@ var Azul = /** @class */ (function () {
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
         this.createPlayerPanels(gamedatas);
-        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories);
+        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
         this.createPlayerTables(gamedatas);
         this.setupNotifications();
         this.setupPreferences();
@@ -823,7 +827,7 @@ var Azul = /** @class */ (function () {
         });
     };
     Azul.prototype.notif_factoriesFilled = function (notif) {
-        this.factories.fillFactories(notif.args.factories);
+        this.factories.fillFactories(notif.args.factories, notif.args.remainingTiles);
     };
     Azul.prototype.notif_tilesSelected = function (notif) {
         if (notif.args.fromFactory == 0) {

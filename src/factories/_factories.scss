@@ -29,6 +29,35 @@
     .tile.hover {
         box-shadow: 0 0 5px 5px white;
     }
+
+    #bag-wrapper {
+        position: absolute;
+        top: 24px;
+        left: 24px;
+    
+        width: 128px;
+        height: 128px;
+    
+        .bag {
+            position: absolute;
+            background: url('img/bag.png');
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+    
+        #bag-empty {
+            z-index: 2;
+            background-position: 103% 0%;
+            transition: height 0.5s;
+        }
+    
+        #bag-full {
+            z-index: 1;
+            background-position: 0% 0%;
+        }
+    }
 }
 
 .tile-count {

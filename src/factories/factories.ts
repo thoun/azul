@@ -9,7 +9,8 @@ class Factories {
     constructor(
         private game: AzulGame, 
         private factoryNumber: number,
-        factories: { [factoryId: number]: Tile[] }
+        factories: { [factoryId: number]: Tile[] },
+        remainingTiles: number,
     ) {
         const factoriesDiv = document.getElementById('factories');
 
@@ -32,7 +33,7 @@ class Factories {
 
         dojo.place(html, 'factories');
 
-        this.fillFactories(factories);
+        this.fillFactories(factories, remainingTiles);
     }
 
     public getWidth(): number {        
@@ -67,7 +68,7 @@ class Factories {
         };
     }
 
-    public fillFactories(factories: { [factoryId: number]: Tile[]; }) {
+    public fillFactories(factories: { [factoryId: number]: Tile[]; }, remainingTiles: number) {
         for (let factoryIndex=0; factoryIndex<=this.factoryNumber; factoryIndex++) {
             this.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
             const factoryTiles = factories[factoryIndex];
@@ -97,6 +98,7 @@ class Factories {
         }
 
         this.updateDiscardedTilesNumbers();
+        this.setRemainingTiles(remainingTiles);
     }
 
     public discardTiles(discardedTiles: Tile[]) {
@@ -273,5 +275,9 @@ class Factories {
 
         setTimeout(() => this.updateDiscardedTilesNumbers(), ANIMATION_MS);
         return promise;
+    }
+
+    private setRemainingTiles(remainingTiles: number) {
+        document.getElementById(`bag-empty`).style.height = `${100 - remainingTiles}%`;
     }
 }

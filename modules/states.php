@@ -25,6 +25,7 @@ trait StateTrait {
 
         self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins !"), [
             'factories' => $factories,
+            'remainingTiles' => intval($this->tiles->countCardInLocation('deck')),
         ]);
 
         self::incStat(1, 'roundsNumber');
