@@ -868,6 +868,9 @@ var Azul = /** @class */ (function () {
     Azul.prototype.notif_undoSelectLine = function (notif) {
         var table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.undo.tiles);
+        if (document.getElementById('last-round') && !notif.args.undo.lastRoundBefore) {
+            dojo.destroy('last-round');
+        }
     };
     Azul.prototype.notif_placeTileOnWall = function (notif) {
         var _this = this;

@@ -84,6 +84,7 @@ interface UndoSelect {
     from: number;
     tiles: Tile[];
     previousFirstPlayer: number;
+    lastRoundBefore: boolean;
 }
 
 interface NotifUndoArgs {

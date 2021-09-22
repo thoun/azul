@@ -568,6 +568,10 @@ class Azul implements AzulGame {
     notif_undoSelectLine(notif: Notif<NotifUndoArgs>) {
         const table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.undo.tiles);
+
+        if (document.getElementById('last-round') && !notif.args.undo.lastRoundBefore) {
+            dojo.destroy('last-round');
+        }
     }
 
     notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
