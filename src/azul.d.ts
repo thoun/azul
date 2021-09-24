@@ -44,6 +44,7 @@ interface AzulGamedatas {
 
 interface AzulGame extends Game {
     getPlayerId(): number;
+    isDefaultFont(): boolean;
     getZoom(): number;
     isVariant(): boolean;
     takeTiles(id: number): void;

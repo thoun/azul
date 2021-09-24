@@ -124,6 +124,16 @@ $game_preferences = [
         ],
         'default' => 1
     ],
+
+    206 => [
+        'name' => totranslate('Font style for player names'),
+        'needReload' => false,
+        'values' => [
+            1 => [ 'name' => totranslate( 'Default font' )],
+            2 => [ 'name' => totranslate( 'Azul font' )],
+        ],
+        'default' => 2
+    ],
 ];
 
 

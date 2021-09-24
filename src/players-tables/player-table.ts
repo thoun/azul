@@ -16,10 +16,10 @@ class PlayerTable {
         </div>
         <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="border-color: #${player.color}; box-shadow: 0 0 5px 2px #${player.color};">
             <div class="player-name-wrapper shift">
-                <div class="player-name color" style="color: #${player.color};">${player.name}</div>
+                <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'}" style="color: #${player.color};">${player.name}</div>
             </div>
             <div class="player-name-wrapper">
-                <div class="player-name dark">${player.name}</div>
+                <div id="player-name-${this.playerId}" class="player-name dark ${game.isDefaultFont() ? 'standard' : 'azul'}">${player.name}</div>
             </div>`;
             
         for (let i=1; i<=5; i++) {
@@ -99,5 +99,13 @@ class PlayerTable {
 
     public setGhostTile(line: number, column: number, color: number = null) {
         dojo.place(`<div class="tile tile${color ?? this.handColor} ghost"></div>`, `player-table-${this.playerId}-wall-spot-${line}-${column}`);
+    }
+    
+    public setFont(prefValue: number): void {
+        const defaultFont = prefValue === 1;
+        dojo.toggleClass(`player-name-shift-${this.playerId}`, 'standard', defaultFont);
+        dojo.toggleClass(`player-name-shift-${this.playerId}`, 'azul', !defaultFont);
+        dojo.toggleClass(`player-name-${this.playerId}`, 'standard', defaultFont);
+        dojo.toggleClass(`player-name-${this.playerId}`, 'azul', !defaultFont);
     }
 }

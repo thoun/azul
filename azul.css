@@ -135,14 +135,12 @@
 .player-table-wrapper .player-name-wrapper {
   position: absolute;
   font-size: 20px;
-  font-family: "Algeria";
   top: 63px;
   left: 46px;
   width: 120px;
   height: 38px;
   text-align: center;
   vertical-align: middle;
-  text-transform: uppercase;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -157,8 +155,15 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.player-table-wrapper .player-name-wrapper .player-name.azul {
+  text-transform: uppercase;
+  font-family: "Algeria";
+}
 .player-table-wrapper .player-name-wrapper .player-name.dark {
   color: #012c3c;
+}
+.player-table-wrapper .player-name-wrapper .player-name.dark.standard {
+  display: none;
 }
 .player-table-wrapper .player-table {
   background: url("img/playerboard.jpg");

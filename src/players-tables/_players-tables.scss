@@ -32,7 +32,6 @@
     .player-name-wrapper {
         position: absolute;
         font-size: 20px;
-        font-family: 'Algeria';
         top: 63px;
         left: 46px;
         width: 120px;
@@ -40,7 +39,6 @@
         text-align: center;
         //overflow: hidden;
         vertical-align: middle;
-        text-transform: uppercase;
         //text-overflow: ellipsis;
         display: flex;
         justify-content: center;
@@ -52,6 +50,11 @@
         }
 
         .player-name {
+            &.azul {
+                text-transform: uppercase;
+                font-family: 'Algeria';
+            }
+
             // limit to 2 lines before overflow
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -60,6 +63,10 @@
     
             &.dark {
                 color: #012c3c;
+
+                &.standard {
+                    display: none;
+                }
             }
         }
     }

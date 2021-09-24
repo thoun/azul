@@ -299,7 +299,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table " + (this.game.isVariant() ? 'variant' : '') + "\" style=\"border-color: #" + player.color + "; box-shadow: 0 0 5px 2px #" + player.color + ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div class=\"player-name color\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div class=\"player-name dark\">" + player.name + "</div>\n            </div>";
+        var html = "<div id=\"player-table-wrapper-" + this.playerId + "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-" + this.playerId + "\" class=\"player-hand " + (player.hand.length ? '' : 'empty') + "\">\n        </div>\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table " + (this.game.isVariant() ? 'variant' : '') + "\" style=\"border-color: #" + player.color + "; box-shadow: 0 0 5px 2px #" + player.color + ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-" + this.playerId + "\" class=\"player-name color " + (game.isDefaultFont() ? 'standard' : 'azul') + "\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-" + this.playerId + "\" class=\"player-name dark " + (game.isDefaultFont() ? 'standard' : 'azul') + "\">" + player.name + "</div>\n            </div>";
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-" + this.playerId + "-line" + i + "\" class=\"line\" style=\"top: " + (10 + 70 * (i - 1)) + "px; width: " + (69 * i - 5) + "px;\"></div>";
         }
@@ -382,6 +382,13 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.setGhostTile = function (line, column, color) {
         if (color === void 0) { color = null; }
         dojo.place("<div class=\"tile tile" + (color !== null && color !== void 0 ? color : this.handColor) + " ghost\"></div>", "player-table-" + this.playerId + "-wall-spot-" + line + "-" + column);
+    };
+    PlayerTable.prototype.setFont = function (prefValue) {
+        var defaultFont = prefValue === 1;
+        dojo.toggleClass("player-name-shift-" + this.playerId, 'standard', defaultFont);
+        dojo.toggleClass("player-name-shift-" + this.playerId, 'azul', !defaultFont);
+        dojo.toggleClass("player-name-" + this.playerId, 'standard', defaultFont);
+        dojo.toggleClass("player-name-" + this.playerId, 'azul', !defaultFont);
     };
     return PlayerTable;
 }());
@@ -587,7 +594,13 @@ var Azul = /** @class */ (function () {
             case 205:
                 dojo.toggleClass(document.getElementsByTagName('html')[0], 'hide-tile-count', prefValue == 2);
                 break;
+            case 206:
+                this.playersTables.forEach(function (playerTable) { return playerTable.setFont(prefValue); });
+                break;
         }
+    };
+    Azul.prototype.isDefaultFont = function () {
+        return Number(this.prefs[206].value) == 1;
     };
     Azul.prototype.startActionTimer = function (buttonId, time) {
         var _a;
@@ -926,7 +939,7 @@ var Azul = /** @class */ (function () {
                     for (var i = 0; i < number; i++) {
                         html += "<div class=\"tile tile" + args.type + "\"></div>";
                     }
-                    log = log.replace('${number} ${color}', html);
+                    log = _(log).replace('${number} ${color}', html);
                 }
             }
         }

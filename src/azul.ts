@@ -246,7 +246,14 @@ class Azul implements AzulGame {
             case 205:
                 dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'hide-tile-count', prefValue == 2);
                 break;
+            case 206: 
+                this.playersTables.forEach(playerTable => playerTable.setFont(prefValue));
+                break;
         }
+    }
+
+    public isDefaultFont(): boolean {
+        return Number((this as any).prefs[206].value) == 1;
     }
 
     private startActionTimer(buttonId: string, time: number) {
@@ -642,7 +649,7 @@ class Azul implements AzulGame {
                         html += `<div class="tile tile${args.type}"></div>`;
                     }
 
-                    log = log.replace('${number} ${color}', html);
+                    log = _(log).replace('${number} ${color}', html);
                 }
             }
         } catch (e) {
