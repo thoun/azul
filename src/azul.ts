@@ -144,7 +144,9 @@ class Azul implements AzulGame {
     onEnteringChooseColumns(args: EnteringChooseColumnsArgs) {
         const playerId = this.getPlayerId();
         const infos = args.players[playerId];
-        this.onEnteringChooseColumnsForPlayer(playerId, infos);
+        if (infos) {
+            this.onEnteringChooseColumnsForPlayer(playerId, infos);
+        }
     }
 
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -200,10 +202,13 @@ class Azul implements AzulGame {
                     (this as any).addActionButton('undoSelectLine_button', _("Undo line selection"), () => this.undoSelectLine(), null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
-                case 'chooseColumns': // for multiplayer states we have to do it here
-                    this.onEnteringChooseColumns(args);
-                    break;
             }
+        }
+        
+        switch (stateName) {
+            case 'chooseColumns': // for multiplayer states we have to do it here
+                this.onEnteringChooseColumns(args);
+                break;
         }
     } 
     

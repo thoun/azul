@@ -379,6 +379,7 @@ var PlayerTable = /** @class */ (function () {
         var ghostTileId = spotId + "-ghost-tile";
         var existingGhostTile = document.getElementById(ghostTileId);
         existingGhostTile === null || existingGhostTile === void 0 ? void 0 : existingGhostTile.parentElement.removeChild(existingGhostTile);
+        console.log('setGhostTile', line, column, color);
         if (column > 0) {
             dojo.place("<div id=\"" + ghostTileId + "\" class=\"tile tile" + color + " ghost\"></div>", spotId);
         }
@@ -507,7 +508,9 @@ var Azul = /** @class */ (function () {
     Azul.prototype.onEnteringChooseColumns = function (args) {
         var playerId = this.getPlayerId();
         var infos = args.players[playerId];
-        this.onEnteringChooseColumnsForPlayer(playerId, infos);
+        if (infos) {
+            this.onEnteringChooseColumnsForPlayer(playerId, infos);
+        }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
@@ -557,10 +560,12 @@ var Azul = /** @class */ (function () {
                     this.addActionButton('undoSelectLine_button', _("Undo line selection"), function () { return _this.undoSelectLine(); }, null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
-                case 'chooseColumns': // for multiplayer states we have to do it here
-                    this.onEnteringChooseColumns(args);
-                    break;
             }
+        }
+        switch (stateName) {
+            case 'chooseColumns': // for multiplayer states we have to do it here
+                this.onEnteringChooseColumns(args);
+                break;
         }
     };
     ///////////////////////////////////////////////////
