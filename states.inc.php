@@ -178,8 +178,6 @@ $playerActionsGameStates = [
         "type" => "game",
         "action" => "stPlaceTiles",
         "transitions" => [ 
-            "chooseColumns" => ST_MULTIPLAYER_CHOOSE_COLUMNS,
-            "nextLine" => ST_PLACE_TILES,
             "newRound" => ST_FILL_FACTORIES,
             "endScore" => ST_END_SCORE,
         ],

@@ -372,6 +372,24 @@ trait UtilTrait {
         }
     }
 
+    function notifPlaceLines(array $playersIds) {
+        $fastScoring = $this->isFastScoring();
+
+        if ($fastScoring) {
+            for ($line = 1; $line <= 5; $line++) {
+                $this->notifPlaceLine($playersIds, $line);
+            }
+            $this->notifFloorLine($playersIds, $line);
+        } else {
+            foreach($playersIds as $playerId) {
+                for ($line = 1; $line <= 5; $line++) {
+                    $this->notifPlaceLine([$playerId], $line);
+                }
+                $this->notifFloorLine([$playerId], $line);
+            }
+        }
+    }
+
     function notifFloorLine(array $playersIds) {
         $floorLinesNotif = [];
         foreach ($playersIds as $playerId) {

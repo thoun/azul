@@ -64,8 +64,6 @@ trait StateTrait {
     }
 
     function stEndRound() {
-        self::setGameStateValue(RESOLVING_LINE, 1);
-
         if ($this->isVariant()) {
             $this->gamestate->nextState('chooseColumns');
         } else {
@@ -105,49 +103,20 @@ trait StateTrait {
 
     function stPlaceTiles() {
         $playersIds = $this->getPlayersIds();
-        $line = intval(self::getGameStateValue(RESOLVING_LINE));
 
-        if ($line > 0) {
-            $fastScoring = $this->isFastScoring();
-            if ($fastScoring) {
-                $this->notifPlaceLine($playersIds, $line);
-            } else {
-                foreach($playersIds as $playerId) {
-                    $this->notifPlaceLine([$playerId], $line);
-                }
-            }
-
-            if ($line < 5) {
-                $line++;
-                self::setGameStateValue(RESOLVING_LINE, $line);                
-
-                $this->gamestate->nextState('nextLine');
-            } else {
-                self::setGameStateValue(RESOLVING_LINE, 0);
-                $this->gamestate->nextState('nextLine');
-            }
-        } else {
-            $fastScoring = $this->isFastScoring();
-            if ($fastScoring) {
-                $this->notifFloorLine($playersIds, $line);
-            } else {
-                foreach($playersIds as $playerId) {
-                    $this->notifFloorLine([$playerId], $line);
-                }
-            }
-        
-            $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
-            $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
-
-            if ($this->getGameProgression() == 100) {
-                $this->gamestate->nextState('endScore');
-            } else {
-                $playerId = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
-                $this->gamestate->changeActivePlayer($playerId);
-                self::giveExtraTime($playerId);
+        $this->notifPlaceLines($playersIds);
     
-                $this->gamestate->nextState('newRound');
-            }
+        $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
+        $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
+
+        if ($this->getGameProgression() == 100) {
+            $this->gamestate->nextState('endScore');
+        } else {
+            $playerId = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
+            $this->gamestate->changeActivePlayer($playerId);
+            self::giveExtraTime($playerId);
+
+            $this->gamestate->nextState('newRound');
         }
     }
 
