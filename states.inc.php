@@ -150,21 +150,25 @@ $playerActionsGameStates = [
         "type" => "game",
         "action" => "stEndRound",
         "transitions" => [
-            "chooseColumn" => ST_MULTIPLAYER_CHOOSE_COLUMN,
+            "chooseColumns" => ST_MULTIPLAYER_CHOOSE_COLUMNS,
             "placeTiles" => ST_PLACE_TILES,
         ],
     ],
 
-    ST_MULTIPLAYER_CHOOSE_COLUMN => [
-        "name" => "chooseColumn",
-        "description" => clienttranslate('Players with complete line ${line} must choose a column'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a column'),
+    ST_MULTIPLAYER_CHOOSE_COLUMNS => [
+        "name" => "chooseColumns",
+        "description" => clienttranslate('Players with complete lines must choose columns to place tiles'),
+        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
         "type" => "multipleactiveplayer",
-        "action" => "stChooseColumn",
-        "args" => "argChooseColumn",
-        "possibleactions" => [ "selectColumn" ],
+        "action" => "stChooseColumns",
+        "args" => "argChooseColumns",
+        "possibleactions" => [ 
+            "selectColumn",
+            "confirmColumns",
+            "undoColumns"
+        ],
         "transitions" => [
-            "placeTiles" => ST_PLACE_TILES,
+            "confirmColumns" => ST_PLACE_TILES,
         ],
     ],
 
@@ -174,7 +178,7 @@ $playerActionsGameStates = [
         "type" => "game",
         "action" => "stPlaceTiles",
         "transitions" => [ 
-            "chooseColumn" => ST_MULTIPLAYER_CHOOSE_COLUMN,
+            "chooseColumns" => ST_MULTIPLAYER_CHOOSE_COLUMNS,
             "nextLine" => ST_PLACE_TILES,
             "newRound" => ST_FILL_FACTORIES,
             "endScore" => ST_END_SCORE,

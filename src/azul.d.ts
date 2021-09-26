@@ -11,8 +11,7 @@ interface AzulPlayer extends Player {
     wall: Tile[];
     hand: Tile[];
     playerNo: number;
-    selectedLine: number; // only used to place ghost tile with selectedColumn
-    selectedColumn: number;
+    selectedColumns: SelectedColumn[];
 }
 
 /**
@@ -59,10 +58,33 @@ interface EnteringChooseLineArgs {
     lines: number[];
 }
 
-interface EnteringChooseColumnArgs {
+interface NextColumnToSelect {
+    availableColumns: number[];
+    color: number;
     line: number;
-    columns: { [playerId: number]: number[] };
-    colors: { [playerId: number]: number };
+}
+
+interface SelectedColumn {
+    column: number;
+    color: number;
+    line: number;
+
+}
+
+interface ChooseColumnsForPlayer {
+    nextColumnToSelect?: NextColumnToSelect;
+    selectedColumns: SelectedColumn[];
+}
+
+
+interface EnteringChooseColumnsArgs {
+    players: { [playerId: number]: ChooseColumnsForPlayer };
+}
+
+interface NotifUpdateSelectColumnArgs {
+    playerId: number;
+    arg: ChooseColumnsForPlayer;
+    undo: boolean;
 }
 
 interface NotifFirstPlayerTokenArgs {

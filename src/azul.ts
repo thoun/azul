@@ -117,17 +117,34 @@ class Azul implements AzulGame {
         }
     }
 
-    onEnteringChooseColumn(args: EnteringChooseColumnArgs) {
+    onEnteringChooseColumnsForPlayer(playerId: number, infos: ChooseColumnsForPlayer) {
+        const table = this.getPlayerTable(playerId);
+
+        infos.selectedColumns.forEach(selectedColumn => table.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));
+
         if ((this as any).isCurrentPlayerActive()) {
-            const playerId = this.getPlayerId();
-            args.columns[playerId].forEach(column => {
-                this.getPlayerTable(playerId).handColor = args.colors[playerId];
-                dojo.addClass(
-                    column == 0 ? `player-table-${this.getPlayerId()}-column0` : `player-table-${this.getPlayerId()}-wall-spot-${args.line}-${column}`, 
-                    'selectable'
+            const nextColumnToSelect = infos.nextColumnToSelect;
+            if (nextColumnToSelect) {
+                nextColumnToSelect.availableColumns.forEach(column =>
+                    dojo.addClass(
+                        /*column == 0 ? `player-table-${playerId}-column0` :*/ `player-table-${playerId}-wall-spot-${nextColumnToSelect.line}-${column}`, 
+                        'selectable'
+                    )
                 );
-            });
+            }
+            
+            if (!document.getElementById('confirmColumns_button')) {
+                (this as any).addActionButton('confirmColumns_button', _("Confirm"), () => this.confirmColumns());
+                (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
+            }
+            dojo.toggleClass('confirmColumns_button', 'disabled', !!infos.nextColumnToSelect);
         }
+    }
+
+    onEnteringChooseColumns(args: EnteringChooseColumnsArgs) {
+        const playerId = this.getPlayerId();
+        const infos = args.players[playerId];
+        this.onEnteringChooseColumnsForPlayer(playerId, infos);
     }
 
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -143,8 +160,8 @@ class Azul implements AzulGame {
             case 'chooseLine':
                 this.onLeavingChooseLine();
                 break;
-            case 'chooseColumn':
-                this.onLeavingChooseColumn();
+            case 'chooseColumns':
+                this.onLeavingChooseColumns();
                 break;
         }
     }
@@ -163,18 +180,7 @@ class Azul implements AzulGame {
         }
     }
 
-    onLeavingChooseColumn() {
-        if (!this.gamedatas.players[this.getPlayerId()]) {
-            return;
-        }
-
-        for (let line=1; line<=5; line++) {
-            for (let column=1; column<=5; column++) {
-                dojo.removeClass(`player-table-${this.getPlayerId()}-wall-spot-${line}-${column}`, 'selectable');
-            }
-        }
-        dojo.removeClass(`player-table-${this.getPlayerId()}-column0`, 'selectable');
-        
+    onLeavingChooseColumns() {        
         Array.from(document.getElementsByClassName('ghost')).forEach(elem => elem.parentElement.removeChild(elem));
     }
 
@@ -194,8 +200,8 @@ class Azul implements AzulGame {
                     (this as any).addActionButton('undoSelectLine_button', _("Undo line selection"), () => this.undoSelectLine(), null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
-                case 'chooseColumn': // for multiplayer states we have to do it here
-                    this.onEnteringChooseColumn(args);
+                case 'chooseColumns': // for multiplayer states we have to do it here
+                    this.onEnteringChooseColumns(args);
                     break;
             }
         }
@@ -385,6 +391,19 @@ class Azul implements AzulGame {
         
     }
 
+    private removeColumnSelection() {
+        if (!this.gamedatas.players[this.getPlayerId()]) {
+            return;
+        }
+
+        for (let line=1; line<=5; line++) {
+            for (let column=1; column<=5; column++) {
+                dojo.removeClass(`player-table-${this.getPlayerId()}-wall-spot-${line}-${column}`, 'selectable');
+            }
+        }
+        dojo.removeClass(`player-table-${this.getPlayerId()}-column0`, 'selectable');
+    }
+
     private createPlayerPanels(gamedatas: AzulGamedatas) {
 
         Object.values(gamedatas.players).forEach(player => {
@@ -478,7 +497,23 @@ class Azul implements AzulGame {
             column
         });
 
-        this.onLeavingChooseColumn();
+        this.removeColumnSelection();
+    }
+
+    public confirmColumns() {
+        if(!(this as any).checkAction('confirmColumns')) {
+            return;
+        }
+
+        this.takeAction('confirmColumns');
+    }
+
+    public undoColumns() {
+        if(!(this as any).checkAction('undoColumns')) {
+            return;
+        }
+
+        this.takeAction('undoColumns');
     }
 
     public takeAction(action: string, data?: any) {
@@ -530,6 +565,7 @@ class Azul implements AzulGame {
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
+            ['updateSelectColumn', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -620,6 +656,14 @@ class Azul implements AzulGame {
 
     notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
         this.placeFirstPlayerToken(notif.args.playerId);
+    }
+
+    notif_updateSelectColumn(notif: Notif<NotifUpdateSelectColumnArgs>) {
+        if (notif.args.undo) {
+            this.removeColumnSelection();
+            this.onLeavingChooseColumns();
+        }
+        this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg);
     }
 
     notif_lastRound() {

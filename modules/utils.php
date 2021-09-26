@@ -84,12 +84,18 @@ trait UtilTrait {
         self::DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
     }
 
-    function getSelectedColumn(int $playerId) {
-        return intval(self::getUniqueValueFromDB("SELECT selected_column FROM player WHERE player_id = $playerId"));
+    function getSelectedColumns(int $playerId) {
+        $json_obj = self::getUniqueValueFromDB("SELECT `selected_columns` FROM `player` where `player_id` = $playerId");
+        $object = json_decode($json_obj, true);
+        return $object;
     }
 
-    function setSelectedColumn(int $playerId, int $selectedColumn) {
-        self::DbQuery("UPDATE player SET selected_column = $selectedColumn WHERE player_id = $playerId");
+    function setSelectedColumn(int $playerId, int $line, int $column) {
+        $object = $this->getSelectedColumns($playerId);
+        $object[$line] = $column;
+        
+        $jsonObj = json_encode($object);        
+        self::DbQuery("UPDATE player SET selected_columns = '$jsonObj' WHERE player_id = $playerId");
     }
 
     function getTileFromDb($dbTile) {
@@ -314,29 +320,37 @@ trait UtilTrait {
             if (count($playerTiles) == $line) {
                 
                 $wallTile = $playerTiles[0];
+                $column = null;
                 if ($this->isVariant()) {
-                    $wallTile->column = $this->getSelectedColumn($playerId);
-                    $this->setSelectedColumn($playerId, 0);
+                    $selectedColumns = $this->getSelectedColumns($playerId);
+                    $column = $selectedColumns[$line];
                 } else {
-                    $wallTile->column = $this->getColumnForTile($line, $wallTile->type);
+                    $column = $this->getColumnForTile($line, $wallTile->type);
                 }
-                $discardedTiles = array_slice($playerTiles, 1);
-                $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
-                $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
 
-                $pointsDetail = $this->getPointsDetailForPlacedTile($playerId, $wallTile);
-
-                $obj = new stdClass();
-                $obj->placedTile = $wallTile;
-                $obj->discardedTiles = $discardedTiles;
-                $obj->pointsDetail = $pointsDetail;
-
-                $completeLinesNotif[$playerId] = $obj;
-
-                $this->incPlayerScore($playerId, $pointsDetail->points);
-
-                self::incStat($pointsDetail->points, 'pointsWallTile');
-                self::incStat($pointsDetail->points, 'pointsWallTile', $playerId);
+                if ($column == 0) {
+                    // variant : we place tiles on floor line, count will be done after
+                    $this->placeTilesOnLine($playerId, $playerTiles, 0, false);
+                } else {
+                    $wallTile->column = $column;
+                    $discardedTiles = array_slice($playerTiles, 1);
+                    $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
+                    $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
+    
+                    $pointsDetail = $this->getPointsDetailForPlacedTile($playerId, $wallTile);
+    
+                    $obj = new stdClass();
+                    $obj->placedTile = $wallTile;
+                    $obj->discardedTiles = $discardedTiles;
+                    $obj->pointsDetail = $pointsDetail;
+    
+                    $completeLinesNotif[$playerId] = $obj;
+    
+                    $this->incPlayerScore($playerId, $pointsDetail->points);
+    
+                    self::incStat($pointsDetail->points, 'pointsWallTile');
+                    self::incStat($pointsDetail->points, 'pointsWallTile', $playerId);
+                }
             }
         }
 
@@ -505,11 +519,14 @@ trait UtilTrait {
     function getAvailableColumnForColor(int $playerId, int $color, int $line) {
         $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
 
+        $ghostTiles = $this->getSelectedColumnsArray($playerId);
+        $wallAndGhost = array_merge($wall, $ghostTiles);
+
         $availableColumns = [];
         for ($column = 1; $column <= 5; $column++) {
 
             $tilesSameColorSameColumnOrSamePosition = array_values(array_filter(
-                $wall, function($tile) use ($column, $line, $color) { return $tile->column == $column && ($tile->type == $color || $tile->line == $line); })
+                $wallAndGhost, function($tile) use ($column, $line, $color) { return $tile->column == $column && ($tile->type == $color || $tile->line == $line); })
             );
 
             if (count($tilesSameColorSameColumnOrSamePosition) == 0) {

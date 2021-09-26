@@ -3,8 +3,6 @@ const HAND_CENTER = 327;
 class PlayerTable {
     public playerId: number;
 
-    public handColor: number;
-
     constructor(
         private game: AzulGame, 
         player: AzulPlayer) {
@@ -52,7 +50,6 @@ class PlayerTable {
                 for (let column=1; column<=5; column++) {
                     document.getElementById(`player-table-${this.playerId}-wall-spot-${line}-${column}`).addEventListener('click', () => {
                         this.game.selectColumn(column);
-                        this.setGhostTile(line, column);
                     });
                 }
             }
@@ -69,9 +66,8 @@ class PlayerTable {
         
         if (this.game.isVariant()) {
             // if player hit refresh when column is selected but not yet applied, we reset ghost tile
-            if (player.selectedColumn && this.playerId === this.game.getPlayerId()) {
-                const tiles = player.lines.filter(tile => tile.line === player.selectedLine);
-                this.setGhostTile(player.selectedLine, player.selectedColumn, tiles[0].type);
+            if (this.playerId === this.game.getPlayerId()) {
+                player.selectedColumns.forEach(selectedColumn => this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));
             }
         }
     }
@@ -97,8 +93,14 @@ class PlayerTable {
         dojo.toggleClass(`player-hand-${this.playerId}`, 'empty', !visible);
     }
 
-    public setGhostTile(line: number, column: number, color: number = null) {
-        dojo.place(`<div class="tile tile${color ?? this.handColor} ghost"></div>`, `player-table-${this.playerId}-wall-spot-${line}-${column}`);
+    public setGhostTile(line: number, column: number, color: number) {
+        const spotId = `player-table-${this.playerId}-wall-spot-${line}-${column}`;
+        const ghostTileId = `${spotId}-ghost-tile`;
+        const existingGhostTile = document.getElementById(ghostTileId);
+        existingGhostTile?.parentElement.removeChild(existingGhostTile);
+        if (column > 0) {
+            dojo.place(`<div id="${ghostTileId}" class="tile tile${color} ghost"></div>`, spotId);
+        }
     }
     
     public setFont(prefValue: number): void {

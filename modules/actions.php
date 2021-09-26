@@ -178,23 +178,39 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function applySelectColumn(int $playerId, int $column) {
-        if ($column > 0) {
-            $this->setSelectedColumn($playerId, $column);
+    function selectColumn(int $column) {
+        $playerId = intval(self::getCurrentPlayerId());
+
+        $nextColumnToSelect = $this->nextColumnToSelect($playerId);
+        if ($nextColumnToSelect != null) {
+            $this->setSelectedColumn($playerId, $nextColumnToSelect->line, $column);
+
+            self::notifyPlayer($playerId, 'updateSelectColumn', '', [
+                'playerId' => $playerId,
+                'arg' => $this->argChooseColumnForPlayer($playerId),
+            ]);
         } else {
-            $line = intval(self::getGameStateValue(RESOLVING_LINE));
-            $tiles = $this->getTilesFromLine($playerId, $line);
-            $this->placeTilesOnLine($playerId, $tiles, 0, false);
+            throw new BgaUserException('No column to select');
         }
     }
 
-    function selectColumn(int $column) {
-        $playerId = self::getCurrentPlayerId();
+    function confirmColumns() {
+        $playerId = intval(self::getCurrentPlayerId());
 
-        $this->applySelectColumn($playerId, $column);
-            
         // Make this player unactive now (and tell the machine state to use transtion "placeTiles" if all players are now unactive
-        $this->gamestate->setPlayerNonMultiactive($playerId, 'placeTiles');
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'confirmColumns');
+    }
+
+    function undoColumns() {
+        $playerId = intval(self::getCurrentPlayerId());
+
+        self::DbQuery("UPDATE player SET selected_columns = '[]' WHERE player_id = $playerId");
+        
+        self::notifyPlayer($playerId, 'updateSelectColumn', '', [
+            'playerId' => $playerId,
+            'arg' => $this->argChooseColumnForPlayer($playerId),
+            'undo' => true,
+        ]);
     }
 
 }

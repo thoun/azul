@@ -91,6 +91,22 @@
       self::ajaxResponse();
     }
 
+    public function confirmColumns() {
+      self::setAjaxMode();
+
+      $this->game->confirmColumns();
+
+      self::ajaxResponse();
+    }
+
+    public function undoColumns() {
+      self::setAjaxMode();
+
+      $this->game->undoColumns();
+
+      self::ajaxResponse();
+    }
+
   }
   
 

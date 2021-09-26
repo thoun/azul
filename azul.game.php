@@ -170,10 +170,7 @@ class Azul extends Table {
             }
 
             if ($isVariant) {
-                $player['selectedColumn'] = $this->getSelectedColumn($playerId);
-                if ($player['selectedColumn'] > 0) {                    
-                    $player['selectedLine'] = intval(self::getGameStateValue(RESOLVING_LINE));
-                }
+                $player['selectedColumns'] = $this->getSelectedColumnsArray($playerId);
             }
         }
 
@@ -275,7 +272,13 @@ class Azul extends Table {
             if ($from_version <= 2109161337) {
                 // ! important ! Use DBPREFIX_<table_name> for all tables    
                 $sql = "CREATE TABLE IF NOT EXISTS DBPREFIX_global_variables(`name` varchar(50) NOT NULL, `value` json, PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8";
-                self::applyDbUpgradeToAllDB( $sql );
+                self::applyDbUpgradeToAllDB($sql);
+            }
+
+            if ($from_version <= 2109241936) {
+                // ! important ! Use <table_name> for all tables    
+                $sql = "ALTER TABLE DBPREFIX_player ADD `selected_columns` json";
+                self::applyDbUpgradeToAllDB($sql);
             }
         }    
 }

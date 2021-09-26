@@ -24,26 +24,65 @@ trait ArgsTrait {
         ];
     }
 
-    function argChooseColumn() {
-        $playersIds = $this->getPlayersIds();
-        $line = intval(self::getGameStateValue(RESOLVING_LINE));
+    function nextColumnToSelect(int $playerId) {
+        $selectedColumns = $this->getSelectedColumns($playerId);
 
-        $playersIdsWithCompleteLine = [];
-        $playersIdsWithColor = [];
+        for ($line = 1; $line <= 5; $line++) {
+            if (!array_key_exists($line, $selectedColumns)) {
+                $playerTiles = $this->getTilesFromLine($playerId, $line);
+                if (count($playerTiles) == $line) {
+                    $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
+
+                    if (count($availableColumns) > 1) {
+                        $lineInfos = new stdClass();
+                        $lineInfos->color = $playerTiles[0]->type;
+                        $lineInfos->availableColumns = $availableColumns;
+                        $lineInfos->line = $line;
+                        return $lineInfos;
+                    } else {
+                        // if only one possibility, it's automaticaly selected
+                        $this->setSelectedColumn($playerId, $line, $availableColumns[0]);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    function getSelectedColumnsArray(int $playerId) {
+        $result = [];
+        $selectedColumns = $this->getSelectedColumns($playerId);
+        foreach($selectedColumns as $line => $column) {
+            $selectedColumn = new stdClass();
+            $selectedColumn->line = $line;
+            $selectedColumn->column = $column;
+            $selectedColumn->type = $this->getTilesFromLine($playerId, $line)[0]->type;
+            $selectedColumn->color = $selectedColumn->type;
+            $result[] = $selectedColumn;
+        }
+
+        return $result;
+    }
+
+    function argChooseColumnForPlayer(int $playerId) {
+        $playerArg = new stdClass();
+        $playerArg->nextColumnToSelect = $this->nextColumnToSelect($playerId);
+        $playerArg->selectedColumns = $this->getSelectedColumnsArray($playerId);
+
+        return $playerArg;
+    }
+
+    function argChooseColumns() {
+        $playersIds = $this->getPlayersIds();
+
+        $players = [];
 
         foreach ($playersIds as $playerId) {
-            $playerTiles = $this->getTilesFromLine($playerId, $line);
-            if (count($playerTiles) == $line) {
-                $columns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
-                $playersIdsWithCompleteLine[$playerId] = $columns;
-                $playersIdsWithColor[$playerId] = $playerTiles[0]->type;
-            }
+            $players[$playerId] = $this->argChooseColumnForPlayer($playerId);
         }
 
         return [
-            'line' => $line,
-            'columns' => $playersIdsWithCompleteLine,
-            'colors' => $playersIdsWithColor,
+            'players' => $players,
         ];
     }
 

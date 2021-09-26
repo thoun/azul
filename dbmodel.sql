@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `tile` (
    PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-ALTER TABLE `player` ADD `selected_column` tinyint UNSIGNED;
+ALTER TABLE `player` ADD `selected_columns` json;
 
 CREATE TABLE IF NOT EXISTS `global_variables` (
   `name` varchar(50) NOT NULL,

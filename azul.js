@@ -325,20 +325,16 @@ var PlayerTable = /** @class */ (function () {
             _loop_3(i);
         }
         if (this.game.isVariant()) {
-            var _loop_4 = function (line) {
-                var _loop_6 = function (column) {
+            for (var line = 1; line <= 5; line++) {
+                var _loop_4 = function (column) {
                     document.getElementById("player-table-" + this_4.playerId + "-wall-spot-" + line + "-" + column).addEventListener('click', function () {
                         _this.game.selectColumn(column);
-                        _this.setGhostTile(line, column);
                     });
                 };
+                var this_4 = this;
                 for (var column = 1; column <= 5; column++) {
-                    _loop_6(column);
+                    _loop_4(column);
                 }
-            };
-            var this_4 = this;
-            for (var line = 1; line <= 5; line++) {
-                _loop_4(line);
             }
             document.getElementById("player-table-" + this.playerId + "-column0").addEventListener('click', function () { return _this.game.selectColumn(0); });
         }
@@ -353,9 +349,8 @@ var PlayerTable = /** @class */ (function () {
         this.placeTilesOnWall(player.wall);
         if (this.game.isVariant()) {
             // if player hit refresh when column is selected but not yet applied, we reset ghost tile
-            if (player.selectedColumn && this.playerId === this.game.getPlayerId()) {
-                var tiles = player.lines.filter(function (tile) { return tile.line === player.selectedLine; });
-                this.setGhostTile(player.selectedLine, player.selectedColumn, tiles[0].type);
+            if (this.playerId === this.game.getPlayerId()) {
+                player.selectedColumns.forEach(function (selectedColumn) { return _this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color); });
             }
         }
     }
@@ -380,8 +375,13 @@ var PlayerTable = /** @class */ (function () {
         dojo.toggleClass("player-hand-" + this.playerId, 'empty', !visible);
     };
     PlayerTable.prototype.setGhostTile = function (line, column, color) {
-        if (color === void 0) { color = null; }
-        dojo.place("<div class=\"tile tile" + (color !== null && color !== void 0 ? color : this.handColor) + " ghost\"></div>", "player-table-" + this.playerId + "-wall-spot-" + line + "-" + column);
+        var spotId = "player-table-" + this.playerId + "-wall-spot-" + line + "-" + column;
+        var ghostTileId = spotId + "-ghost-tile";
+        var existingGhostTile = document.getElementById(ghostTileId);
+        existingGhostTile === null || existingGhostTile === void 0 ? void 0 : existingGhostTile.parentElement.removeChild(existingGhostTile);
+        if (column > 0) {
+            dojo.place("<div id=\"" + ghostTileId + "\" class=\"tile tile" + color + " ghost\"></div>", spotId);
+        }
     };
     PlayerTable.prototype.setFont = function (prefValue) {
         var defaultFont = prefValue === 1;
@@ -485,15 +485,29 @@ var Azul = /** @class */ (function () {
             args.lines.forEach(function (i) { return dojo.addClass("player-table-" + _this.getPlayerId() + "-line" + i, 'selectable'); });
         }
     };
-    Azul.prototype.onEnteringChooseColumn = function (args) {
+    Azul.prototype.onEnteringChooseColumnsForPlayer = function (playerId, infos) {
         var _this = this;
+        var table = this.getPlayerTable(playerId);
+        infos.selectedColumns.forEach(function (selectedColumn) { return table.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color); });
         if (this.isCurrentPlayerActive()) {
-            var playerId_1 = this.getPlayerId();
-            args.columns[playerId_1].forEach(function (column) {
-                _this.getPlayerTable(playerId_1).handColor = args.colors[playerId_1];
-                dojo.addClass(column == 0 ? "player-table-" + _this.getPlayerId() + "-column0" : "player-table-" + _this.getPlayerId() + "-wall-spot-" + args.line + "-" + column, 'selectable');
-            });
+            var nextColumnToSelect_1 = infos.nextColumnToSelect;
+            if (nextColumnToSelect_1) {
+                nextColumnToSelect_1.availableColumns.forEach(function (column) {
+                    return dojo.addClass(
+                    /*column == 0 ? `player-table-${playerId}-column0` :*/ "player-table-" + playerId + "-wall-spot-" + nextColumnToSelect_1.line + "-" + column, 'selectable');
+                });
+            }
+            if (!document.getElementById('confirmColumns_button')) {
+                this.addActionButton('confirmColumns_button', _("Confirm"), function () { return _this.confirmColumns(); });
+                this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
+            }
+            dojo.toggleClass('confirmColumns_button', 'disabled', !!infos.nextColumnToSelect);
         }
+    };
+    Azul.prototype.onEnteringChooseColumns = function (args) {
+        var playerId = this.getPlayerId();
+        var infos = args.players[playerId];
+        this.onEnteringChooseColumnsForPlayer(playerId, infos);
     };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
@@ -507,8 +521,8 @@ var Azul = /** @class */ (function () {
             case 'chooseLine':
                 this.onLeavingChooseLine();
                 break;
-            case 'chooseColumn':
-                this.onLeavingChooseColumn();
+            case 'chooseColumns':
+                this.onLeavingChooseColumns();
                 break;
         }
     };
@@ -523,16 +537,7 @@ var Azul = /** @class */ (function () {
             dojo.removeClass("player-table-" + this.getPlayerId() + "-line" + i, 'selectable');
         }
     };
-    Azul.prototype.onLeavingChooseColumn = function () {
-        if (!this.gamedatas.players[this.getPlayerId()]) {
-            return;
-        }
-        for (var line = 1; line <= 5; line++) {
-            for (var column = 1; column <= 5; column++) {
-                dojo.removeClass("player-table-" + this.getPlayerId() + "-wall-spot-" + line + "-" + column, 'selectable');
-            }
-        }
-        dojo.removeClass("player-table-" + this.getPlayerId() + "-column0", 'selectable');
+    Azul.prototype.onLeavingChooseColumns = function () {
         Array.from(document.getElementsByClassName('ghost')).forEach(function (elem) { return elem.parentElement.removeChild(elem); });
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -552,8 +557,8 @@ var Azul = /** @class */ (function () {
                     this.addActionButton('undoSelectLine_button', _("Undo line selection"), function () { return _this.undoSelectLine(); }, null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
-                case 'chooseColumn': // for multiplayer states we have to do it here
-                    this.onEnteringChooseColumn(args);
+                case 'chooseColumns': // for multiplayer states we have to do it here
+                    this.onEnteringChooseColumns(args);
                     break;
             }
         }
@@ -722,6 +727,17 @@ var Azul = /** @class */ (function () {
             return Promise.resolve(true);
         }
     };
+    Azul.prototype.removeColumnSelection = function () {
+        if (!this.gamedatas.players[this.getPlayerId()]) {
+            return;
+        }
+        for (var line = 1; line <= 5; line++) {
+            for (var column = 1; column <= 5; column++) {
+                dojo.removeClass("player-table-" + this.getPlayerId() + "-wall-spot-" + line + "-" + column, 'selectable');
+            }
+        }
+        dojo.removeClass("player-table-" + this.getPlayerId() + "-column0", 'selectable');
+    };
     Azul.prototype.createPlayerPanels = function (gamedatas) {
         var _this = this;
         Object.values(gamedatas.players).forEach(function (player) {
@@ -797,7 +813,19 @@ var Azul = /** @class */ (function () {
         this.takeAction('selectColumn', {
             column: column
         });
-        this.onLeavingChooseColumn();
+        this.removeColumnSelection();
+    };
+    Azul.prototype.confirmColumns = function () {
+        if (!this.checkAction('confirmColumns')) {
+            return;
+        }
+        this.takeAction('confirmColumns');
+    };
+    Azul.prototype.undoColumns = function () {
+        if (!this.checkAction('undoColumns')) {
+            return;
+        }
+        this.takeAction('undoColumns');
     };
     Azul.prototype.takeAction = function (action, data) {
         data = data || {};
@@ -844,6 +872,7 @@ var Azul = /** @class */ (function () {
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
+            ['updateSelectColumn', 1],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -918,6 +947,13 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.notif_firstPlayerToken = function (notif) {
         this.placeFirstPlayerToken(notif.args.playerId);
+    };
+    Azul.prototype.notif_updateSelectColumn = function (notif) {
+        if (notif.args.undo) {
+            this.removeColumnSelection();
+            this.onLeavingChooseColumns();
+        }
+        this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg);
     };
     Azul.prototype.notif_lastRound = function () {
         if (document.getElementById('last-round')) {

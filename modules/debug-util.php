@@ -12,12 +12,12 @@ trait DebugUtilTrait {
             return;
         } 
 
-        for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343492, $i); }
-        for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343493, $i); }
+        //for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343492, $i); }
+        //for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343493, $i); }
 
         //for ($i=1; $i<=5;$i++) { $this->addTilesInFactory(10, $i); }
 
-        /*$this->debugSetWallTile(2343492, 1, 1, 1);
+        $this->debugSetWallTile(2343492, 1, 1, 1);
         $this->debugSetWallTile(2343492, 1, 2, 2);
         $this->debugSetWallTile(2343492, 1, 4, 4);
         $this->debugSetWallTile(2343492, 1, 5, 5);
@@ -27,7 +27,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 5, 1, 2);
         $this->debugSetWallTile(2343492, 5, 5, 4);
         $this->debugSetWallTile(2343492, 5, 4, 5);
-        $this->debugSetLineTiles(2343492, 5, 5, 3);*/
+        $this->debugSetLineTiles(2343492, 5, 5, 3);
 
         $this->gamestate->changeActivePlayer(2343492);
     }

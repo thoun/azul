@@ -31,6 +31,10 @@ trait StateTrait {
         self::incStat(1, 'roundsNumber');
         self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
 
+        if ($this->isVariant()) {
+            self::DbQuery("UPDATE player SET selected_columns = '{}'");
+        }
+
         $this->gamestate->nextState('next');
     }
 
@@ -63,34 +67,37 @@ trait StateTrait {
         self::setGameStateValue(RESOLVING_LINE, 1);
 
         if ($this->isVariant()) {
-            $this->gamestate->nextState('chooseColumn');
+            $this->gamestate->nextState('chooseColumns');
         } else {
             $this->gamestate->nextState('placeTiles');
         }
     }
 
-    function stChooseColumn() {
+    function stChooseColumns() {
         $playersIds = $this->getPlayersIds();
-        $line = intval(self::getGameStateValue(RESOLVING_LINE));
 
-        $playersIdsWithCompleteLine = [];
+        $playersIdsWithCompleteLines = [];
 
         foreach ($playersIds as $playerId) {
-            $playerTiles = $this->getTilesFromLine($playerId, $line);
-            if (count($playerTiles) == $line) {
-                $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
+            for ($line = 1; $line <= 5; $line++) {
+                $playerTiles = $this->getTilesFromLine($playerId, $line);
+                if (count($playerTiles) == $line) {
+                    $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
 
-                if (count($availableColumns) > 1) {
-                    $playersIdsWithCompleteLine[] = $playerId;
-                } else {
-                    // if only one possibility, it's automaticaly selected
-                    $this->applySelectColumn($playerId, $availableColumns[0]);
+                    if (count($availableColumns) > 1) {                        
+                        if (!array_key_exists($playerId, $playersIdsWithCompleteLines)) {                   
+                            $playersIdsWithCompleteLines[] = $playerId;
+                        }
+                    } else {
+                        // if only one possibility, it's automaticaly selected
+                        $this->setSelectedColumn($playerId, $line, $availableColumns[0]);
+                    }
                 }
             }
         }
 
-        if (count($playersIdsWithCompleteLine) > 0) {
-            $this->gamestate->setPlayersMultiactive($playersIdsWithCompleteLine, 'placeTiles');
+        if (count($playersIdsWithCompleteLines) > 0) {
+            $this->gamestate->setPlayersMultiactive($playersIdsWithCompleteLines, 'placeTiles');
         } else {
             $this->gamestate->nextState('placeTiles');
         }
@@ -114,11 +121,7 @@ trait StateTrait {
                 $line++;
                 self::setGameStateValue(RESOLVING_LINE, $line);                
 
-                if ($this->isVariant()) {
-                    $this->gamestate->nextState('chooseColumn');
-                } else {
-                    $this->gamestate->nextState('nextLine');
-                }
+                $this->gamestate->nextState('nextLine');
             } else {
                 self::setGameStateValue(RESOLVING_LINE, 0);
                 $this->gamestate->nextState('nextLine');
