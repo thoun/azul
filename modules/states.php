@@ -77,18 +77,22 @@ trait StateTrait {
         $playersIdsWithCompleteLines = [];
 
         foreach ($playersIds as $playerId) {
-            for ($line = 1; $line <= 5; $line++) {
-                $playerTiles = $this->getTilesFromLine($playerId, $line);
-                if (count($playerTiles) == $line) {
-                    $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
+            $selectedColumns = $this->getSelectedColumns($playerId);
 
-                    if (count($availableColumns) > 1) {                        
-                        if (!array_key_exists($playerId, $playersIdsWithCompleteLines)) {                   
-                            $playersIdsWithCompleteLines[] = $playerId;
+            for ($line = 1; $line <= 5; $line++) {
+                if (!array_key_exists($line, $selectedColumns)) {
+                    $playerTiles = $this->getTilesFromLine($playerId, $line);
+                    if (count($playerTiles) == $line) {
+                        $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
+
+                        if (count($availableColumns) > 1) {                        
+                            if (!array_key_exists($playerId, $playersIdsWithCompleteLines)) {                   
+                                $playersIdsWithCompleteLines[] = $playerId;
+                            }
+                        } else {
+                            // if only one possibility, it's automaticaly selected
+                            $this->setSelectedColumn($playerId, $line, $availableColumns[0]);
                         }
-                    } else {
-                        // if only one possibility, it's automaticaly selected
-                        $this->setSelectedColumn($playerId, $line, $availableColumns[0]);
                     }
                 }
             }

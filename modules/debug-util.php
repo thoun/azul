@@ -21,13 +21,14 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 1, 2, 2);
         $this->debugSetWallTile(2343492, 1, 4, 4);
         $this->debugSetWallTile(2343492, 1, 5, 5);
-        $this->debugSetLineTiles(2343492, 1, 1, 3);
+        //$this->debugSetLineTiles(2343492, 1, 1, 3);
 
         $this->debugSetWallTile(2343492, 5, 2, 1);
-        $this->debugSetWallTile(2343492, 5, 1, 2);
+        //$this->debugSetWallTile(2343492, 5, 1, 2);
+        $this->debugSetWallTile(2343492, 5, 1, 3);
         $this->debugSetWallTile(2343492, 5, 5, 4);
         $this->debugSetWallTile(2343492, 5, 4, 5);
-        $this->debugSetLineTiles(2343492, 5, 5, 3);
+        //$this->debugSetLineTiles(2343492, 5, 5, 3);
 
         $this->gamestate->changeActivePlayer(2343492);
     }
