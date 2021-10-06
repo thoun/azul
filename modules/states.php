@@ -99,9 +99,9 @@ trait StateTrait {
         }
 
         if (count($playersIdsWithCompleteLines) > 0) {
-            $this->gamestate->setPlayersMultiactive($playersIdsWithCompleteLines, 'placeTiles');
+            $this->gamestate->setPlayersMultiactive($playersIdsWithCompleteLines, 'confirmColumns');
         } else {
-            $this->gamestate->nextState('placeTiles');
+            $this->gamestate->nextState('confirmColumns');
         }
     }
 
