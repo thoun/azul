@@ -298,6 +298,12 @@ class Azul implements AzulGame {
 
     public setAutoZoom() {
         const zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
+
+        if (!zoomWrapperWidth) {
+            setTimeout(() => this.setAutoZoom(), 200);
+            return;
+        }
+
         const factoryWidth = this.factories.getWidth();
         let newZoom = this.zoom;
         while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth/newZoom < factoryWidth) {

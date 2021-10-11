@@ -640,7 +640,12 @@ var Azul = /** @class */ (function () {
         return this.zoom;
     };
     Azul.prototype.setAutoZoom = function () {
+        var _this = this;
         var zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
+        if (!zoomWrapperWidth) {
+            setTimeout(function () { return _this.setAutoZoom(); }, 200);
+            return;
+        }
         var factoryWidth = this.factories.getWidth();
         var newZoom = this.zoom;
         while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth / newZoom < factoryWidth) {
