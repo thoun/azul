@@ -2,10 +2,12 @@
 
 <div id="zoom-wrapper">
     <div id="table">
-        <div id="factories">
-            <div id="bag-wrapper">
-                <div id="bag-full" class="bag"></div>
-                <div id="bag-empty" class="bag"></div>
+        <div id="centered-table">
+            <div id="factories">
+                <div id="bag-wrapper">
+                    <div id="bag-full" class="bag"></div>
+                    <div id="bag-empty" class="bag"></div>
+                </div>
             </div>
         </div>
     </div>

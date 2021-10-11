@@ -315,24 +315,17 @@ class Azul implements AzulGame {
         dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
 
         const div = document.getElementById('table');
-        const hands: HTMLDivElement[] = Array.from(document.getElementsByClassName('hand')) as HTMLDivElement[];
         if (zoom === 1) {
             div.style.transform = '';
             div.style.margin = '';
-            hands.forEach(hand => {
-                hand.style.transform = '';
-                hand.style.margin = '';
-            });
         } else {
             div.style.transform = `scale(${zoom})`;
-            div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
-            hands.forEach(hand => {
-                hand.style.transform = `scale(${zoom})`;
-                hand.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% 0 0`;
-            });
+            const margin = ZOOM_LEVELS_MARGIN[newIndex] / 2;
+            div.style.margin = `0 ${margin}% ${(1-zoom)*-100}% ${margin}%`;
         }
 
         document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
+        this.onTableCenterSizeChange();
     }
 
     public zoomIn() {
@@ -349,6 +342,16 @@ class Azul implements AzulGame {
         }
         const newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
         this.setZoom(ZOOM_LEVELS[newIndex]);
+    }
+
+    private onTableCenterSizeChange() {
+        const maxWidth = document.getElementById('table').clientWidth;
+        const factoriesWidth = document.getElementById('factories').clientWidth;
+        const playerTableWidth = 780;
+        const tablesMaxWidth = maxWidth - factoriesWidth;
+     
+        document.getElementById('centered-table').style.width = tablesMaxWidth < playerTableWidth * this.gamedatas.playerorder.length ?
+            `${factoriesWidth + (Math.floor(tablesMaxWidth / playerTableWidth) * playerTableWidth)}px` : `unset`;
     }
 
     public isVariant(): boolean {

@@ -38,7 +38,7 @@ class PlayerTable {
         html += `    </div>
         </div>`;
 
-        dojo.place(html, 'table');
+        dojo.place(html, 'centered-table');
 
         this.placeTilesOnHand(player.hand);
 

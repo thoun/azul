@@ -315,7 +315,7 @@ var PlayerTable = /** @class */ (function () {
             html += "<div id=\"player-table-" + this.playerId + "-column0\" class=\"floor wall-spot\"></div>";
         }
         html += "    </div>\n        </div>";
-        dojo.place(html, 'table');
+        dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
         var _loop_3 = function (i) {
             document.getElementById("player-table-" + this_3.playerId + "-line" + i).addEventListener('click', function () { return _this.game.selectLine(i); });
@@ -379,7 +379,6 @@ var PlayerTable = /** @class */ (function () {
         var ghostTileId = spotId + "-ghost-tile";
         var existingGhostTile = document.getElementById(ghostTileId);
         existingGhostTile === null || existingGhostTile === void 0 ? void 0 : existingGhostTile.parentElement.removeChild(existingGhostTile);
-        console.log('setGhostTile', line, column, color);
         if (column > 0) {
             dojo.place("<div id=\"" + ghostTileId + "\" class=\"tile tile" + color + " ghost\"></div>", spotId);
         }
@@ -658,24 +657,17 @@ var Azul = /** @class */ (function () {
         dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
         dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
         var div = document.getElementById('table');
-        var hands = Array.from(document.getElementsByClassName('hand'));
         if (zoom === 1) {
             div.style.transform = '';
             div.style.margin = '';
-            hands.forEach(function (hand) {
-                hand.style.transform = '';
-                hand.style.margin = '';
-            });
         }
         else {
             div.style.transform = "scale(" + zoom + ")";
-            div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
-            hands.forEach(function (hand) {
-                hand.style.transform = "scale(" + zoom + ")";
-                hand.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% 0 0";
-            });
+            var margin = ZOOM_LEVELS_MARGIN[newIndex] / 2;
+            div.style.margin = "0 " + margin + "% " + (1 - zoom) * -100 + "% " + margin + "%";
         }
         document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
+        this.onTableCenterSizeChange();
     };
     Azul.prototype.zoomIn = function () {
         if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
@@ -690,6 +682,14 @@ var Azul = /** @class */ (function () {
         }
         var newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
         this.setZoom(ZOOM_LEVELS[newIndex]);
+    };
+    Azul.prototype.onTableCenterSizeChange = function () {
+        var maxWidth = document.getElementById('table').clientWidth;
+        var factoriesWidth = document.getElementById('factories').clientWidth;
+        var playerTableWidth = 780;
+        var tablesMaxWidth = maxWidth - factoriesWidth;
+        document.getElementById('centered-table').style.width = tablesMaxWidth < playerTableWidth * this.gamedatas.playerorder.length ?
+            factoriesWidth + (Math.floor(tablesMaxWidth / playerTableWidth) * playerTableWidth) + "px" : "unset";
     };
     Azul.prototype.isVariant = function () {
         return this.gamedatas.variant;

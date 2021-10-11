@@ -1,12 +1,11 @@
 
 #table {
-    /*display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    align-items: center;*/
+    display: flex;
+    justify-content: center;
+
     overflow-x: auto;
     position: relative;
-    transform-origin: left top;
+    transform-origin: center top;
 }
 
 .player-table-wrapper {
