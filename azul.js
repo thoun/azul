@@ -935,7 +935,7 @@ var Azul = /** @class */ (function () {
         var _this = this;
         Object.keys(notif.args.floorLines).forEach(function (playerId) {
             var floorLine = notif.args.floorLines[playerId];
-            _this.removeTiles(floorLine.tiles, true);
+            setTimeout(function () { return _this.removeTiles(floorLine.tiles, true); }, SCORE_MS - 50);
             _this.displayScoring("player-table-" + playerId + "-line0", _this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
             _this.incScore(Number(playerId), floorLine.points);
         });

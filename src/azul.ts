@@ -644,7 +644,7 @@ class Azul implements AzulGame {
         Object.keys(notif.args.floorLines).forEach(playerId => {
             const floorLine: FloorLine = notif.args.floorLines[playerId];
             
-            this.removeTiles(floorLine.tiles, true);
+            setTimeout(() => this.removeTiles(floorLine.tiles, true), SCORE_MS - 50);
             (this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
             this.incScore(Number(playerId), floorLine.points);
         });
