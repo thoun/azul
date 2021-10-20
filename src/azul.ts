@@ -447,7 +447,11 @@ class Azul implements AzulGame {
     }
 
     public removeTile(tile: Tile, fadeOut?: boolean) {
-        if (document.getElementById(`tile${tile.id}`)) {
+        // we don't remove the FP tile, it just goes back to the center
+        if (tile.type == 0) {
+            const coordinates = this.factories.getCoordinatesForTile0();
+            this.placeTile(tile, `factory0`, coordinates.left, coordinates.top, undefined);
+        } else if (document.getElementById(`tile${tile.id}`)) {
             fadeOut ?
                 (this as any).fadeOutAndDestroy(`tile${tile.id}`) :
                 dojo.destroy(`tile${tile.id}`);

@@ -111,7 +111,7 @@ var Factories = /** @class */ (function () {
                 }
                 _this.tilesInFactories[factoryIndex][tile.type].push(tile);
                 if (tile.type == 0) {
-                    _this.game.placeTile(tile, "factory" + factoryIndex, left, top, tile.type !== 0 ? Math.round(Math.random() * 90 - 45) : undefined);
+                    _this.game.placeTile(tile, "factory" + factoryIndex, left, top);
                 }
                 else {
                     var delay = animation ? tileIndex * 80 : 0;
@@ -772,7 +772,12 @@ var Azul = /** @class */ (function () {
         this.playersTables.push(new PlayerTable(this, gamedatas.players[playerId]));
     };
     Azul.prototype.removeTile = function (tile, fadeOut) {
-        if (document.getElementById("tile" + tile.id)) {
+        // we don't remove the FP tile, it just goes back to the center
+        if (tile.type == 0) {
+            var coordinates = this.factories.getCoordinatesForTile0();
+            this.placeTile(tile, "factory0", coordinates.left, coordinates.top, undefined);
+        }
+        else if (document.getElementById("tile" + tile.id)) {
             fadeOut ?
                 this.fadeOutAndDestroy("tile" + tile.id) :
                 dojo.destroy("tile" + tile.id);

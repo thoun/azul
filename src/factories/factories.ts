@@ -60,7 +60,7 @@ class Factories {
         };
     }
 
-    private getCoordinatesForTile0() {
+    public getCoordinatesForTile0() {
         const centerFactoryDiv = document.getElementById('factory0');
         return {
             left: centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE,
@@ -95,7 +95,7 @@ class Factories {
                 }
                 this.tilesInFactories[factoryIndex][tile.type].push(tile);
                 if (tile.type == 0) {
-                    this.game.placeTile(tile, `factory${factoryIndex}`, left, top, tile.type !== 0 ? Math.round(Math.random()*90 - 45) : undefined);
+                    this.game.placeTile(tile, `factory${factoryIndex}`, left, top);
                 } else {
                     const delay = animation ? tileIndex * 80 : 0;
                     setTimeout(() => {
