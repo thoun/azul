@@ -34,6 +34,9 @@ trait StateTrait {
         if ($this->isVariant()) {
             self::DbQuery("UPDATE player SET selected_columns = '{}'");
         }
+        
+        // TODO TEMP
+        //$this->debugPlayRandomlyToTen();
 
         $this->gamestate->nextState('next');
     }

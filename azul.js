@@ -963,6 +963,9 @@ var Azul = /** @class */ (function () {
             this.removeColumnSelection();
             this.onLeavingChooseColumns();
         }
+        // when a player is deactivated, updateActionButton calling onEnteringChooseColumns is called with old args.
+        // so we set args up-to-date to avoid conflict between current situation and old args
+        this.gamedatas.gamestate.args.players[notif.args.playerId] = notif.args.arg;
         this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg);
     };
     Azul.prototype.notif_lastRound = function () {

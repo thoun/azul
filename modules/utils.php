@@ -224,9 +224,7 @@ trait UtilTrait {
     }
 
     function getPlayersIds() {
-        $sql = "SELECT player_id FROM player ORDER BY player_no";
-        $dbResults = self::getCollectionFromDB($sql);
-        return array_map(function($dbResult) { return intval($dbResult['player_id']); }, array_values($dbResults));
+        return array_keys($this->loadPlayersBasicInfos());
     }
 
     function getTileOnWallCoordinates(array $tiles, int $row, int $column) {
