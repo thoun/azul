@@ -11,21 +11,29 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
         var destinationCR = destination.getBoundingClientRect();
         var deltaX = destinationCR.left - objectCR.left + (posX !== null && posX !== void 0 ? posX : 0) * game.getZoom();
         var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0) * game.getZoom();
-        object.style.transition = "transform 0.5s ease-in";
-        object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px) rotate(" + rotation + "deg)";
-        var transitionend = function () {
-            //console.log('ontransitionend', object, destination);
+        var attachToNewParent = function () {
             object.style.top = posY !== undefined ? posY + "px" : 'unset';
             object.style.left = posX !== undefined ? posX + "px" : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? '' + originalZIndex : 'unset';
-            object.style.transform = rotation ? "rotate(" + rotation + "deg)" : 'unset';
-            object.style.transition = 'unset';
             destination.appendChild(object);
-            object.removeEventListener('transitionend', transitionend);
-            resolve(true);
         };
-        object.addEventListener('transitionend', transitionend);
+        if (document.visibilityState === 'hidden') {
+            // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
+            attachToNewParent();
+        }
+        else {
+            object.style.transition = "transform 0.5s ease-in";
+            object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px) rotate(" + rotation + "deg)";
+            var transitionend_1 = function () {
+                attachToNewParent();
+                object.style.transform = rotation ? "rotate(" + rotation + "deg)" : 'unset';
+                object.style.transition = 'unset';
+                object.removeEventListener('transitionend', transitionend_1);
+                resolve(true);
+            };
+            object.addEventListener('transitionend', transitionend_1);
+        }
     });
 }
 var FACTORY_RADIUS = 125;

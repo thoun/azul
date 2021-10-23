@@ -14,24 +14,32 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
         const deltaX = destinationCR.left - objectCR.left + (posX ?? 0) * game.getZoom();
         const deltaY = destinationCR.top - objectCR.top + (posY ?? 0) * game.getZoom();
 
-        object.style.transition = `transform 0.5s ease-in`;
-        object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px) rotate(${rotation}deg)`;
-
-        const transitionend = () => {
-            //console.log('ontransitionend', object, destination);
+        const attachToNewParent = () => {
             object.style.top = posY !== undefined ? `${posY}px` : 'unset';
             object.style.left = posX !== undefined ? `${posX}px` : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? ''+originalZIndex : 'unset';
-            object.style.transform = rotation ? `rotate(${rotation}deg)` : 'unset';
-            object.style.transition = 'unset';
             destination.appendChild(object);
+        }
 
-            object.removeEventListener('transitionend', transitionend);
+        if (document.visibilityState === 'hidden') {
+            // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
+            attachToNewParent();
+        } else {
+            object.style.transition = `transform 0.5s ease-in`;
+            object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px) rotate(${rotation}deg)`;
 
-            resolve(true);
-        };
+            const transitionend = () => {
+                attachToNewParent();
+                object.style.transform = rotation ? `rotate(${rotation}deg)` : 'unset';
+                object.style.transition = 'unset';
 
-        object.addEventListener('transitionend', transitionend);
+                object.removeEventListener('transitionend', transitionend);
+
+                resolve(true);
+            };
+
+            object.addEventListener('transitionend', transitionend);
+        }
     });
 }
