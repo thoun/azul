@@ -16,6 +16,8 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
             object.style.left = posX !== undefined ? posX + "px" : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? '' + originalZIndex : 'unset';
+            object.style.transform = rotation ? "rotate(" + rotation + "deg)" : 'unset';
+            object.style.transition = 'unset';
             destination.appendChild(object);
         };
         if (document.visibilityState === 'hidden') {
@@ -27,8 +29,6 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
             object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px) rotate(" + rotation + "deg)";
             var transitionend_1 = function () {
                 attachToNewParent();
-                object.style.transform = rotation ? "rotate(" + rotation + "deg)" : 'unset';
-                object.style.transition = 'unset';
                 object.removeEventListener('transitionend', transitionend_1);
                 resolve(true);
             };

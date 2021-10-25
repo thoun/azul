@@ -19,6 +19,8 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
             object.style.left = posX !== undefined ? `${posX}px` : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? ''+originalZIndex : 'unset';
+            object.style.transform = rotation ? `rotate(${rotation}deg)` : 'unset';
+            object.style.transition = 'unset';
             destination.appendChild(object);
         }
 
@@ -31,8 +33,6 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
 
             const transitionend = () => {
                 attachToNewParent();
-                object.style.transform = rotation ? `rotate(${rotation}deg)` : 'unset';
-                object.style.transition = 'unset';
 
                 object.removeEventListener('transitionend', transitionend);
 
