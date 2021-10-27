@@ -111,6 +111,8 @@ class Azul extends Table {
         self::initStat('player', 'pointsCompleteColumn', 0);
         self::initStat('table', 'pointsCompleteColor', 0);
         self::initStat('player', 'pointsCompleteColor', 0);
+        self::initStat('table', 'incompleteLinesAtEndRound', 0);
+        self::initStat('player', 'incompleteLinesAtEndRound', 0);
         self::initStat('player', 'firstPlayer', 0);
 
         $this->setupTiles();
@@ -119,7 +121,7 @@ class Azul extends Table {
         $this->activeNextPlayer();
 
         // TODO TEMP to test
-        //$this->debugSetup();
+        $this->debugSetup();
 
         /************ End of the game initialization *****/
     }

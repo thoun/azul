@@ -78,6 +78,11 @@ $commonStats = [
         "name" => totranslate("Points gained with complete color"),
         "type" => "int"
     ],
+    "incompleteLinesAtEndRound" => [
+        "id" => 25,
+        "name" => totranslate("Incomplete lines at the end of rounds"),
+        "type" => "int"
+    ],
 ];
 
 $stats_type = [

@@ -349,6 +349,9 @@ trait UtilTrait {
                     self::incStat($pointsDetail->points, 'pointsWallTile');
                     self::incStat($pointsDetail->points, 'pointsWallTile', $playerId);
                 }
+            } else if (count($playerTiles) > 0) {
+                self::incStat(1, 'incompleteLinesAtEndRound');
+                self::incStat(1, 'incompleteLinesAtEndRound', $playerId);
             }
         }
 
