@@ -144,7 +144,8 @@ var Factories = /** @class */ (function () {
             var _a = _this.getFreePlaceForFactoryCenter(tile.type), left = _a.left, top = _a.top;
             _this.tilesInFactories[0][tile.type].push(tile);
             _this.tilesPositionsInCenter[tile.type].push({ id: tile.id, x: left, y: top });
-            var rotation = Number(document.getElementById("tile" + tile.id).dataset.rotation || 0);
+            var tileDiv = document.getElementById("tile" + tile.id);
+            var rotation = tileDiv ? Number(tileDiv.dataset.rotation || 0) : 0;
             return _this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random() * 20 - 10));
         });
         setTimeout(function () { return _this.updateDiscardedTilesNumbers(); }, ANIMATION_MS);
@@ -833,7 +834,9 @@ var Azul = /** @class */ (function () {
         if (!this.checkAction('selectColumn')) {
             return;
         }
+        var line = this.gamedatas.gamestate.args.players[this.getPlayerId()].nextColumnToSelect.line;
         this.takeAction('selectColumn', {
+            line: line,
             column: column
         });
         this.removeColumnSelection();

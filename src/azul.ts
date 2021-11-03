@@ -511,7 +511,10 @@ class Azul implements AzulGame {
             return;
         }
 
+        const line = this.gamedatas.gamestate.args.players[this.getPlayerId()].nextColumnToSelect.line;
+
         this.takeAction('selectColumn', {
+            line,
             column
         });
 

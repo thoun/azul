@@ -7,8 +7,7 @@ trait DebugUtilTrait {
 ////////////
 
     function debugSetup() {
-        global $g_config;
-        if (!$g_config['debug_from_chat']) { 
+        if ($this->getBgaEnvironment() != 'studio') { 
             return;
         } 
 
@@ -17,7 +16,7 @@ trait DebugUtilTrait {
 
         //for ($i=1; $i<=5;$i++) { $this->addTilesInFactory(10, $i); }
 
-        $this->debugSetWallTile(2343492, 1, 1, 1);
+        /*$this->debugSetWallTile(2343492, 1, 1, 1);
         $this->debugSetWallTile(2343492, 1, 2, 2);
         $this->debugSetWallTile(2343492, 1, 4, 4);
         $this->debugSetWallTile(2343492, 1, 5, 5);
@@ -27,7 +26,34 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 5, 1, 2);
         $this->debugSetWallTile(2343492, 5, 5, 4);
         $this->debugSetWallTile(2343492, 5, 4, 5);
+        $this->debugSetLineTiles(2343492, 5, 5, 3);*/
+
+        /*
+        case 1: $colorName = _('Black'); break;
+        case 2: $colorName = _('Cyan'); break;
+        case 3: $colorName = _('Blue'); break;
+        case 4: $colorName = _('Yellow'); break;
+        case 5: $colorName = _('Red'); break;
+        */
+        $this->debugSetLineTiles(2343492, 1, 1, 1);
+        $this->debugSetLineTiles(2343492, 2, 2, 1);
+        $this->debugSetLineTiles(2343492, 4, 4, 4);
         $this->debugSetLineTiles(2343492, 5, 5, 3);
+
+        $this->debugSetWallTile(2343492, 1, 1, 5);
+        $this->debugSetWallTile(2343492, 1, 2, 2);
+        $this->debugSetWallTile(2343492, 1, 3, 4);
+        $this->debugSetWallTile(2343492, 2, 1, 3);
+        $this->debugSetWallTile(2343492, 2, 2, 4);
+        $this->debugSetWallTile(2343492, 2, 3, 5);
+        $this->debugSetWallTile(2343492, 2, 4, 2);
+        $this->debugSetWallTile(2343492, 3, 1, 2);
+        $this->debugSetWallTile(2343492, 3, 2, 5);
+        $this->debugSetWallTile(2343492, 3, 3, 1);
+        $this->debugSetWallTile(2343492, 4, 2, 1);
+        $this->debugSetWallTile(2343492, 4, 3, 2);
+        $this->debugSetWallTile(2343492, 4, 4, 3);
+        $this->debugSetWallTile(2343492, 5, 1, 1);
 
         $this->gamestate->changeActivePlayer(2343492);
     }

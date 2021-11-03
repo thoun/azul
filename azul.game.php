@@ -121,7 +121,7 @@ class Azul extends Table {
         $this->activeNextPlayer();
 
         // TODO TEMP to test
-        $this->debugSetup();
+        //$this->debugSetup();
 
         /************ End of the game initialization *****/
     }

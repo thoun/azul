@@ -56,8 +56,11 @@ trait ArgsTrait {
             $selectedColumn = new stdClass();
             $selectedColumn->line = $line;
             $selectedColumn->column = $column;
-            $selectedColumn->type = $this->getTilesFromLine($playerId, $line)[0]->type;
-            $selectedColumn->color = $selectedColumn->type;
+            $tiles = $this->getTilesFromLine($playerId, $line);
+            if (count($tiles) > 0) {
+                $selectedColumn->type = $tiles[0]->type;
+                $selectedColumn->color = $selectedColumn->type;
+            }
             $result[] = $selectedColumn;
         }
 

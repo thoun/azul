@@ -116,7 +116,8 @@ class Factories {
             const {left, top} = this.getFreePlaceForFactoryCenter(tile.type);
             this.tilesInFactories[0][tile.type].push(tile);
             this.tilesPositionsInCenter[tile.type].push({ id: tile.id, x: left, y: top });
-            const rotation = Number(document.getElementById(`tile${tile.id}`).dataset.rotation || 0);
+            const tileDiv = document.getElementById(`tile${tile.id}`);
+            const rotation = tileDiv ? Number(tileDiv.dataset.rotation || 0) : 0;
             return this.game.placeTile(tile, 'factory0', left, top, rotation + Math.round(Math.random()*20 - 10));
         });
 

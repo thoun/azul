@@ -84,9 +84,10 @@
       self::setAjaxMode();
 
       // Retrieve arguments
+      $line = self::getArg("line", AT_posint, true);
       $column = self::getArg("column", AT_posint, true);
 
-      $this->game->selectColumn($column);
+      $this->game->selectColumn($line, $column);
 
       self::ajaxResponse();
     }

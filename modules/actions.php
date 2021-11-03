@@ -178,20 +178,15 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function selectColumn(int $column) {
+    function selectColumn(int $line, int $column) {
         $playerId = intval(self::getCurrentPlayerId());
 
-        $nextColumnToSelect = $this->nextColumnToSelect($playerId);
-        if ($nextColumnToSelect != null) {
-            $this->setSelectedColumn($playerId, $nextColumnToSelect->line, $column);
+        $this->setSelectedColumn($playerId, $line, $column);
 
-            self::notifyPlayer($playerId, 'updateSelectColumn', '', [
-                'playerId' => $playerId,
-                'arg' => $this->argChooseColumnForPlayer($playerId),
-            ]);
-        } else {
-            throw new BgaUserException('No column to select');
-        }
+        self::notifyPlayer($playerId, 'updateSelectColumn', '', [
+            'playerId' => $playerId,
+            'arg' => $this->argChooseColumnForPlayer($playerId),
+        ]);
     }
 
     function confirmColumns() {
