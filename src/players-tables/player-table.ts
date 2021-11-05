@@ -42,6 +42,12 @@ class PlayerTable {
             html += `<div id="player-table-${this.playerId}-column0" class="floor wall-spot"></div>`;
         }
         
+        html += `
+            <div class="score-magnified row">2</div>
+            <div class="score-magnified column">7</div>
+            <div class="score-magnified color">10</div>
+        `;
+
         html += `    </div>
         </div>`;
 

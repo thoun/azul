@@ -250,6 +250,26 @@
   background: url("img/red-cb.svg");
   border-radius: 5px;
 }
+.player-table-wrapper .player-table .score-magnified {
+  position: absolute;
+  color: black;
+  font-size: 2em;
+  font-weight: 700;
+  position: absolute;
+  text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px #fff;
+}
+.player-table-wrapper .player-table .score-magnified.row {
+  left: 647px;
+  top: 370px;
+}
+.player-table-wrapper .player-table .score-magnified.column {
+  left: 702px;
+  top: 447px;
+}
+.player-table-wrapper .player-table .score-magnified.color {
+  left: 593px;
+  top: 425px;
+}
 
 .wall-tile-cb {
   opacity: 0;

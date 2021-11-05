@@ -175,6 +175,29 @@
                 border-radius: 5px;
             }
         }
+
+        .score-magnified {
+            position: absolute;
+            color: black;
+            font-size: 2em;
+            font-weight: 700;
+            position: absolute;
+            //text-shadow: 1px 0 1px #fff,0 -1px 1px #fff,0 1px 1px #fff,-1px 0 1px #fff;
+            text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px #fff;
+
+            &.row {
+                left: 647px;
+                top: 370px;
+            }
+            &.column {
+                left: 702px;
+                top: 447px;
+            }
+            &.color {
+                left: 593px;
+                top: 425px;
+            }
+        }
     }
 }
 

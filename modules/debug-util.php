@@ -59,10 +59,9 @@ trait DebugUtilTrait {
     }
 
     function debugPlayRandomlyToTen() {
-        global $g_config;
-        if (!$g_config['debug_from_chat']) { 
+        if ($this->getBgaEnvironment() != 'studio') { 
             return;
-        } 
+        }
 
         $playersIds = $this->getPlayersIds();
         $coup = 0;

@@ -328,6 +328,7 @@ var PlayerTable = /** @class */ (function () {
         if (this.game.isVariant()) {
             html += "<div id=\"player-table-" + this.playerId + "-column0\" class=\"floor wall-spot\"></div>";
         }
+        html += "\n            <div class=\"score-magnified row\">2</div>\n            <div class=\"score-magnified column\">7</div>\n            <div class=\"score-magnified color\">10</div>\n        ";
         html += "    </div>\n        </div>";
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
