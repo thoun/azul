@@ -177,6 +177,9 @@
 .player-table-wrapper .player-table.variant {
   background: url("img/playerboard-variant.jpg");
 }
+.player-table-wrapper .player-table.variant .wall-tile-cb {
+  display: none;
+}
 .player-table-wrapper .player-table:not(.variant) .wall {
   background: #ffffffb0;
   box-shadow: 0 0 10px 5px #ffffffb0;
@@ -239,6 +242,21 @@
   100% {
     box-shadow: 0 0 30px 15px white;
   }
+}
+.player-table-wrapper .player-table .wall .wall-tile-cb {
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  background: url("img/red-cb.svg");
+  border-radius: 5px;
+}
+
+.wall-tile-cb {
+  opacity: 0;
+}
+
+.cb .wall-tile-cb {
+  opacity: 0.3;
 }
 
 .player_board_content .tile {

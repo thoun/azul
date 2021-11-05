@@ -314,6 +314,11 @@ var PlayerTable = /** @class */ (function () {
         }
         html += "<div id=\"player-table-" + this.playerId + "-line0\" class=\"floor line\"></div>";
         html += "<div id=\"player-table-" + this.playerId + "-wall\" class=\"wall\">";
+        // color-blind marks on wall
+        for (var line = 1; line <= 5; line++) {
+            var column = ((line + 1) % 5) + 1;
+            html += "<div class=\"wall-tile-cb\" style=\"left: " + (69 * (column - 1) + 4) + "px; top: " + (70 * (line - 1) + 4) + "px;\"></div>";
+        }
         for (var line = 1; line <= 5; line++) {
             for (var column = 1; column <= 5; column++) {
                 html += "<div id=\"player-table-" + this.playerId + "-wall-spot-" + line + "-" + column + "\" class=\"wall-spot\" style=\"left: " + (69 * (column - 1) - 1) + "px; top: " + (70 * (line - 1) - 1) + "px;\"></div>";
@@ -417,7 +422,7 @@ var log = isDebug ? console.log.bind(window.console) : function () { };
 var Azul = /** @class */ (function () {
     function Azul() {
         this.playersTables = [];
-        this.zoom = 1;
+        this.zoom = 0.75;
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);

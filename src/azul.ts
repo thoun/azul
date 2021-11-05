@@ -24,7 +24,7 @@ class Azul implements AzulGame {
     private factories: Factories;
     private playersTables: PlayerTable[] = [];
 
-    public zoom: number = 1;
+    public zoom: number = 0.75;
 
     constructor() {    
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);

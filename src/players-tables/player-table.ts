@@ -25,6 +25,13 @@ class PlayerTable {
         }
         html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
         html += `<div id="player-table-${this.playerId}-wall" class="wall">`;
+
+        // color-blind marks on wall
+        for (let line=1; line<=5; line++) {
+            const column = ((line + 1) % 5) + 1;
+            html += `<div class="wall-tile-cb" style="left: ${69*(column-1) +4}px; top: ${70*(line-1) +4}px;"></div>`;
+        }
+
         for (let line=1; line<=5; line++) {
             for (let column=1; column<=5; column++) {
                 html += `<div id="player-table-${this.playerId}-wall-spot-${line}-${column}" class="wall-spot" style="left: ${69*(column-1) - 1}px; top: ${70*(line-1) - 1}px;"></div>`;
