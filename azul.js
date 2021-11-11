@@ -50,14 +50,16 @@ var Factories = /** @class */ (function () {
         var halfSize = radius + FACTORY_RADIUS;
         var size = halfSize * 2 + "px";
         factoriesDiv.style.width = size;
-        factoriesDiv.style.height = size;
+        factoriesDiv.style.height = '1135px';
+        var heightShift = (1135 - halfSize * 2) / 2 + 35;
+        document.getElementById('bag-wrapper').style.top = 24 + heightShift + "px";
         var html = "<div>";
         html += "<div id=\"factory0\" class=\"factory-center\"></div>";
         for (var i = 1; i <= factoryNumber; i++) {
             var angle = (i - 1) * Math.PI * 2 / factoryNumber; // in radians
             var left = radius * Math.sin(angle);
             var top_1 = radius * Math.cos(angle);
-            html += "<div id=\"factory" + i + "\" class=\"factory\" style=\"left: " + (halfSize - FACTORY_RADIUS + left) + "px; top: " + (halfSize - FACTORY_RADIUS - top_1) + "px;\"></div>";
+            html += "<div id=\"factory" + i + "\" class=\"factory\" style=\"left: " + (halfSize - FACTORY_RADIUS + left) + "px; top: " + (heightShift + halfSize - FACTORY_RADIUS - top_1) + "px;\"></div>";
         }
         html += "</div>";
         dojo.place(html, 'factories');
