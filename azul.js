@@ -604,6 +604,10 @@ var Azul = /** @class */ (function () {
         dojo.query(".preference_control").connect("onchange", onchange);
         // Call onPreferenceChange() now
         dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
+        try {
+            document.getElementById('preference_control_299').closest(".preference_choice").style.display = 'none';
+        }
+        catch (e) { }
     };
     Azul.prototype.onPreferenceChange = function (prefId, prefValue) {
         switch (prefId) {
@@ -623,6 +627,26 @@ var Azul = /** @class */ (function () {
             case 206:
                 this.playersTables.forEach(function (playerTable) { return playerTable.setFont(prefValue); });
                 break;
+            case 299:
+                this.toggleZoomNotice(prefValue == 1);
+                break;
+        }
+    };
+    Azul.prototype.toggleZoomNotice = function (visible) {
+        var elem = document.getElementById('zoom-notice');
+        if (visible) {
+            if (!elem) {
+                dojo.place("\n                <div id=\"zoom-notice\">\n                    " + _("Use zoom controls to adapt players board size !") + "\n                    <div style=\"text-align: center; margin-top: 10px;\"><a id=\"hide-zoom-notice\">" + _("Dismiss") + "</a></div>\n                    <div class=\"arrow-right\"></div>\n                </div>\n                ", 'zoom-controls');
+                document.getElementById('hide-zoom-notice').addEventListener('click', function () {
+                    var select = document.getElementById('preference_control_299');
+                    select.value = '2';
+                    var event = new Event('change');
+                    select.dispatchEvent(event);
+                });
+            }
+        }
+        else if (elem) {
+            elem.parentElement.removeChild(elem);
         }
     };
     Azul.prototype.isDefaultFont = function () {

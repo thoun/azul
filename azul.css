@@ -448,3 +448,28 @@ html.background2 #zoom-wrapper #zoom-controls button {
   background: #26b3e1;
   color: white;
 }
+
+#zoom-notice {
+  position: absolute;
+  background: white;
+  min-width: 350px;
+  right: 80px;
+  top: 0;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 2px 2px 5px 0px #000000cc;
+}
+#zoom-notice #hide-zoom-notice {
+  font-weight: bold;
+  cursor: pointer;
+}
+#zoom-notice .arrow-right {
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 12px solid white;
+  position: absolute;
+  right: -12px;
+  top: 8px;
+}

@@ -240,6 +240,10 @@ class Azul implements AzulGame {
           dojo.query("#ingame_menu_content .preference_control"),
           el => onchange({ target: el })
         );
+
+        try {
+            (document.getElementById('preference_control_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
+        } catch (e) {}
     }
       
     private onPreferenceChange(prefId: number, prefValue: number) {
@@ -260,6 +264,34 @@ class Azul implements AzulGame {
             case 206: 
                 this.playersTables.forEach(playerTable => playerTable.setFont(prefValue));
                 break;
+            case 299: 
+                this.toggleZoomNotice(prefValue == 1);
+                break;
+        }
+    }
+
+    private toggleZoomNotice(visible: boolean) {
+        const elem = document.getElementById('zoom-notice');
+        if (visible) {
+            if (!elem) {
+                dojo.place(`
+                <div id="zoom-notice">
+                    ${_("Use zoom controls to adapt players board size !")}
+                    <div style="text-align: center; margin-top: 10px;"><a id="hide-zoom-notice">${_("Dismiss")}</a></div>
+                    <div class="arrow-right"></div>
+                </div>
+                `, 'zoom-controls');
+
+                document.getElementById('hide-zoom-notice').addEventListener('click', () => {
+                    const select = document.getElementById('preference_control_299') as HTMLSelectElement;
+                    select.value = '2';
+    
+                    var event = new Event('change');
+                    select.dispatchEvent(event);
+                });
+            }
+        } else if (elem) {
+            elem.parentElement.removeChild(elem);
         }
     }
 

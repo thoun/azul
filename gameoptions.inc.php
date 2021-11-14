@@ -134,6 +134,16 @@ $game_preferences = [
         ],
         'default' => 2
     ],
+
+    299 => [
+        'name' => '',
+        'needReload' => false,
+        'values' => [
+            1 => ['name' => totranslate('Enabled')],
+            2 => ['name' => totranslate('Disabled')],
+        ],
+        'default' => 1
+    ],
 ];
 
 
