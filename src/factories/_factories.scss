@@ -29,33 +29,31 @@
     .tile.hover {
         box-shadow: 0 0 5px 5px white;
     }
-
-    #bag-wrapper {
-        position: absolute;
-        top: 24px;
-        left: 24px;
     
+    #bag {
+        position: absolute;
+        top: 0;
+        left: 24px;
         width: 128px;
         height: 128px;
-    
-        .bag {
+        background: url('img/bag.png');
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 8;
+
+        #bag-counter {
+            font-size: 2em;
+            font-weight: 700;
             position: absolute;
-            background: url('img/bag.png');
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-    
-        #bag-empty {
-            z-index: 2;
-            background-position: 100% 0%;
-            transition: height 0.5s;
-        }
-    
-        #bag-full {
-            z-index: 1;
-            background-position: 0% 0%;
+            text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px #fff;
+            pointer-events: none;
+            display: none;
+            user-select: none;
+
+            &.visible {
+                display: unset;
+            }
         }
     }
 }

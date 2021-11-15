@@ -9,6 +9,7 @@
     },
     "files": [
         "src/framework.d.ts",
+        "src/counter.d.ts",
         "src/stock.d.ts",
         "src/azul.d.ts",
         "src/slide-utils.ts",

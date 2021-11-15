@@ -52,7 +52,11 @@ var Factories = /** @class */ (function () {
         factoriesDiv.style.width = size;
         factoriesDiv.style.height = '1135px';
         var heightShift = (1135 - halfSize * 2) / 2 + 35;
-        document.getElementById('bag-wrapper').style.top = 24 + heightShift + "px";
+        var bagDiv = document.getElementById('bag');
+        bagDiv.style.top = heightShift + "px";
+        this.bagCounter = new ebg.counter();
+        this.bagCounter.create('bag-counter');
+        bagDiv.addEventListener('click', function () { return dojo.toggleClass('bag-counter', 'visible'); });
         var html = "<div>";
         html += "<div id=\"factory0\" class=\"factory-center\"></div>";
         for (var i = 1; i <= factoryNumber; i++) {
@@ -126,7 +130,7 @@ var Factories = /** @class */ (function () {
                 else {
                     var delay = animation ? tileIndex * 80 : 0;
                     setTimeout(function () {
-                        _this.game.placeTile(tile, "bag-empty", 20, 20, 0);
+                        _this.game.placeTile(tile, "bag", 20, 20, 0);
                         slideToObjectAndAttach(_this.game, document.getElementById("tile" + tile.id), "factory" + factoryIndex, left, top, Math.round(Math.random() * 90 - 45));
                     }, delay);
                     tileIndex++;
@@ -300,7 +304,7 @@ var Factories = /** @class */ (function () {
         return promise;
     };
     Factories.prototype.setRemainingTiles = function (remainingTiles) {
-        document.getElementById("bag-empty").style.height = 100 - remainingTiles + "%";
+        this.bagCounter.setValue(remainingTiles);
     };
     return Factories;
 }());

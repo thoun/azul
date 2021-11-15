@@ -5,6 +5,7 @@ const CENTER_FACTORY_TILE_SHIFT = 12;
 class Factories {
     private tilesPositionsInCenter: PlacedTile[][] = [[], [], [], [], [], []]; // color, tiles
     private tilesInFactories: Tile[][][] = []; // factory, color, tiles
+    bagCounter: Counter;
 
     constructor(
         private game: AzulGame, 
@@ -21,7 +22,11 @@ class Factories {
         factoriesDiv.style.height = '1135px';
         const heightShift = (1135 - halfSize*2) / 2 + 35;
 
-        document.getElementById('bag-wrapper').style.top = `${24 + heightShift}px`;
+        const bagDiv = document.getElementById('bag');
+        bagDiv.style.top = `${heightShift}px`;
+        this.bagCounter = new ebg.counter();
+        this.bagCounter.create('bag-counter');
+        bagDiv.addEventListener('click', () => dojo.toggleClass('bag-counter', 'visible'));
 
         let html = `<div>`;
         html += `<div id="factory0" class="factory-center"></div>`;
@@ -102,7 +107,7 @@ class Factories {
                 } else {
                     const delay = animation ? tileIndex * 80 : 0;
                     setTimeout(() => {
-                        this.game.placeTile(tile, `bag-empty`, 20, 20, 0);
+                        this.game.placeTile(tile, `bag`, 20, 20, 0);
                         slideToObjectAndAttach(this.game, document.getElementById(`tile${tile.id}`), `factory${factoryIndex}`, left, top, Math.round(Math.random()*90 - 45));
                     }, delay);
                     tileIndex++;
@@ -292,6 +297,6 @@ class Factories {
     }
 
     private setRemainingTiles(remainingTiles: number) {
-        document.getElementById(`bag-empty`).style.height = `${100 - remainingTiles}%`;
+        this.bagCounter.setValue(remainingTiles);
     }
 }
