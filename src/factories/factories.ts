@@ -72,7 +72,7 @@ class Factories {
         const centerFactoryDiv = document.getElementById('factory0');
         return {
             left: centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE,
-            top: centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE,
+            top: centerFactoryDiv.clientHeight / 2,
         };
     }
 
@@ -142,7 +142,7 @@ class Factories {
         const angle = (0.3 + color/5 + Math.random()/4)*Math.PI*2;
         const distance = Math.random()*radius;
         newPlace.x = xCenter - HALF_TILE_SIZE - distance*Math.sin(angle);
-        newPlace.y = yCenter - HALF_TILE_SIZE - distance*Math.cos(angle);
+        newPlace.y = yCenter - distance*Math.cos(angle);
     }
 
     private getMinDistance(placedTiles: PlacedTile[], newPlace: PlacedTile): number {
@@ -159,12 +159,12 @@ class Factories {
     private getFreePlaceCoordinatesForFactoryCenter(placedTiles: PlacedTile[], xCenter: number, yCenter: number, color: number): PlacedTile {
         const radius = 175 + this.factoryNumber*25 - 165;
         
-        let place = { x: 0, y: 0};
+        let place = { x: 0, y: HALF_TILE_SIZE};
         this.setRandomCoordinates(place, xCenter, yCenter, radius, color);
         let minDistance = this.getMinDistance(placedTiles, place);
         let protection = 0;
         while (protection < 1000 && minDistance < HALF_TILE_SIZE*2) {
-            const newPlace = { x: 0, y: 0};
+            const newPlace = { x: 0, y: HALF_TILE_SIZE};
             this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
             const newMinDistance = this.getMinDistance(placedTiles, newPlace);
             if (newMinDistance > minDistance) {
@@ -184,7 +184,7 @@ class Factories {
 
         const placed: PlacedTile[] = div.dataset.placed ? JSON.parse(div.dataset.placed) : [{ // we init with first player tile
             x: xCenter - HALF_TILE_SIZE,
-            y: yCenter - HALF_TILE_SIZE,
+            y: yCenter,
         }];
 
         const newPlace = this.getFreePlaceCoordinatesForFactoryCenter(placed, xCenter, yCenter, color);

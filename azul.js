@@ -92,7 +92,7 @@ var Factories = /** @class */ (function () {
         var centerFactoryDiv = document.getElementById('factory0');
         return {
             left: centerFactoryDiv.clientWidth / 2 - HALF_TILE_SIZE,
-            top: centerFactoryDiv.clientHeight / 2 - HALF_TILE_SIZE,
+            top: centerFactoryDiv.clientHeight / 2,
         };
     };
     Factories.prototype.fillFactories = function (factories, remainingTiles, animation) {
@@ -164,7 +164,7 @@ var Factories = /** @class */ (function () {
         var angle = (0.3 + color / 5 + Math.random() / 4) * Math.PI * 2;
         var distance = Math.random() * radius;
         newPlace.x = xCenter - HALF_TILE_SIZE - distance * Math.sin(angle);
-        newPlace.y = yCenter - HALF_TILE_SIZE - distance * Math.cos(angle);
+        newPlace.y = yCenter - distance * Math.cos(angle);
     };
     Factories.prototype.getMinDistance = function (placedTiles, newPlace) {
         var _this = this;
@@ -179,12 +179,12 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.getFreePlaceCoordinatesForFactoryCenter = function (placedTiles, xCenter, yCenter, color) {
         var radius = 175 + this.factoryNumber * 25 - 165;
-        var place = { x: 0, y: 0 };
+        var place = { x: 0, y: HALF_TILE_SIZE };
         this.setRandomCoordinates(place, xCenter, yCenter, radius, color);
         var minDistance = this.getMinDistance(placedTiles, place);
         var protection = 0;
         while (protection < 1000 && minDistance < HALF_TILE_SIZE * 2) {
-            var newPlace = { x: 0, y: 0 };
+            var newPlace = { x: 0, y: HALF_TILE_SIZE };
             this.setRandomCoordinates(newPlace, xCenter, yCenter, radius, color);
             var newMinDistance = this.getMinDistance(placedTiles, newPlace);
             if (newMinDistance > minDistance) {
@@ -201,7 +201,7 @@ var Factories = /** @class */ (function () {
         var yCenter = div.clientHeight / 2;
         var placed = div.dataset.placed ? JSON.parse(div.dataset.placed) : [{
                 x: xCenter - HALF_TILE_SIZE,
-                y: yCenter - HALF_TILE_SIZE,
+                y: yCenter,
             }];
         var newPlace = this.getFreePlaceCoordinatesForFactoryCenter(placed, xCenter, yCenter, color);
         placed.push(newPlace);
