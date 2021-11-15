@@ -12,7 +12,6 @@ html {
 
     &.background2 {  
       background: url('img/background2.jpg') #00587a;    
-      background-blend-mode: multiply;
 
       #zoom-wrapper {
         #zoom-controls {  
@@ -27,9 +26,8 @@ html {
 }
 
 .mode_3d #game_play_area_background {
-    background: url('img/background.jpg') #00587a;
-    background-repeat: repeat;
-    background-blend-mode: multiply;
+  background: url('img/background.jpg') #fff8f0;
+  background-repeat: repeat;
 }
 
 @font-face {
