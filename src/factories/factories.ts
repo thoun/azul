@@ -242,7 +242,7 @@ class Factories {
 
     public tileMouseEnter(id: number) {
         const tiles = this.getTilesOfSameColorInSameFactory(id);
-        if (tiles?.length) {
+        if (tiles?.length && this.tilesInFactories[0].some(tilesOfColor => tilesOfColor.some(tile => tile.id == id))) {
             document.getElementById(`tileCount${tiles[0].type}`)?.classList.add('hover');
         }
         tiles?.forEach(tile => {

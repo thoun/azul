@@ -256,7 +256,7 @@ var Factories = /** @class */ (function () {
     Factories.prototype.tileMouseEnter = function (id) {
         var _a;
         var tiles = this.getTilesOfSameColorInSameFactory(id);
-        if (tiles === null || tiles === void 0 ? void 0 : tiles.length) {
+        if ((tiles === null || tiles === void 0 ? void 0 : tiles.length) && this.tilesInFactories[0].some(function (tilesOfColor) { return tilesOfColor.some(function (tile) { return tile.id == id; }); })) {
             (_a = document.getElementById("tileCount" + tiles[0].type)) === null || _a === void 0 ? void 0 : _a.classList.add('hover');
         }
         tiles === null || tiles === void 0 ? void 0 : tiles.forEach(function (tile) {
