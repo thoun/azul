@@ -14,7 +14,11 @@ trait DebugUtilTrait {
         //for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343492, $i); }
         //for ($i=1; $i<=4;$i++) { $this->debugSetWallColumn(2343493, $i); }
 
-        for ($i=1; $i<=5;$i++) { $this->addTilesInFactory(10, $i); }
+        //for ($i=1; $i<=5;$i++) { $this->addTilesInFactory(10, $i); }
+
+        /*$tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('deck'));
+        $tiles = array_slice($tiles, 0, 83);
+        $this->tiles->moveCards(array_map('getIdPredicate', $tiles), 'discard');*/
 
         /*$this->debugSetWallTile(2343492, 1, 1, 1);
         $this->debugSetWallTile(2343492, 1, 2, 2);
@@ -56,6 +60,17 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 5, 1, 1);*/
 
         $this->gamestate->changeActivePlayer(2343492);
+
+        $this->debugSetLineTiles(2343493, 1, 1, 3);
+        $this->debugSetLineTiles(2343493, 2, 2, 5);
+        $this->debugSetLineTiles(2343493, 4, 2, 4);
+        $this->debugSetLineTiles(2343493, 5, 5, 2);
+
+        $this->debugSetWallTile(2343493, 1, 1, 2);
+        $this->debugSetWallTile(2343493, 2, 3, 1);
+        $this->debugSetWallTile(2343493, 3, 5, 5);
+
+        // update `tile` set card_location='discard' where card_location='factory' and card_location_arg <> 1
     }
 
     function debugPlayRandomlyToTen() {

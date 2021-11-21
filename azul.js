@@ -20,7 +20,7 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
             object.style.transition = 'unset';
             destination.appendChild(object);
         };
-        if (document.visibilityState === 'hidden') {
+        if (document.visibilityState === 'hidden' || game.instantaneousMode) {
             // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
             attachToNewParent();
         }

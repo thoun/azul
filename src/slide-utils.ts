@@ -24,7 +24,7 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
             destination.appendChild(object);
         }
 
-        if (document.visibilityState === 'hidden') {
+        if (document.visibilityState === 'hidden' || (game as any).instantaneousMode) {
             // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
             attachToNewParent();
         } else {
