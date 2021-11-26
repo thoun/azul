@@ -152,11 +152,16 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-break: anywhere;
 }
 .player-table-wrapper .player-name-wrapper .player-name.azul {
   text-transform: uppercase;
   font-family: "Algeria";
+}
+.player-table-wrapper .player-name-wrapper .player-name.with-space {
+  line-break: normal;
+}
+.player-table-wrapper .player-name-wrapper .player-name.without-space {
+  line-break: anywhere;
 }
 .player-table-wrapper .player-name-wrapper .player-name.dark {
   color: #012c3c;
