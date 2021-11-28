@@ -33,13 +33,20 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
 
             const transitionend = () => {
                 attachToNewParent();
-
                 object.removeEventListener('transitionend', transitionend);
-
                 resolve(true);
             };
 
             object.addEventListener('transitionend', transitionend);
+
+            // security check : if transition fails, we force tile to destination
+            setTimeout(() => {
+                if (!destination.contains(object)) {
+                    attachToNewParent();
+                    object.removeEventListener('transitionend', transitionend);
+                    resolve(true);
+                }
+            }, 600);
         }
     });
 }

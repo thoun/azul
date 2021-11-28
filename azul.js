@@ -33,6 +33,14 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
                 resolve(true);
             };
             object.addEventListener('transitionend', transitionend_1);
+            // security check : if transition fails, we force tile to destination
+            setTimeout(function () {
+                if (!destination.contains(object)) {
+                    attachToNewParent();
+                    object.removeEventListener('transitionend', transitionend_1);
+                    resolve(true);
+                }
+            }, 600);
         }
     });
 }

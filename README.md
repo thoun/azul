@@ -43,7 +43,7 @@ function getDebugLines(playerId) {
         }
     }
 }
-getDebugLines(91641553)
+getDebugLines(84222058)
 
 function getDebugWall(playerId) {
     for (line = 1; line <= 5; line++) {
@@ -57,4 +57,4 @@ function getDebugWall(playerId) {
         }
     }
 }
-getDebugWall(91641553)
+getDebugWall(84222058)
