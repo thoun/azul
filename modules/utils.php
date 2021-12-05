@@ -205,6 +205,9 @@ trait UtilTrait {
     function availableLines(int $playerId) {
 
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        if (count($tiles) === 0) {
+            return [];
+        }
         $color = $tiles[0]->type;
 
         $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));

@@ -33,6 +33,7 @@ Also add one auto-FTP upload extension (for example https://marketplace.visualst
 Make sure ftp-sync.json and node_modules are in .gitignore
 
 # Debug utils
+## generate debug lines from a replay position
 function getDebugLines(playerId) {
     for (line = 1; line <= 5; line++) {
         const lineId = `player-table-${playerId}-line${line}`;
@@ -58,3 +59,8 @@ function getDebugWall(playerId) {
     }
 }
 getDebugWall(84222058)
+
+## see factoriesFilled notifs from a replay
+JSON.stringify(
+g_gamelogs.map(log => log.data).filter(notifs => notifs.some(notif => notif.type === "factoriesFilled")).map(notifs => notifs.find(notif => notif.type === "factoriesFilled").args)
+)

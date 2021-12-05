@@ -483,10 +483,17 @@ class Azul implements AzulGame {
         if (tile.type == 0) {
             const coordinates = this.factories.getCoordinatesForTile0();
             this.placeTile(tile, `factory0`, coordinates.left, coordinates.top, undefined);
-        } else if (document.getElementById(`tile${tile.id}`)) {
-            fadeOut ?
-                (this as any).fadeOutAndDestroy(`tile${tile.id}`) :
-                dojo.destroy(`tile${tile.id}`);
+        } else {
+            const divElement = document.getElementById(`tile${tile.id}`);
+            if (divElement) {
+                if (fadeOut) {
+                    const destroyedId = `${divElement.id}-to-be-destroyed`;
+                    divElement.id = destroyedId;
+                    (this as any).fadeOutAndDestroy(destroyedId);
+                } else {
+                    divElement.parentElement.removeChild(divElement);
+                }
+            }
         }
     }
 

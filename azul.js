@@ -831,10 +831,18 @@ var Azul = /** @class */ (function () {
             var coordinates = this.factories.getCoordinatesForTile0();
             this.placeTile(tile, "factory0", coordinates.left, coordinates.top, undefined);
         }
-        else if (document.getElementById("tile" + tile.id)) {
-            fadeOut ?
-                this.fadeOutAndDestroy("tile" + tile.id) :
-                dojo.destroy("tile" + tile.id);
+        else {
+            var divElement = document.getElementById("tile" + tile.id);
+            if (divElement) {
+                if (fadeOut) {
+                    var destroyedId = divElement.id + "-to-be-destroyed";
+                    divElement.id = destroyedId;
+                    this.fadeOutAndDestroy(destroyedId);
+                }
+                else {
+                    divElement.parentElement.removeChild(divElement);
+                }
+            }
         }
     };
     Azul.prototype.removeTiles = function (tiles, fadeOut) {
