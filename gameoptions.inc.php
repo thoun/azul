@@ -52,6 +52,7 @@ $game_options = [
                 ],
                 2 => [
                     'name' => totranslate('Disabled'),
+                    'tmdisplay' => totranslate('Undo/confirm disabled'), 
                 ]
             ],
         'default' => 1
@@ -62,6 +63,7 @@ $game_options = [
         'values' => [
                 1 => [
                     'name' => totranslate('Enabled'),
+                    'tmdisplay' => totranslate('Fast scoring'), 
                 ],
                 2 => [
                     'name' => totranslate('Disabled'),
