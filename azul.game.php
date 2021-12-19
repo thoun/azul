@@ -232,6 +232,17 @@ class Azul extends Table {
             
             if ($state['type'] === "activeplayer") {
                 switch ($statename) {
+                    case 'chooseTile':
+                        $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory'));
+                        $tiles = array_values(array_filter($factoryTiles, function ($tile) { return $tile->type > 0; }));
+                        $this->takeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id, true);
+                        break;
+                    case 'chooseLine':
+                        $this->selectLine(0, true);
+                        break;
+                    case 'confirmLine':
+                        $this->confirmLine(true);
+                        break;
                     default:
                         $this->gamestate->nextState("nextPlayer"); // all player actions got nextPlayer action as a "zombiePass"
                         break;

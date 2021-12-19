@@ -11,8 +11,10 @@ trait ActionTrait {
         (note: each method below must match an input method in azul.action.php)
     */
     
-    function takeTiles(int $id) {
-        self::checkAction('takeTiles'); 
+    function takeTiles(int $id, $skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('takeTiles');
+        }
         
         $playerId = intval(self::getActivePlayerId());
 
@@ -115,8 +117,10 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function selectLine(int $line) {
-        self::checkAction('selectLine'); 
+    function selectLine(int $line, $skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('selectLine');
+        }
         
         $playerId = self::getActivePlayerId();
 
@@ -145,8 +149,10 @@ trait ActionTrait {
         }
     }
 
-    function confirmLine() {
-        self::checkAction('confirmLine'); 
+    function confirmLine($skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('confirmLine');
+        }
         
         $this->gamestate->nextState('nextPlayer');
     }
