@@ -31,22 +31,28 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
             object.style.transition = `transform 0.5s ease-in`;
             object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px) rotate(${rotation}deg)`;
 
+            let securityTimeoutId = null;
+
             const transitionend = () => {
                 attachToNewParent();
                 object.removeEventListener('transitionend', transitionend);
                 resolve(true);
+
+                if (securityTimeoutId) {
+                    clearTimeout(securityTimeoutId);
+                }
             };
 
             object.addEventListener('transitionend', transitionend);
 
             // security check : if transition fails, we force tile to destination
-            setTimeout(() => {
+            securityTimeoutId = setTimeout(() => {
                 if (!destination.contains(object)) {
                     attachToNewParent();
                     object.removeEventListener('transitionend', transitionend);
                     resolve(true);
                 }
-            }, 600);
+            }, 700);
         }
     });
 }

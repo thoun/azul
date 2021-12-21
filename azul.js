@@ -27,20 +27,24 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
         else {
             object.style.transition = "transform 0.5s ease-in";
             object.style.transform = "translate(" + deltaX / game.getZoom() + "px, " + deltaY / game.getZoom() + "px) rotate(" + rotation + "deg)";
+            var securityTimeoutId_1 = null;
             var transitionend_1 = function () {
                 attachToNewParent();
                 object.removeEventListener('transitionend', transitionend_1);
                 resolve(true);
+                if (securityTimeoutId_1) {
+                    clearTimeout(securityTimeoutId_1);
+                }
             };
             object.addEventListener('transitionend', transitionend_1);
             // security check : if transition fails, we force tile to destination
-            setTimeout(function () {
+            securityTimeoutId_1 = setTimeout(function () {
                 if (!destination.contains(object)) {
                     attachToNewParent();
                     object.removeEventListener('transitionend', transitionend_1);
                     resolve(true);
                 }
-            }, 600);
+            }, 700);
         }
     });
 }
