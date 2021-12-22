@@ -16,11 +16,13 @@ trait ArgsTrait {
         $playerId = self::getActivePlayerId();
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
+        $number = count($tiles);
+
         return [
             'lines' => $this->availableLines($playerId),
-            'number' => count($tiles),
-            'color' => $this->getColor($tiles[0]->type),
-            'type' => $tiles[0]->type,
+            'number' => $number,
+            'color' => $number > 0 ? $this->getColor($tiles[0]->type) : null,
+            'type' => $number > 0 ? $tiles[0]->type : null,
         ];
     }
 
