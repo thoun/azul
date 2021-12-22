@@ -434,6 +434,10 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
 var ANIMATION_MS = 500;
 var SCORE_MS = 1500;
 var SLOW_SCORE_MS = 2000;
+var REFILL_DELAY = [];
+REFILL_DELAY[5] = 1600;
+REFILL_DELAY[7] = 2200;
+REFILL_DELAY[9] = 2900;
 var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 var LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
@@ -945,7 +949,7 @@ var Azul = /** @class */ (function () {
         //log( 'notifications subscriptions setup' );
         var _this = this;
         var notifs = [
-            ['factoriesFilled', ANIMATION_MS],
+            ['factoriesFilled', ANIMATION_MS + REFILL_DELAY[this.gamedatas.factoryNumber]],
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],

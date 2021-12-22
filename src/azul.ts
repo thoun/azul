@@ -11,6 +11,11 @@ const ANIMATION_MS = 500;
 const SCORE_MS = 1500;
 const SLOW_SCORE_MS = 2000;
 
+const REFILL_DELAY = [];
+REFILL_DELAY[5] = 1600;
+REFILL_DELAY[7] = 2200;
+REFILL_DELAY[9] = 2900;
+
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 const LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
@@ -615,7 +620,7 @@ class Azul implements AzulGame {
         //log( 'notifications subscriptions setup' );
 
         const notifs = [
-            ['factoriesFilled', ANIMATION_MS],
+            ['factoriesFilled', ANIMATION_MS + REFILL_DELAY[this.gamedatas.factoryNumber]],
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
