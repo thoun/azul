@@ -225,7 +225,7 @@
   width: unset;
 }
 .player-table-wrapper .player-table .wall-spot.selectable {
-  border-color: red;
+  animation: selectable-wall 1s alternate-reverse infinite ease-in-out;
   pointer-events: all;
   cursor: pointer;
 }
@@ -284,6 +284,14 @@
   opacity: 0.3;
 }
 
+@keyframes selectable-wall {
+  from {
+    border-color: #ff4141;
+  }
+  to {
+    border-color: #5a0000;
+  }
+}
 .player_board_content .tile {
   position: relative;
   margin: 5px;

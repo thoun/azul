@@ -87,7 +87,7 @@ trait DebugUtilTrait {
         }
     }
 
-    private function debugSetWallColumn(int $playerId, int $column) {
+    function debugSetWallColumn(int $playerId, int $column) {
         $tiles = $this->getTilesFromDb($this->tiles->getCardsOnTop(5, 'deck'));
 
         $line = 0;
@@ -96,18 +96,18 @@ trait DebugUtilTrait {
         }
     }
 
-    private function debugSetWallTile(int $playerId, int $line, int $column, int $color) {
+    function debugSetWallTile(int $playerId, int $line, int $column, int $color) {
         $tile = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation($color, null, 'deck'))[0];
 
         $this->tiles->moveCard($tile->id, 'wall'.$playerId, $line*100 + $column);
     }
 
-    private function debugSetLineTiles(int $playerId, int $line, int $number, int $color) {
+    function debugSetLineTiles(int $playerId, int $line, int $number, int $color) {
         $tiles = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation($color, null, 'deck'));
         $this->placeTilesOnLine($playerId, array_slice($tiles, 0, $number), $line, false);
     }
 
-    private function addTilesInFactory(int $number, int $color, $factory = 0) {
+    function addTilesInFactory(int $number, int $color, $factory = 0) {
         $colorTiles = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation($color, null, 'deck'));
 
         $tiles = array_slice($colorTiles, 0, $number);
@@ -125,7 +125,7 @@ trait DebugUtilTrait {
         return false;
     }
 
-    private function debugPlayRandomlyForPlayer(int $playerId) {
+    function debugPlayRandomlyForPlayer(int $playerId) {
         $factories = [];
         $factoryNumber = $this->getFactoryNumber();
         for ($i = 0; $i<=$factoryNumber; $i++) {

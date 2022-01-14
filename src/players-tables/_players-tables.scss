@@ -142,7 +142,7 @@
             }
 
             &.selectable {
-                border-color: red;
+                animation: selectable-wall 1s alternate-reverse infinite ease-in-out;
                 pointer-events: all;
                 cursor: pointer;
             }
@@ -212,4 +212,13 @@
 }
 .cb .wall-tile-cb {
     opacity: 0.3;
+}
+
+@keyframes selectable-wall {
+    from {
+    border-color: rgb(255, 65, 65);
+    }
+    to {
+        border-color: rgb(90, 0, 0);
+    }
 }

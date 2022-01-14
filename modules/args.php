@@ -22,6 +22,7 @@ trait ArgsTrait {
             'lines' => $this->availableLines($playerId),
             'number' => $number,
             'color' => $number > 0 ? $this->getColor($tiles[0]->type) : null,
+            'i18n' => ['color'],
             'type' => $number > 0 ? $tiles[0]->type : null,
         ];
     }

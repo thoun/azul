@@ -161,7 +161,8 @@ trait UtilTrait {
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'number' => count($tiles),
-            'color' => $this->getColor($tiles[0]->type),            
+            'color' => $this->getColor($tiles[0]->type),
+            'i18n' => ['color'],
             'type' => $tiles[0]->type,
             'preserve' => [ 2 => 'type' ],
             'line' => $line,
@@ -175,11 +176,11 @@ trait UtilTrait {
     function getColor(int $type) {
         $colorName = null;
         switch ($type) {
-            case 1: $colorName = _('Black'); break;
-            case 2: $colorName = _('Cyan'); break;
-            case 3: $colorName = _('Blue'); break;
-            case 4: $colorName = _('Yellow'); break;
-            case 5: $colorName = _('Red'); break;
+            case 1: $colorName = clienttranslate('Black'); break;
+            case 2: $colorName = clienttranslate('Cyan'); break;
+            case 3: $colorName = clienttranslate('Blue'); break;
+            case 4: $colorName = clienttranslate('Yellow'); break;
+            case 5: $colorName = clienttranslate('Red'); break;
         }
         return $colorName;
     }
@@ -367,7 +368,8 @@ trait UtilTrait {
                 self::notifyAllPlayers('placeTileOnWallTextLogDetails', clienttranslate('${player_name} places ${number} ${color} and gains ${points} point(s)'), [
                     'player_name' => $this->getPlayerName($playerId),
                     'number' => 1,
-                    'color' => $this->getColor($notif->placedTile->type),                
+                    'color' => $this->getColor($notif->placedTile->type),
+                    'i18n' => ['color'],
                     'type' => $notif->placedTile->type,
                     'preserve' => [ 2 => 'type' ],
                     'points' => $notif->pointsDetail->points,
@@ -532,6 +534,7 @@ trait UtilTrait {
                 self::notifyAllPlayers('completeColorLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete color ${color}'), [
                     'player_name' => $this->getPlayerName($playerId),
                     'color' => $this->getColor($notif->tiles[0]->type),
+                    'i18n' => ['color'],
                     'points' => $notif->points,
                 ]);
             }
