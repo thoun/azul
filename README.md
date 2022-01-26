@@ -44,7 +44,7 @@ function getDebugLines(playerId) {
         }
     }
 }
-getDebugLines(84222058)
+getDebugLines(88616973)
 
 function getDebugWall(playerId) {
     for (line = 1; line <= 5; line++) {
@@ -58,7 +58,7 @@ function getDebugWall(playerId) {
         }
     }
 }
-getDebugWall(84222058)
+getDebugWall(88616973)
 
 ## see factoriesFilled notifs from a replay
 JSON.stringify(

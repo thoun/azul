@@ -87,7 +87,7 @@ trait UtilTrait {
     function getSelectedColumns(int $playerId) {
         $json_obj = self::getUniqueValueFromDB("SELECT `selected_columns` FROM `player` where `player_id` = $playerId");
         $object = json_decode($json_obj, true);
-        return $object;
+        return $object ?? [];
     }
 
     function setSelectedColumn(int $playerId, int $line, int $column) {

@@ -59,7 +59,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 4, 4, 3);
         $this->debugSetWallTile(2343492, 5, 1, 1);*/
 
-        $this->gamestate->changeActivePlayer(2343492);
+        /*$this->gamestate->changeActivePlayer(2343492);
 
         $this->debugSetLineTiles(2343493, 1, 1, 3);
         $this->debugSetLineTiles(2343493, 2, 2, 5);
@@ -68,7 +68,42 @@ trait DebugUtilTrait {
 
         $this->debugSetWallTile(2343493, 1, 1, 2);
         $this->debugSetWallTile(2343493, 2, 3, 1);
-        $this->debugSetWallTile(2343493, 3, 5, 5);
+        $this->debugSetWallTile(2343493, 3, 5, 5);*/
+
+        // platinumove
+        $this->debugSetLineTiles(2343492, 1, 1, 3);
+        $this->debugSetLineTiles(2343492, 2, 2, 5);
+        $this->debugSetLineTiles(2343492, 4, 2, 4);
+        $this->debugSetLineTiles(2343492, 5, 5, 2);
+        $this->debugSetWallTile(2343492, 1, 1, 2);
+        $this->debugSetWallTile(2343492, 2, 3, 1);
+        $this->debugSetWallTile(2343492, 3, 5, 5);
+
+        // Aloyra
+        $this->debugSetLineTiles(2343493, 1, 1, 3);
+        $this->debugSetLineTiles(2343493, 2, 2, 2);
+        $this->debugSetLineTiles(2343493, 3, 1, 5);
+        $this->debugSetLineTiles(2343493, 4, 4, 3);
+        $this->debugSetWallTile(2343493, 3, 3, 3);
+        $this->debugSetWallTile(2343493, 5, 1, 3);
+
+        // gerbroe
+        $this->debugSetLineTiles(2343494, 1, 1, 4);
+        $this->debugSetLineTiles(2343494, 2, 2, 3);
+        $this->debugSetLineTiles(2343494, 4, 4, 1);
+        $this->debugSetLineTiles(2343494, 5, 5, 5);
+        $this->debugSetWallTile(2343494, 3, 3, 1);
+        $this->debugSetWallTile(2343494, 4, 3, 2);
+
+        // suny03ua
+        $this->debugSetLineTiles(2343495, 1, 1, 5);
+        $this->debugSetLineTiles(2343495, 2, 2, 5);
+        $this->debugSetLineTiles(2343495, 3, 3, 4);
+        $this->debugSetLineTiles(2343495, 4, 2, 1);
+        $this->debugSetLineTiles(2343495, 5, 2, 4);
+        $this->debugSetWallTile(2343495, 2, 3, 2);
+        $this->debugSetWallTile(2343495, 3, 3, 1);
+        $this->debugSetWallTile(2343495, 4, 3, 4);
 
         // update `tile` set card_location='discard' where card_location='factory' and card_location_arg <> 1
     }
@@ -105,6 +140,20 @@ trait DebugUtilTrait {
     function debugSetLineTiles(int $playerId, int $line, int $number, int $color) {
         $tiles = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation($color, null, 'deck'));
         $this->placeTilesOnLine($playerId, array_slice($tiles, 0, $number), $line, false);
+    }
+
+    function debugEmptyFactories() {
+        $factoryNumber = $this->getFactoryNumber();
+        for ($i = 1; $i<=$factoryNumber; $i++) {
+            if (intval($this->tiles->countCardInLocation('factory', $i)) > 0) {
+                $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $i));
+                foreach ($tiles as $key => $tile) {
+                    if ($i > 1 || $key > 0) {
+                        $this->tiles->moveCard($tile->id, 'discard');
+                    }
+                }
+            }
+        }
     }
 
     function addTilesInFactory(int $number, int $color, $factory = 0) {
