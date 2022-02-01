@@ -106,7 +106,7 @@ trait UtilTrait {
     }
 
     function getTilesFromDb(array $dbTiles) {
-        return array_map(function($dbTile) { return $this->getTileFromDb($dbTile); }, array_values($dbTiles));
+        return array_map(fn($dbTile) => $this->getTileFromDb($dbTile), array_values($dbTiles));
     }
 
     function setupTiles() {
@@ -187,7 +187,7 @@ trait UtilTrait {
 
     function getTilesFromLine(int $playerId, int $line) {
         $tiles = array_values(array_filter(
-            $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), function($tile) use ($line) { return $tile->line == $line; })
+            $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), fn($tile) => $tile->line == $line)
         );
         usort($tiles, 'sortByColumn');
 
@@ -216,7 +216,7 @@ trait UtilTrait {
         $lines = [0];
         for ($i=1; $i<=5; $i++) {
             $lineTiles = $this->getTilesFromLine($playerId, $i);
-            $playerWallTileLine = array_values(array_filter($playerWallTiles, function ($tile) use ($i) { return $tile->line == $i; }));
+            $playerWallTileLine = array_values(array_filter($playerWallTiles, fn($tile) => $tile->line == $i));
             $availableLine = count($lineTiles) == 0 || ($lineTiles[0]->type == $color && count($lineTiles) < $i);
             $availableWall = !$this->someOfColor($playerWallTileLine, $color);
             if ($availableLine && $availableWall) {
@@ -434,7 +434,7 @@ trait UtilTrait {
     function notifCompleteLines(array $playersIds, array $walls, int $line) {        
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], function($tile) use ($line) { return $tile->line == $line; }));
+            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile)=> $tile->line == $line));
             usort($playerTiles, 'sortByColumn');
 
             if (count($playerTiles) == 5) {
@@ -471,7 +471,7 @@ trait UtilTrait {
     function notifCompleteColumns(array $playersIds, array $walls, int $column) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], function($tile) use ($column) { return $tile->column == $column; }));
+            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->column == $column));
             usort($playerTiles, 'sortByLine');
             
             if (count($playerTiles) == 5) {
@@ -507,7 +507,7 @@ trait UtilTrait {
     function notifCompleteColors(array $playersIds, array $walls, int $color) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], function($tile) use ($color) { return $tile->type == $color; }));
+            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->type == $color));
             usort($playerTiles, 'sortByLine');
             
             if (count($playerTiles) == 5) {
@@ -551,7 +551,7 @@ trait UtilTrait {
         for ($column = 1; $column <= 5; $column++) {
 
             $tilesSameColorSameColumnOrSamePosition = array_values(array_filter(
-                $wallAndGhost, function($tile) use ($column, $line, $color) { return $tile->column == $column && ($tile->type == $color || $tile->line == $line); })
+                $wallAndGhost, fn($tile) => $tile->column == $column && ($tile->type == $color || $tile->line == $line))
             );
 
             if (count($tilesSameColorSameColumnOrSamePosition) == 0) {
@@ -567,7 +567,7 @@ trait UtilTrait {
             // construction line is complete
             
             $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
-            $playerWallTileLineCount = count(array_values(array_filter($playerWallTiles, function ($tile) use ($line) { return $tile->line == $line; })));
+            $playerWallTileLineCount = count(array_values(array_filter($playerWallTiles, fn($tile) => $tile->line == $line)));
             
             // wall has only on spot left
             if ($playerWallTileLineCount >= 4) {

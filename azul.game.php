@@ -198,7 +198,7 @@ class Azul extends Table {
         foreach ($playerIds as $playerId) {
             $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
             for ($i=1; $i<=5; $i++) {
-                $playerWallTileLineCount = count(array_values(array_filter($playerWallTiles, function ($tile) use ($i) { return $tile->line == $i; })));
+                $playerWallTileLineCount = count(array_values(array_filter($playerWallTiles, fn($tile) => $tile->line == $i)));
                 if ($playerWallTileLineCount > $maxColumns) {
                     $maxColumns = $playerWallTileLineCount;
                 }
@@ -232,7 +232,7 @@ class Azul extends Table {
                 switch ($statename) {
                     case 'chooseTile':
                         $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory'));
-                        $tiles = array_values(array_filter($factoryTiles, function ($tile) { return $tile->type > 0; }));
+                        $tiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type > 0));
                         $this->takeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id, true);
                         break;
                     case 'chooseLine':

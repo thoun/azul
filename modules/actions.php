@@ -39,7 +39,7 @@ trait ActionTrait {
         $hasFirstPlayer = false;
 
         if ($factory == 0) {
-            $firstPlayerTokens = array_values(array_filter($factoryTiles, function ($fpTile) { return $fpTile->type == 0; }));
+            $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
             $hasFirstPlayer = count($firstPlayerTokens) > 0;
 
             foreach($factoryTiles as $factoryTile) {

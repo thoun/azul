@@ -186,7 +186,7 @@ trait DebugUtilTrait {
         $factory = bga_rand(0, count($factories) - 1);
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
         //if (count($tiles) > 0) {
-            $line = $this->array_some($tiles, function ($tile) { return $tile->type == 0; }) ? 0 : bga_rand(0, 5);
+            $line = $this->array_some($tiles, fn($tile) => $tile->type == 0) ? 0 : bga_rand(0, 5);
 
             $this->placeTilesOnLine($playerId, $tiles, $line, false);
         //}
