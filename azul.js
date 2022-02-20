@@ -31,17 +31,20 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
             var transitionend_1 = function () {
                 attachToNewParent();
                 object.removeEventListener('transitionend', transitionend_1);
+                object.removeEventListener('transitioncancel', transitionend_1);
                 resolve(true);
                 if (securityTimeoutId_1) {
                     clearTimeout(securityTimeoutId_1);
                 }
             };
             object.addEventListener('transitionend', transitionend_1);
+            object.addEventListener('transitioncancel', transitionend_1);
             // security check : if transition fails, we force tile to destination
             securityTimeoutId_1 = setTimeout(function () {
                 if (!destination.contains(object)) {
                     attachToNewParent();
                     object.removeEventListener('transitionend', transitionend_1);
+                    object.removeEventListener('transitioncancel', transitionend_1);
                     resolve(true);
                 }
             }, 700);

@@ -36,6 +36,7 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
             const transitionend = () => {
                 attachToNewParent();
                 object.removeEventListener('transitionend', transitionend);
+                object.removeEventListener('transitioncancel', transitionend);
                 resolve(true);
 
                 if (securityTimeoutId) {
@@ -44,12 +45,14 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
             };
 
             object.addEventListener('transitionend', transitionend);
+            object.addEventListener('transitioncancel', transitionend);
 
             // security check : if transition fails, we force tile to destination
             securityTimeoutId = setTimeout(() => {
                 if (!destination.contains(object)) {
                     attachToNewParent();
                     object.removeEventListener('transitionend', transitionend);
+                    object.removeEventListener('transitioncancel', transitionend);
                     resolve(true);
                 }
             }, 700);
