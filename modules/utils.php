@@ -326,9 +326,11 @@ trait UtilTrait {
                 if ($this->isVariant()) {
                     $selectedColumns = $this->getSelectedColumns($playerId);
                     if (!array_key_exists($line, $selectedColumns)) {
-                        throw new BgaUserException("Game have no selected column for line $line. Please create a bug report and let the table open if possible.");
+                        // happens when a player left the game with a complete row
+                        $column = 0;
+                    } else {
+                        $column = $selectedColumns[$line];
                     }
-                    $column = $selectedColumns[$line];
                 } else {
                     $column = $this->getColumnForTile($line, $wallTile->type);
                 }
