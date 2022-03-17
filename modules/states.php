@@ -23,6 +23,16 @@ trait StateTrait {
             $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
         }
 
+        if ($this->isVariant()) {
+            self::DbQuery("UPDATE player SET selected_columns = '{}'");
+
+            $lastRoundLogged = intval(self::getGameStateValue(END_TURN_LOGGED)) > 0;
+            if ($lastRoundLogged) {
+                self::setGameStateValue(END_TURN_LOGGED, 0);
+                self::notifyAllPlayers('removeLastRound', '', []);
+            }
+        }
+
         self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins !"), [
             'factories' => $factories,
             'remainingTiles' => intval($this->tiles->countCardInLocation('deck')),
@@ -30,10 +40,6 @@ trait StateTrait {
 
         self::incStat(1, 'roundsNumber');
         self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
-
-        if ($this->isVariant()) {
-            self::DbQuery("UPDATE player SET selected_columns = '{}'");
-        }
         
         // TODO TEMP
         //$this->debugPlayRandomlyToTen();

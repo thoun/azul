@@ -962,6 +962,7 @@ var Azul = /** @class */ (function () {
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
+            ['removeLastRound', 1],
             ['updateSelectColumn', 1],
         ];
         notifs.forEach(function (notif) {
@@ -1052,7 +1053,16 @@ var Azul = /** @class */ (function () {
         if (document.getElementById('last-round')) {
             return;
         }
-        dojo.place("<div id=\"last-round\">\n            " + _("This is the last round of the game!") + "\n        </div>", 'page-title');
+        var message = _("This is the last round of the game!");
+        if (this.isVariant()) {
+            message += ' <i>(' + _("if the complete line can be placed on the wall") + ')</i>';
+        }
+        dojo.place("<div id=\"last-round\">" + message + "</div>", 'page-title');
+    };
+    Azul.prototype.notif_removeLastRound = function () {
+        if (document.getElementById('last-round')) {
+            dojo.destroy('last-round');
+        }
     };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */

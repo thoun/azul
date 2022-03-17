@@ -20,11 +20,11 @@ trait DebugUtilTrait {
         $tiles = array_slice($tiles, 0, 83);
         $this->tiles->moveCards(array_map('getIdPredicate', $tiles), 'discard');*/
 
-        /*$this->debugSetWallTile(2343492, 1, 1, 1);
-        $this->debugSetWallTile(2343492, 1, 2, 2);
-        $this->debugSetWallTile(2343492, 1, 4, 4);
-        $this->debugSetWallTile(2343492, 1, 5, 5);
-        $this->debugSetLineTiles(2343492, 1, 1, 3);
+        $this->debugSetWallTile(2343492, 2, 1, 1);
+        $this->debugSetWallTile(2343492, 2, 2, 2);
+        $this->debugSetWallTile(2343492, 2, 4, 4);
+        $this->debugSetWallTile(2343492, 2, 5, 5);
+        /*$this->debugSetLineTiles(2343492, 1, 1, 3);
 
         $this->debugSetWallTile(2343492, 5, 2, 1);
         $this->debugSetWallTile(2343492, 5, 1, 2);
@@ -70,7 +70,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343493, 2, 3, 1);
         $this->debugSetWallTile(2343493, 3, 5, 5);*/
 
-        // platinumove
+        /*// platinumove
         $this->debugSetLineTiles(2343492, 1, 1, 3);
         $this->debugSetLineTiles(2343492, 2, 2, 5);
         $this->debugSetLineTiles(2343492, 4, 2, 4);
@@ -103,7 +103,7 @@ trait DebugUtilTrait {
         $this->debugSetLineTiles(2343495, 5, 2, 4);
         $this->debugSetWallTile(2343495, 2, 3, 2);
         $this->debugSetWallTile(2343495, 3, 3, 1);
-        $this->debugSetWallTile(2343495, 4, 3, 4);
+        $this->debugSetWallTile(2343495, 4, 3, 4);*/
 
         // update `tile` set card_location='discard' where card_location='factory' and card_location_arg <> 1
     }

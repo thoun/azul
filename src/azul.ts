@@ -630,6 +630,7 @@ class Azul implements AzulGame {
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
+            ['removeLastRound', 1],
             ['updateSelectColumn', 1],
         ];
 
@@ -741,9 +742,17 @@ class Azul implements AzulGame {
             return;
         }
         
-        dojo.place(`<div id="last-round">
-            ${_("This is the last round of the game!")}
-        </div>`, 'page-title');
+        let message = _("This is the last round of the game!");
+        if (this.isVariant()) {
+            message += ' <i>(' + _("if the complete line can be placed on the wall") + ')</i>';
+        }
+        dojo.place(`<div id="last-round">${message}</div>`, 'page-title');
+    }
+
+    notif_removeLastRound() {
+        if (document.getElementById('last-round')) {
+            dojo.destroy('last-round');
+        }
     }
 
     /* This enable to inject translatable styled things to logs or action bar */
