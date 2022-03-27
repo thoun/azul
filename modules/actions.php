@@ -134,11 +134,7 @@ trait ActionTrait {
 
         $lastRoundLogged = intval(self::getGameStateValue(END_TURN_LOGGED)) > 0;
         if ($this->lineWillBeComplete($playerId, $line) && !$lastRoundLogged) {
-            $message = clienttranslate('${player_name} will complete a line, it\'s last turn !');
-            if ($this->isVariant()) {
-                $message .= ' ('.clienttranslate('if the complete line can be placed on the wall').')';
-            }
-            self::notifyAllPlayers('lastRound', $message, [
+            self::notifyAllPlayers('lastRound', clienttranslate('${player_name} will complete a line, it\'s last turn !'), [
                 'playerId' => $playerId,
                 'player_name' => self::getActivePlayerName(),
             ]);
@@ -194,9 +190,11 @@ trait ActionTrait {
 
         $this->setSelectedColumn($playerId, $line, $column);
 
+        $arg = $this->argChooseColumnForPlayer($playerId);
+
         self::notifyPlayer($playerId, 'updateSelectColumn', '', [
             'playerId' => $playerId,
-            'arg' => $this->argChooseColumnForPlayer($playerId),
+            'arg' => $arg,
         ]);
     }
 

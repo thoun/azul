@@ -88,6 +88,8 @@ trait StateTrait {
         foreach ($playersIds as $playerId) {
             $selectedColumns = $this->getSelectedColumns($playerId);
 
+            $canAutoSelect = true;
+
             for ($line = 1; $line <= 5; $line++) {
                 if (!array_key_exists($line, $selectedColumns)) {
                     $playerTiles = $this->getTilesFromLine($playerId, $line);
@@ -97,8 +99,9 @@ trait StateTrait {
                         if (count($availableColumns) > 1) {                        
                             if (!array_key_exists($playerId, $playersIdsWithCompleteLines)) {                   
                                 $playersIdsWithCompleteLines[] = $playerId;
+                                $canAutoSelect = false;
                             }
-                        } else {
+                        } else if ($canAutoSelect) {
                             // if only one possibility, it's automaticaly selected
                             $this->setSelectedColumn($playerId, $line, $availableColumns[0]);
                         }

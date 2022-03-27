@@ -6,6 +6,16 @@ trait DebugUtilTrait {
 //////////// Utility functions
 ////////////
 
+    // shortcut to launch multiple debug lines
+    function d() {
+        if ($this->getBgaEnvironment() != 'studio') { 
+            return;
+        } 
+
+        $this->debugEmptyFactories();
+        $this->removeFp();
+    }
+
     function debugSetup() {
         if ($this->getBgaEnvironment() != 'studio') { 
             return;
@@ -20,10 +30,16 @@ trait DebugUtilTrait {
         $tiles = array_slice($tiles, 0, 83);
         $this->tiles->moveCards(array_map('getIdPredicate', $tiles), 'discard');*/
 
+        $this->debugSetLineTiles(2343492, 1, 1, 3);
+        $this->debugSetLineTiles(2343492, 2, 2, 3);
         $this->debugSetWallTile(2343492, 2, 1, 1);
         $this->debugSetWallTile(2343492, 2, 2, 2);
         $this->debugSetWallTile(2343492, 2, 4, 4);
         $this->debugSetWallTile(2343492, 2, 5, 5);
+
+        $this->debugEmptyFactories();
+        $this->removeFp();
+
         /*$this->debugSetLineTiles(2343492, 1, 1, 3);
 
         $this->debugSetWallTile(2343492, 5, 2, 1);
@@ -106,6 +122,8 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343495, 4, 3, 4);*/
 
         // update `tile` set card_location='discard' where card_location='factory' and card_location_arg <> 1
+        $this->debugEmptyFactories();
+        $this->gamestate->changeActivePlayer(2343492);
     }
 
     function debugPlayRandomlyToTen() {
@@ -165,6 +183,15 @@ trait DebugUtilTrait {
 
     }
 
+    function removeFp() {
+        $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', 0));
+        $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
+        $hasFirstPlayer = count($firstPlayerTokens) > 0;
+        if ($hasFirstPlayer) {
+            $this->putFirstPlayerTile($firstPlayerTokens, 2343492);
+        }
+    }
+
     function array_some(array $array, callable $fn) {
         foreach ($array as $value) {
             if($fn($value)) {
@@ -222,4 +249,10 @@ trait DebugUtilTrait {
 			++$sid;
 		}
 	}
+
+    function debug($debugData) {
+        if ($this->getBgaEnvironment() != 'studio') { 
+            return;
+        }die('debug data : '.json_encode($debugData));
+    }
 }

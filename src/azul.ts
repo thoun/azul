@@ -142,7 +142,7 @@ class Azul implements AzulGame {
                 (this as any).addActionButton('confirmColumns_button', _("Confirm"), () => this.confirmColumns());
                 (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
             }
-            dojo.toggleClass('confirmColumns_button', 'disabled', !!infos.nextColumnToSelect);
+            dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect);
         }
     }
 

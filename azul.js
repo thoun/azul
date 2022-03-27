@@ -542,7 +542,7 @@ var Azul = /** @class */ (function () {
                 this.addActionButton('confirmColumns_button', _("Confirm"), function () { return _this.confirmColumns(); });
                 this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
             }
-            dojo.toggleClass('confirmColumns_button', 'disabled', !!infos.nextColumnToSelect);
+            dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect_1);
         }
     };
     Azul.prototype.onEnteringChooseColumns = function (args) {
