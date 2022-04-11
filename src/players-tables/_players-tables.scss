@@ -216,9 +216,11 @@
 
 @keyframes selectable-wall {
     from {
-    border-color: rgb(255, 65, 65);
+        border-color: rgb(255, 65, 65);
+        background: #FFFFFF66;
     }
     to {
         border-color: rgb(90, 0, 0);
+        background: #FFFFFF33;
     }
 }

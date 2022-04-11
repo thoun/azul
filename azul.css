@@ -287,9 +287,11 @@
 @keyframes selectable-wall {
   from {
     border-color: #ff4141;
+    background: #FFFFFF66;
   }
   to {
     border-color: #5a0000;
+    background: #FFFFFF33;
   }
 }
 .player_board_content .tile {
