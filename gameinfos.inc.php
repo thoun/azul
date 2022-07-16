@@ -19,7 +19,7 @@ $gameinfos = [
 'designer' => 'Michael Kiesling',       
 
 // Game artist (or game artists, separated by commas)
-'artist' => 'Philippe Guérin, Chris Quilliams',         
+'artist' => 'Chris Quilliams',         
 
 // Year of FIRST publication of this game. Can be negative.
 'year' => 2017,                 
