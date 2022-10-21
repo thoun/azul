@@ -362,18 +362,21 @@ var PlayerTable = /** @class */ (function () {
             _loop_3(i);
         }
         if (this.game.isVariant()) {
-            for (var line = 1; line <= 5; line++) {
-                var _loop_4 = function (column) {
+            var _loop_4 = function (line) {
+                var _loop_6 = function (column) {
                     document.getElementById("player-table-" + this_4.playerId + "-wall-spot-" + line + "-" + column).addEventListener('click', function () {
-                        _this.game.selectColumn(column);
+                        _this.game.selectColumn(line, column);
                     });
                 };
-                var this_4 = this;
                 for (var column = 1; column <= 5; column++) {
-                    _loop_4(column);
+                    _loop_6(column);
                 }
+            };
+            var this_4 = this;
+            for (var line = 1; line <= 5; line++) {
+                _loop_4(line);
             }
-            document.getElementById("player-table-" + this.playerId + "-column0").addEventListener('click', function () { return _this.game.selectColumn(0); });
+            document.getElementById("player-table-" + this.playerId + "-column0").addEventListener('click', function () { return _this.game.selectColumn(0, 0); });
         }
         var _loop_5 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
@@ -506,6 +509,9 @@ var Azul = /** @class */ (function () {
                 break;
             case 'chooseLine':
                 this.onEnteringChooseLine(args.args);
+                break;
+            case 'privateChooseColumns':
+                this.onEnteringChooseColumnsForPlayer(this.getPlayerId(), args.args);
                 break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
@@ -894,11 +900,10 @@ var Azul = /** @class */ (function () {
         }
         this.takeAction('undoSelectLine');
     };
-    Azul.prototype.selectColumn = function (column) {
+    Azul.prototype.selectColumn = function (line, column) {
         if (!this.checkAction('selectColumn')) {
             return;
         }
-        var line = this.gamedatas.gamestate.args.players[this.getPlayerId()].nextColumnToSelect.line;
         this.takeAction('selectColumn', {
             line: line,
             column: column
@@ -1044,9 +1049,11 @@ var Azul = /** @class */ (function () {
             this.removeColumnSelection();
             this.onLeavingChooseColumns();
         }
-        // when a player is deactivated, updateActionButton calling onEnteringChooseColumns is called with old args.
-        // so we set args up-to-date to avoid conflict between current situation and old args
-        this.gamedatas.gamestate.args.players[notif.args.playerId] = notif.args.arg;
+        if (this.gamedatas.gamestate.name === 'chooseColumns') {
+            // when a player is deactivated, updateActionButton calling onEnteringChooseColumns is called with old args.
+            // so we set args up-to-date to avoid conflict between current situation and old args
+            this.gamedatas.gamestate.args.players[notif.args.playerId] = notif.args.arg;
+        }
         this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg);
     };
     Azul.prototype.notif_lastRound = function () {

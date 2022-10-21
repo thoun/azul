@@ -101,6 +101,9 @@ class Azul implements AzulGame {
             case 'chooseLine':
                 this.onEnteringChooseLine(args.args);
                 break;
+            case 'privateChooseColumns':
+                this.onEnteringChooseColumnsForPlayer(this.getPlayerId(), args.args);
+                break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
@@ -550,12 +553,10 @@ class Azul implements AzulGame {
         this.takeAction('undoSelectLine');
     }
 
-    public selectColumn(column: number) {
+    public selectColumn(line: number, column: number) {
         if(!(this as any).checkAction('selectColumn')) {
             return;
         }
-
-        const line = this.gamedatas.gamestate.args.players[this.getPlayerId()].nextColumnToSelect.line;
 
         this.takeAction('selectColumn', {
             line,
@@ -730,9 +731,11 @@ class Azul implements AzulGame {
             this.onLeavingChooseColumns();
         }
 
-        // when a player is deactivated, updateActionButton calling onEnteringChooseColumns is called with old args.
-        // so we set args up-to-date to avoid conflict between current situation and old args
-        this.gamedatas.gamestate.args.players[notif.args.playerId] = notif.args.arg;
+        if (this.gamedatas.gamestate.name === 'chooseColumns') {
+            // when a player is deactivated, updateActionButton calling onEnteringChooseColumns is called with old args.
+            // so we set args up-to-date to avoid conflict between current situation and old args
+            this.gamedatas.gamestate.args.players[notif.args.playerId] = notif.args.arg;
+        }
 
         this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg);
     }

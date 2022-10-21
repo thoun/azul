@@ -64,11 +64,11 @@ class PlayerTable {
             for (let line=1; line<=5; line++) {
                 for (let column=1; column<=5; column++) {
                     document.getElementById(`player-table-${this.playerId}-wall-spot-${line}-${column}`).addEventListener('click', () => {
-                        this.game.selectColumn(column);
+                        this.game.selectColumn(line, column);
                     });
                 }
             }
-            document.getElementById(`player-table-${this.playerId}-column0`).addEventListener('click', () => this.game.selectColumn(0));
+            document.getElementById(`player-table-${this.playerId}-column0`).addEventListener('click', () => this.game.selectColumn(0, 0));
         }
 
         for (let i=0; i<=5; i++) {

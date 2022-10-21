@@ -48,7 +48,7 @@ interface AzulGame extends Game {
     isVariant(): boolean;
     takeTiles(id: number): void;
     selectLine(line: number): void;
-    selectColumn(column: number): void;
+    selectColumn(line: number, column: number): void;
     removeTile(tile: Tile): void;
     removeTiles(tiles: Tile[]): void;
     placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean>;

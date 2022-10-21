@@ -150,7 +150,8 @@ $playerActionsGameStates = [
         "type" => "game",
         "action" => "stEndRound",
         "transitions" => [
-            "chooseColumns" => ST_MULTIPLAYER_CHOOSE_COLUMNS,
+            //"chooseColumns" => ST_MULTIPLAYER_CHOOSE_COLUMNS,
+            "chooseColumns" => ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS,
             "placeTiles" => ST_PLACE_TILES,
         ],
     ],
@@ -168,6 +169,37 @@ $playerActionsGameStates = [
             "undoColumns"
         ],
         "transitions" => [
+            "confirmColumns" => ST_PLACE_TILES,
+        ],
+    ],
+
+    ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS => [
+        "name" => "multiChooseColumns",
+        "description" => clienttranslate('Players with complete lines must choose columns to place tiles'),
+        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
+        "type" => "multipleactiveplayer",
+        "initialprivate" => ST_PRIVATE_CHOOSE_COLUMNS,
+        "action" => "stMultiChooseColumns",
+        "possibleactions" => [ 
+        ],
+        "transitions" => [
+            "confirmColumns" => ST_PLACE_TILES,
+        ],
+    ],
+
+    ST_PRIVATE_CHOOSE_COLUMNS => [
+        "name" => "privateChooseColumns",
+        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
+        "type" => "private",
+        "action" => "stPrivateChooseColumns",
+        "args" => "argChooseColumnForPlayer",
+        "possibleactions" => [
+            "selectColumn",
+            "confirmColumns",
+            "undoColumns"
+        ],
+        "transitions" => [
+            "next" => ST_PRIVATE_CHOOSE_COLUMNS,
             "confirmColumns" => ST_PLACE_TILES,
         ],
     ],

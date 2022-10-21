@@ -117,6 +117,41 @@ trait StateTrait {
         }
     }
 
+    function stMultiChooseColumns() {
+        $this->gamestate->setAllPlayersMultiactive();
+        $this->gamestate->initializePrivateStateForAllActivePlayers(); 
+    }
+
+    function stPrivateChooseColumns(int $playerId) {
+        $selectedColumns = $this->getSelectedColumns($playerId);
+        $disablePlayer = true;
+        
+        for ($line = 1; $line <= 5; $line++) {
+            if (!array_key_exists($line, $selectedColumns)) {
+                $playerTiles = $this->getTilesFromLine($playerId, $line);
+                if (count($playerTiles) == $line) {
+                    $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
+
+                    if (count($availableColumns) > 1) {
+                        $disablePlayer = false;
+                    } else {
+                        // if only one possibility, it's automaticaly selected
+                        $this->setSelectedColumn($playerId, $line, $availableColumns[0]);
+
+                        if ($line < 5) {
+                            $this->gamestate->nextPrivateState($playerId, 'next');
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($disablePlayer) {
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'confirmColumns');
+        }
+    }
+
     function stPlaceTiles() {
         $playersIds = $this->getPlayersIds();
 
