@@ -200,6 +200,21 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "next" => ST_PRIVATE_CHOOSE_COLUMNS,
+            "undo" => ST_PRIVATE_CHOOSE_COLUMNS,
+            "confirm" => ST_PRIVATE_CONFIRM_COLUMNS,
+        ],
+    ],
+
+    ST_PRIVATE_CONFIRM_COLUMNS => [
+        "name" => "privateConfirmColumns",
+        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
+        "type" => "private",
+        "possibleactions" => [
+            "confirmColumns",
+            "undoColumns"
+        ],
+        "transitions" => [
+            "undo" => ST_PRIVATE_CHOOSE_COLUMNS,
             "confirmColumns" => ST_PLACE_TILES,
         ],
     ],

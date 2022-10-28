@@ -102,7 +102,7 @@ class Azul implements AzulGame {
                 this.onEnteringChooseLine(args.args);
                 break;
             case 'privateChooseColumns':
-                this.onEnteringChooseColumnsForPlayer(this.getPlayerId(), args.args);
+                this.onEnteringChooseColumnsForPlayer(this.getPlayerId(), args.args, true);
                 break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
@@ -125,7 +125,7 @@ class Azul implements AzulGame {
         }
     }
 
-    onEnteringChooseColumnsForPlayer(playerId: number, infos: ChooseColumnsForPlayer) {
+    onEnteringChooseColumnsForPlayer(playerId: number, infos: ChooseColumnsForPlayer, privateMulti: boolean) {
         const table = this.getPlayerTable(playerId);
 
         infos.selectedColumns.forEach(selectedColumn => table.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));
@@ -141,11 +141,13 @@ class Azul implements AzulGame {
                 );
             }
             
-            if (!document.getElementById('confirmColumns_button')) {
-                (this as any).addActionButton('confirmColumns_button', _("Confirm"), () => this.confirmColumns());
-                (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
+            if (!privateMulti) {
+                if (!document.getElementById('confirmColumns_button')) {
+                    (this as any).addActionButton('confirmColumns_button', _("Confirm"), () => this.confirmColumns());
+                    (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
+                }
+                dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect);
             }
-            dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect);
         }
     }
 
@@ -153,7 +155,7 @@ class Azul implements AzulGame {
         const playerId = this.getPlayerId();
         const infos = args.players[playerId];
         if (infos) {
-            this.onEnteringChooseColumnsForPlayer(playerId, infos);
+            this.onEnteringChooseColumnsForPlayer(playerId, infos, false);
         }
     }
 
@@ -198,6 +200,8 @@ class Azul implements AzulGame {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     public onUpdateActionButtons(stateName: string, args: any) {
+        log('onUpdateActionButtons', stateName, args);
+        
         if((this as any).isCurrentPlayerActive()) {
             switch (stateName) {    
                 case 'chooseLine':
@@ -209,6 +213,13 @@ class Azul implements AzulGame {
                     (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmLine());
                     (this as any).addActionButton('undoSelectLine_button', _("Undo line selection"), () => this.undoSelectLine(), null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
+                    break;
+                case 'privateChooseColumns':
+                case 'privateConfirmColumns':
+                    const privateChooseColumnArgs = args as ChooseColumnsForPlayer;
+                    (this as any).addActionButton('confirmColumns_button', _("Confirm"), () => this.confirmColumns());
+                    (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
+                    dojo.toggleClass('confirmColumns_button', 'disabled', !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns');
                     break;
             }
         }
@@ -737,7 +748,7 @@ class Azul implements AzulGame {
             this.gamedatas.gamestate.args.players[notif.args.playerId] = notif.args.arg;
         }
 
-        this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg);
+        this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg, this.gamedatas.gamestate.name !== 'chooseColumns');
     }
 
     notif_lastRound() {

@@ -196,6 +196,11 @@ trait ActionTrait {
             'playerId' => $playerId,
             'arg' => $arg,
         ]);
+
+        if (intval($this->gamestate->state_id()) == ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS) {
+            $confirm = $arg->nextColumnToSelect === null;
+            $this->gamestate->nextPrivateState($playerId, $confirm ? 'confirm' : 'next');
+        }
     }
 
     function confirmColumns() {
@@ -215,6 +220,10 @@ trait ActionTrait {
             'arg' => $this->argChooseColumnForPlayer($playerId),
             'undo' => true,
         ]);
+
+        if (intval($this->gamestate->state_id()) == ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS) {
+            $this->gamestate->nextPrivateState($playerId, 'undo');
+        }
     }
 
 }

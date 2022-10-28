@@ -30,7 +30,7 @@ trait DebugUtilTrait {
         $tiles = array_slice($tiles, 0, 83);
         $this->tiles->moveCards(array_map('getIdPredicate', $tiles), 'discard');*/
 
-        $this->debugSetLineTiles(2343492, 1, 1, 3);
+        /*$this->debugSetLineTiles(2343492, 1, 1, 3);
         $this->debugSetLineTiles(2343492, 2, 2, 3);
         $this->debugSetWallTile(2343492, 2, 1, 1);
         $this->debugSetWallTile(2343492, 2, 2, 2);
@@ -38,7 +38,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 2, 5, 5);
 
         $this->debugEmptyFactories();
-        $this->removeFp();
+        $this->removeFp();*/
 
         /*$this->debugSetLineTiles(2343492, 1, 1, 3);
 
@@ -47,6 +47,29 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 5, 5, 4);
         $this->debugSetWallTile(2343492, 5, 4, 5);
         $this->debugSetLineTiles(2343492, 5, 5, 3);*/
+
+        $this->debugSetLineTiles(2343492, 3, 3, 1);
+        $this->debugSetLineTiles(2343492, 4, 3, 2);
+        $this->debugSetLineTiles(2343492, 5, 4, 5);
+        $this->debugSetWallTile(2343492, 1, 1, 5);
+        $this->debugSetWallTile(2343492, 1, 2, 2);
+        $this->debugSetWallTile(2343492, 1, 3, 3);
+        $this->debugSetWallTile(2343492, 2, 1, 3);
+        $this->debugSetWallTile(2343492, 2, 2, 4);
+        $this->debugSetWallTile(2343492, 2, 3, 1);
+        $this->debugSetWallTile(2343492, 2, 4, 5);
+        $this->debugSetWallTile(2343492, 3, 2, 5);
+        $this->debugSetWallTile(2343492, 3, 3, 2);
+        $this->debugSetWallTile(2343492, 4, 1, 4);
+        $this->debugSetWallTile(2343492, 4, 2, 1);
+        $this->debugSetWallTile(2343492, 4, 3, 5);
+        $this->debugSetWallTile(2343492, 5, 1, 2);
+        $this->debugSetWallTile(2343492, 5, 2, 3);
+        $this->debugSetWallTile(2343492, 5, 3, 4);
+        
+        $this->debugSetLineTiles(2343493, 1, 1, 1);
+        $this->debugSetLineTiles(2343493, 4, 2, 5);
+        $this->debugSetLineTiles(2343493, 5, 5, 4);
 
         /*
         case 1: $colorName = _('Black'); break;
@@ -161,6 +184,8 @@ trait DebugUtilTrait {
     }
 
     function debugEmptyFactories() {
+        $this->removeFp();
+
         $factoryNumber = $this->getFactoryNumber();
         for ($i = 1; $i<=$factoryNumber; $i++) {
             if (intval($this->tiles->countCardInLocation('factory', $i)) > 0) {

@@ -511,7 +511,7 @@ var Azul = /** @class */ (function () {
                 this.onEnteringChooseLine(args.args);
                 break;
             case 'privateChooseColumns':
-                this.onEnteringChooseColumnsForPlayer(this.getPlayerId(), args.args);
+                this.onEnteringChooseColumnsForPlayer(this.getPlayerId(), args.args, true);
                 break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
@@ -532,7 +532,7 @@ var Azul = /** @class */ (function () {
             args.lines.forEach(function (i) { return dojo.addClass("player-table-" + _this.getPlayerId() + "-line" + i, 'selectable'); });
         }
     };
-    Azul.prototype.onEnteringChooseColumnsForPlayer = function (playerId, infos) {
+    Azul.prototype.onEnteringChooseColumnsForPlayer = function (playerId, infos, privateMulti) {
         var _this = this;
         var table = this.getPlayerTable(playerId);
         infos.selectedColumns.forEach(function (selectedColumn) { return table.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color); });
@@ -544,18 +544,20 @@ var Azul = /** @class */ (function () {
                     /*column == 0 ? `player-table-${playerId}-column0` :*/ "player-table-" + playerId + "-wall-spot-" + nextColumnToSelect_1.line + "-" + column, 'selectable');
                 });
             }
-            if (!document.getElementById('confirmColumns_button')) {
-                this.addActionButton('confirmColumns_button', _("Confirm"), function () { return _this.confirmColumns(); });
-                this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
+            if (!privateMulti) {
+                if (!document.getElementById('confirmColumns_button')) {
+                    this.addActionButton('confirmColumns_button', _("Confirm"), function () { return _this.confirmColumns(); });
+                    this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
+                }
+                dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect_1);
             }
-            dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect_1);
         }
     };
     Azul.prototype.onEnteringChooseColumns = function (args) {
         var playerId = this.getPlayerId();
         var infos = args.players[playerId];
         if (infos) {
-            this.onEnteringChooseColumnsForPlayer(playerId, infos);
+            this.onEnteringChooseColumnsForPlayer(playerId, infos, false);
         }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -594,6 +596,7 @@ var Azul = /** @class */ (function () {
     //
     Azul.prototype.onUpdateActionButtons = function (stateName, args) {
         var _this = this;
+        log('onUpdateActionButtons', stateName, args);
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'chooseLine':
@@ -605,6 +608,13 @@ var Azul = /** @class */ (function () {
                     this.addActionButton('confirmLine_button', _("Confirm"), function () { return _this.confirmLine(); });
                     this.addActionButton('undoSelectLine_button', _("Undo line selection"), function () { return _this.undoSelectLine(); }, null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
+                    break;
+                case 'privateChooseColumns':
+                case 'privateConfirmColumns':
+                    var privateChooseColumnArgs = args;
+                    this.addActionButton('confirmColumns_button', _("Confirm"), function () { return _this.confirmColumns(); });
+                    this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
+                    dojo.toggleClass('confirmColumns_button', 'disabled', !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns');
                     break;
             }
         }
@@ -1054,7 +1064,7 @@ var Azul = /** @class */ (function () {
             // so we set args up-to-date to avoid conflict between current situation and old args
             this.gamedatas.gamestate.args.players[notif.args.playerId] = notif.args.arg;
         }
-        this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg);
+        this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg, this.gamedatas.gamestate.name !== 'chooseColumns');
     };
     Azul.prototype.notif_lastRound = function () {
         if (document.getElementById('last-round')) {
