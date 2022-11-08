@@ -41,7 +41,8 @@ $game_options = [
                     'nobeginner' => true
                 ]
             ],
-        'default' => 1
+        'default' => 1,
+        'level' => 'major',
     ],
 
     101 => [
