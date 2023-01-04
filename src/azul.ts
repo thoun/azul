@@ -17,7 +17,6 @@ REFILL_DELAY[7] = 2200;
 REFILL_DELAY[9] = 2900;
 
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
-const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 const LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
 
 const isDebug = window.location.host == 'studio.boardgamearena.com';
@@ -26,6 +25,7 @@ const log = isDebug ? console.log.bind(window.console) : function () { };
 class Azul implements AzulGame {
     private gamedatas: AzulGamedatas;
 
+    private zoomManager: ZoomManager;
     private factories: Factories;
     private playersTables: PlayerTable[] = [];
 
@@ -70,15 +70,20 @@ class Azul implements AzulGame {
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
         this.createPlayerTables(gamedatas);
 
+        // before set
+        this.zoomManager = new ZoomManager({
+            element: document.getElementById('table'),
+            localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
+            zoomLevels: ZOOM_LEVELS,
+            onDimensionsChange: () => this.onTableCenterSizeChange(),
+        });
+
         this.setupNotifications();
         this.setupPreferences();
 
         if (gamedatas.endRound) {
             this.notif_lastRound();
         }
-
-        document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
-        document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
 
         (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
@@ -273,6 +278,7 @@ class Azul implements AzulGame {
                 break;
             case 202:
                 dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2', prefValue == 2);
+                this.zoomManager.setZoomControlsColor(prefValue == 2 ? 'white' : 'black');
                 break;
             case 203:
                 dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'cb', prefValue == 1);
@@ -299,7 +305,7 @@ class Azul implements AzulGame {
                     <div style="text-align: center; margin-top: 10px;"><a id="hide-zoom-notice">${_("Dismiss")}</a></div>
                     <div class="arrow-right"></div>
                 </div>
-                `, 'zoom-controls');
+                `, 'bga-zoom-controls');
 
                 document.getElementById('hide-zoom-notice').addEventListener('click', () => {
                     const select = document.getElementById('preference_control_299') as HTMLSelectElement;
@@ -348,7 +354,7 @@ class Azul implements AzulGame {
     }
 
     public setAutoZoom() {
-        const zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
+        const zoomWrapperWidth = document.getElementById('bga-zoom-wrapper').clientWidth;
 
         if (!zoomWrapperWidth) {
             setTimeout(() => this.setAutoZoom(), 200);
@@ -361,44 +367,7 @@ class Azul implements AzulGame {
             newZoom = ZOOM_LEVELS[ZOOM_LEVELS.indexOf(newZoom) - 1];
         }
         // zoom will also place player tables. we call setZoom even if this method didn't change it because it might have been changed by localStorage zoom
-        this.setZoom(newZoom);
-    }    
-
-    private setZoom(zoom: number = 1) {
-        this.zoom = zoom;
-        localStorage.setItem(LOCAL_STORAGE_ZOOM_KEY, ''+this.zoom);
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom);
-        dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
-        dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
-
-        const div = document.getElementById('table');
-        if (zoom === 1) {
-            div.style.transform = '';
-            div.style.margin = '';
-        } else {
-            div.style.transform = `scale(${zoom})`;
-            const margin = ZOOM_LEVELS_MARGIN[newIndex] / 2;
-            div.style.margin = `0 ${margin}% ${(1-zoom)*-100}% ${margin}%`;
-        }
-
-        document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
-        this.onTableCenterSizeChange();
-    }
-
-    public zoomIn() {
-        if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
-            return;
-        }
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) + 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
-    }
-
-    public zoomOut() {
-        if (this.zoom === ZOOM_LEVELS[0]) {
-            return;
-        }
-        const newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
-        this.setZoom(ZOOM_LEVELS[newIndex]);
+        this.zoomManager.setZoom(newZoom);
     }
 
     private onTableCenterSizeChange() {

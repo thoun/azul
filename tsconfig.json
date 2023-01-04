@@ -11,6 +11,7 @@
         "src/framework.d.ts",
         "src/counter.d.ts",
         "src/stock.d.ts",
+        "node_modules/bga-zoom/src/zoom-manager.ts",
         "src/azul.d.ts",
         "src/slide-utils.ts",
         "src/factories/factories.ts",

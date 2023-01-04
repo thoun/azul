@@ -1,4 +1,61 @@
-@import url(../../../css/csslayer.css);
+#bga-zoom-wrapper {
+  position: relative;
+}
+
+#bga-zoom-wrapper #bga-zoom-controls {
+  position: absolute;
+  top: 0;
+}
+
+#bga-zoom-wrapper #bga-zoom-controls[data-position=top-left] {
+  left: 0;
+}
+
+#bga-zoom-wrapper #bga-zoom-controls[data-position=top-right] {
+  right: 0;
+}
+
+#bga-zoom-wrapper #bga-zoom-controls button {
+  border: 0;
+}
+
+#bga-zoom-wrapper #bga-zoom-controls button:not(.disabled) {
+  cursor: pointer;
+}
+
+#bga-zoom-wrapper #bga-zoom-controls button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#bga-zoom-wrapper #bga-zoom-controls .bga-zoom-out-icon {
+  width: 40px;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="65 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M118,118C122.1,113.8 124.3,108.7 124.3,102.8C124.3,96.8 122.1,91.8 118,87.6C113.8,83.4 108.7,81.3 102.8,81.3C96.8,81.3 91.8,83.4 87.6,87.6C83.3,91.8 81.3,96.8 81.3,102.8C81.3,108.7 83.3,113.8 87.6,118C91.8,122.2 96.8,124.3 102.8,124.3C108.7,124.3 113.8,122.2 118,118" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M118,118L132.3,132.3" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M114.5,102.1L90.8,102.1" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g></g></svg>');
+}
+
+#bga-zoom-wrapper #bga-zoom-controls .bga-zoom-in-icon {
+  width: 40px;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M23.8,102.1L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L47.5,102.1" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L35.7,90.3" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M51,118C55.2,113.8 57.3,108.7 57.3,102.8C57.3,96.8 55.2,91.8 51,87.6C46.8,83.4 41.7,81.3 35.8,81.3C29.9,81.3 24.8,83.4 20.6,87.6C16.4,91.8 14.3,96.8 14.3,102.8C14.3,108.7 16.4,113.8 20.6,118C24.8,122.2 29.9,124.3 35.8,124.3C41.7,124.3 46.8,122.2 51,118" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,113.9L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M65.3,132.3L51,118" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g></g></svg>');
+}
+
+#bga-zoom-wrapper #bga-zoom-controls[data-color=white] .bga-zoom-out-icon {
+  width: 40px;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="65 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M118,118C122.1,113.8 124.3,108.7 124.3,102.8C124.3,96.8 122.1,91.8 118,87.6C113.8,83.4 108.7,81.3 102.8,81.3C96.8,81.3 91.8,83.4 87.6,87.6C83.3,91.8 81.3,96.8 81.3,102.8C81.3,108.7 83.3,113.8 87.6,118C91.8,122.2 96.8,124.3 102.8,124.3C108.7,124.3 113.8,122.2 118,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M118,118L132.3,132.3" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M114.5,102.1L90.8,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g></g></svg>');
+}
+
+#bga-zoom-wrapper #bga-zoom-controls[data-color=white] .bga-zoom-in-icon {
+  width: 40px;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M23.8,102.1L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L47.5,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L35.7,90.3" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M51,118C55.2,113.8 57.3,108.7 57.3,102.8C57.3,96.8 55.2,91.8 51,87.6C46.8,83.4 41.7,81.3 35.8,81.3C29.9,81.3 24.8,83.4 20.6,87.6C16.4,91.8 14.3,96.8 14.3,102.8C14.3,108.7 16.4,113.8 20.6,118C24.8,122.2 29.9,124.3 35.8,124.3C41.7,124.3 46.8,122.2 51,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,113.9L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M65.3,132.3L51,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g></g></svg>');
+}
+
+#bga-zoom-wrapper .bga-zoom-inner {
+  transform-origin: left top;
+}
+
 #factories {
   position: relative;
   float: left;
@@ -119,11 +176,11 @@
 }
 .player-table-wrapper .player-hand {
   height: 75px;
-  background: #FFFFFFDD;
+  background: rgba(255, 255, 255, 0.8666666667);
   margin-bottom: -5px;
   margin-left: 15px;
   margin-right: 15px;
-  box-shadow: 0 0 5px 5px #FFFFFFDD;
+  box-shadow: 0 0 5px 5px rgba(255, 255, 255, 0.8666666667);
   opacity: 1;
   transition: opacity 0.5s;
 }
@@ -186,8 +243,8 @@
   display: none;
 }
 .player-table-wrapper .player-table:not(.variant) .wall {
-  background: #ffffffb0;
-  box-shadow: 0 0 10px 5px #ffffffb0;
+  background: rgba(255, 255, 255, 0.6901960784);
+  box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.6901960784);
 }
 .player-table-wrapper .player-table .line {
   display: inline-block;
@@ -286,12 +343,12 @@
 
 @keyframes selectable-wall {
   from {
-    border-color: #ff4141;
-    background: #FFFFFF66;
+    border-color: rgb(255, 65, 65);
+    background: rgba(255, 255, 255, 0.4);
   }
   to {
-    border-color: #5a0000;
-    background: #FFFFFF33;
+    border-color: rgb(90, 0, 0);
+    background: rgba(255, 255, 255, 0.2);
   }
 }
 .player_board_content .tile {
@@ -365,7 +422,7 @@
   width: 32px;
   height: 32px;
   position: relative;
-  box-shadow: 1px 1px 1px 1px #00000099;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.6);
 }
 
 .cb .tile.tile5 {
@@ -394,11 +451,6 @@ html {
 html.background2 {
   background: url("img/background2.jpg") #00587a;
 }
-html.background2 #zoom-wrapper #zoom-controls button {
-  width: 32px;
-  height: 32px;
-  background-image: url("img/zoom-white.svg");
-}
 
 .mode_3d #game_play_area_background {
   background: url("img/background.jpg") #fff8f0;
@@ -411,40 +463,12 @@ html.background2 #zoom-wrapper #zoom-controls button {
   font-weight: normal;
   font-style: normal;
 }
-#zoom-wrapper {
-  position: relative;
-}
-#zoom-wrapper #zoom-controls {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-#zoom-wrapper #zoom-controls button {
-  width: 32px;
-  height: 32px;
-  background: url("img/zoom.svg");
-  background-size: auto 220%;
-}
-#zoom-wrapper #zoom-controls button:not(.disabled) {
-  cursor: pointer;
-}
-#zoom-wrapper #zoom-controls button.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-#zoom-wrapper #zoom-controls #zoom-in {
-  background-position: 6% 94%;
-}
-#zoom-wrapper #zoom-controls #zoom-out {
-  background-position: 82% 94%;
-}
-
 #page-title .tile {
   margin: -2px 3px -5px 3px;
   width: 24px;
   height: 24px;
   position: relative;
-  box-shadow: 1px 1px 1px 1px #00000099;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.6);
 }
 
 .log .tile {
@@ -470,7 +494,7 @@ html.background2 #zoom-wrapper #zoom-controls button {
   top: 0;
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 2px 2px 5px 0px #000000cc;
+  box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 0.8);
 }
 #zoom-notice #hide-zoom-notice {
   font-weight: bold;

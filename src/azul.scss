@@ -1,5 +1,4 @@
-@import url(../../../css/csslayer.css);
-
+@import '../node_modules/bga-zoom/bga-zoom';
 @import 'factories/factories';
 @import 'players-tables/players-tables';
 @import 'playerboards';
@@ -11,17 +10,7 @@ html {
 
 
     &.background2 {  
-      background: url('img/background2.jpg') #00587a;    
-
-      #zoom-wrapper {
-        #zoom-controls {  
-          button {
-            width: 32px;
-            height: 32px;
-            background-image: url('img/zoom-white.svg');
-          }
-        }
-      }
+      background: url('img/background2.jpg') #00587a;
     }
 }
 
@@ -38,57 +27,24 @@ html {
     font-style: normal;
 }
 
-#zoom-wrapper {
+#page-title {
+  .tile {        
+      margin: -2px 3px -5px 3px;
+      width: 24px;
+      height: 24px;
+      position: relative;
+      box-shadow: 1px 1px 1px 1px #00000099;
+  }
+}
+
+.log {
+  .tile {
+    margin: 2px 2px -2px 2px;
     position: relative;
-  
-    #zoom-controls {
-      position: absolute;
-      top: 0;
-      right: 0;
-  
-      button {
-        width: 32px;
-        height: 32px;
-        background: url('img/zoom.svg');
-        background-size: auto 220%;
-  
-        &:not(.disabled) {
-          cursor: pointer;
-        }
-  
-        &.disabled {
-          cursor: not-allowed;
-          opacity: 0.5;
-        }
-      }
-  
-      #zoom-in {
-        background-position: 6% 94%;
-      }
-      #zoom-out {
-        background-position: 82% 94%;
-      }
-    }
+    width: 16px;
+    height: 16px;
+    box-shadow: none;
   }
-
-  #page-title {
-    .tile {        
-        margin: -2px 3px -5px 3px;
-        width: 24px;
-        height: 24px;
-        position: relative;
-        box-shadow: 1px 1px 1px 1px #00000099;
-    }
-  }
-
-  .log {
-    .tile {
-        margin: 2px 2px -2px 2px;
-        position: relative;
-        width: 16px;
-        height: 16px;
-        box-shadow: none;
-    }
 }
 
 #last-round {
