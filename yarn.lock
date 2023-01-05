@@ -10,9 +10,9 @@ anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-bga-zoom@thoun/bga-zoom:
+bga-zoom@thoun/bga-zoom#main:
   version "1.0.0"
-  resolved "https://codeload.github.com/thoun/bga-zoom/tar.gz/418148f049f172c49124d52f4e1bdc17f2558dae"
+  resolved "https://codeload.github.com/thoun/bga-zoom/tar.gz/1e295d8b1d803cbcfe1249a579069b00ee2b68c9"
 
 binary-extensions@^2.0.0:
   version "2.2.0"
