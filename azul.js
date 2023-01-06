@@ -832,6 +832,9 @@ var Azul = /** @class */ (function () {
             case 206:
                 this.playersTables.forEach(function (playerTable) { return playerTable.setFont(prefValue); });
                 break;
+            case 210:
+                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = (prefValue == 1).toString();
+                break;
             case 299:
                 this.toggleZoomNotice(prefValue == 1);
                 break;

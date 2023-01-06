@@ -2,6 +2,10 @@
   position: relative;
 }
 
+#bga-zoom-wrapper .bga-zoom-inner {
+  transform-origin: left top;
+}
+
 #bga-zoom-wrapper #bga-zoom-controls {
   position: absolute;
   top: 0;
@@ -50,10 +54,6 @@
   width: 40px;
   height: 40px;
   background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M23.8,102.1L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L47.5,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L35.7,90.3" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M51,118C55.2,113.8 57.3,108.7 57.3,102.8C57.3,96.8 55.2,91.8 51,87.6C46.8,83.4 41.7,81.3 35.8,81.3C29.9,81.3 24.8,83.4 20.6,87.6C16.4,91.8 14.3,96.8 14.3,102.8C14.3,108.7 16.4,113.8 20.6,118C24.8,122.2 29.9,124.3 35.8,124.3C41.7,124.3 46.8,122.2 51,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,113.9L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M65.3,132.3L51,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g></g></svg>');
-}
-
-#bga-zoom-wrapper .bga-zoom-inner {
-  transform-origin: left top;
 }
 
 #factories {
@@ -442,6 +442,105 @@
 
 .hide-scoring-tile .scoring-tile {
   display: none;
+}
+
+html[data-chocolatier-skin=true] {
+  background: url("img/chocolatier/background.jpg") #fff8f0;
+  background-repeat: repeat;
+}
+html[data-chocolatier-skin=true] #factories .factory {
+  background: url("img/chocolatier/factory.png");
+}
+html[data-chocolatier-skin=true] #factories #bag {
+  background: url("img/chocolatier/bag.png");
+}
+html[data-chocolatier-skin=true] .tile-count.tile1 {
+  color: #040707;
+}
+html[data-chocolatier-skin=true] .tile-count.tile1.hover {
+  box-shadow: 0 0 5px 5px #040707;
+}
+html[data-chocolatier-skin=true] .tile-count.tile2 {
+  color: #720d2f;
+}
+html[data-chocolatier-skin=true] .tile-count.tile2.hover {
+  box-shadow: 0 0 5px 5px #720d2f;
+}
+html[data-chocolatier-skin=true] .tile-count.tile3 {
+  color: #51c4cd;
+}
+html[data-chocolatier-skin=true] .tile-count.tile3.hover {
+  box-shadow: 0 0 5px 5px #51c4cd;
+}
+html[data-chocolatier-skin=true] .tile-count.tile4 {
+  color: #9a542e;
+}
+html[data-chocolatier-skin=true] .tile-count.tile4.hover {
+  box-shadow: 0 0 5px 5px #9a542e;
+}
+html[data-chocolatier-skin=true] .tile-count.tile5 {
+  color: #f1e5bc;
+}
+html[data-chocolatier-skin=true] .tile-count.tile5.hover {
+  box-shadow: 0 0 5px 5px #f1e5bc;
+}
+html[data-chocolatier-skin=true] .player-table-wrapper .player-table {
+  background: url("img/chocolatier/playerboard.jpg");
+}
+html[data-chocolatier-skin=true] .player-table-wrapper .player-table.variant {
+  background: url("img/chocolatier/playerboard-variant.jpg");
+}
+html[data-chocolatier-skin=true] .player-table-wrapper .player-table .wall {
+  left: 383px;
+}
+html[data-chocolatier-skin=true].cb .wall-tile-cb {
+  opacity: 0;
+}
+html[data-chocolatier-skin=true] .tile.tile0 {
+  background: url("img/chocolatier/starting-tile.png") #a7d8bd;
+  background-size: contain;
+  border-color: #a7d8bd;
+  z-index: 8;
+}
+html[data-chocolatier-skin=true] .tile.tile1 {
+  background: url("img/chocolatier/tile-brown-swirl.png") #040707;
+  background-size: contain;
+  border-color: #040707;
+}
+html[data-chocolatier-skin=true] .tile.tile2 {
+  background: url("img/chocolatier/tile-red.png") #720d2f;
+  background-size: contain;
+  border-color: #720d2f;
+}
+html[data-chocolatier-skin=true] .tile.tile3 {
+  background: url("img/chocolatier/tile-blue.png") #51c4cd;
+  background-size: contain;
+  border-color: #51c4cd;
+}
+html[data-chocolatier-skin=true] .tile.tile4 {
+  background: url("img/chocolatier/tile-brown-stripe.png") #9a542e;
+  background-size: contain;
+  border-color: #9a542e;
+}
+html[data-chocolatier-skin=true] .tile.tile5 {
+  background: url("img/chocolatier/tile-cream") #f1e5bc;
+  background-size: contain;
+  border-color: #f1e5bc;
+}
+html[data-chocolatier-skin=true] .cb .tile.tile5 {
+  background: url("img/chocolatier/tile-cream") #f1e5bc;
+  background-size: contain;
+}
+html[data-chocolatier-skin=true].background2 {
+  background: url("img/chocolatier/background2.jpg") #fff8f0;
+}
+html[data-chocolatier-skin=true] .mode_3d #game_play_area_background {
+  background: url("img/chocolatier/background.jpg") #fff8f0;
+  background-repeat: repeat;
+}
+html[data-chocolatier-skin=true] #last-round {
+  background: #a7d8bd;
+  color: #9a542e;
 }
 
 html {

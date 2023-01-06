@@ -1,0 +1,24 @@
+html[data-chocolatier-skin="true"] {
+  @import 'factories';
+  @import 'players-tables';
+  @import 'tile';
+
+  background: url('img/chocolatier/background.jpg') #fff8f0;
+  background-repeat: repeat;
+
+
+  &.background2 {  
+    background: url('img/chocolatier/background2.jpg') #fff8f0;
+  }
+
+  .mode_3d #game_play_area_background {
+    background: url('img/chocolatier/background.jpg') #fff8f0;
+    background-repeat: repeat;
+  }
+
+  #last-round {
+    background: #a7d8bd;
+    color: #9a542e;
+  }
+    
+}

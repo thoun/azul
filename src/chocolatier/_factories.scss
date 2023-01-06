@@ -1,0 +1,47 @@
+#factories {
+    .factory {
+        background: url('img/chocolatier/factory.png');
+    }
+    
+    #bag {
+        background: url('img/chocolatier/bag.png');
+    }
+}
+
+.tile-count {    
+    &.tile1 {
+        color: #040707;
+
+        &.hover {
+            box-shadow: 0 0 5px 5px #040707;
+        }
+    }
+    &.tile2 {
+        color: #720d2f;
+        
+        &.hover {
+            box-shadow: 0 0 5px 5px #720d2f;
+        }
+    }
+    &.tile3 {
+        color: #51c4cd;
+        
+        &.hover {
+            box-shadow: 0 0 5px 5px #51c4cd;
+        }
+    }
+    &.tile4 {
+        color: #9a542e;
+        
+        &.hover {
+            box-shadow: 0 0 5px 5px #9a542e;
+        }
+    }
+    &.tile5 {
+        color: #f1e5bc;
+        
+        &.hover {
+            box-shadow: 0 0 5px 5px #f1e5bc;
+        }
+    }
+}

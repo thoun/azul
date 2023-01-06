@@ -78,6 +78,17 @@ $game_options = [
 
 
 $game_preferences = [
+
+    210 => [
+        'name' => totranslate('Chocolatier skin'),
+        'needReload' => false,
+        'values' => [
+            1 => [ 'name' => totranslate('Enabled')],
+            2 => [ 'name' => totranslate('Disabled')],
+        ],
+        'default' => 2
+    ],
+
     201 => [
         'name' => totranslate('Tile shimmer'),
         'needReload' => false,
@@ -137,6 +148,8 @@ $game_preferences = [
         ],
         'default' => 2
     ],
+
+    // 210 chocolatier
 
     299 => [
         'name' => '',

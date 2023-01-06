@@ -1,0 +1,38 @@
+.tile {
+    &.tile0 {
+        background: url('img/chocolatier/starting-tile.png') #a7d8bd;
+        background-size: contain;
+        border-color: #a7d8bd;
+        z-index: 8;
+    }
+    &.tile1 {
+        background: url('img/chocolatier/tile-brown-swirl.png') #040707;
+        background-size: contain;
+        border-color: #040707;
+    }
+    &.tile2 {
+        background: url('img/chocolatier/tile-red.png') #720d2f;
+        background-size: contain;
+        border-color: #720d2f;
+    }
+    &.tile3 {
+        background: url('img/chocolatier/tile-blue.png') #51c4cd;
+        background-size: contain;
+        border-color: #51c4cd;
+    }
+    &.tile4 {
+        background: url('img/chocolatier/tile-brown-stripe.png') #9a542e;
+        background-size: contain;
+        border-color: #9a542e;
+    }
+    &.tile5 {
+        background: url('img/chocolatier/tile-cream') #f1e5bc;
+        background-size: contain;
+        border-color: #f1e5bc;
+    }
+}
+
+.cb .tile.tile5 {
+    background: url('img/chocolatier/tile-cream') #f1e5bc;
+    background-size: contain;
+}

@@ -289,6 +289,9 @@ class Azul implements AzulGame {
             case 206: 
                 this.playersTables.forEach(playerTable => playerTable.setFont(prefValue));
                 break;
+            case 210:
+                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = (prefValue == 1).toString();
+                break;
             case 299: 
                 this.toggleZoomNotice(prefValue == 1);
                 break;

@@ -1,0 +1,17 @@
+.player-table-wrapper {
+    .player-table {
+        background: url('img/chocolatier/playerboard.jpg');
+
+        &.variant {            
+            background: url('img/chocolatier/playerboard-variant.jpg');
+        }
+
+        .wall {
+            left: 383px;
+        }
+    }
+}
+
+&.cb .wall-tile-cb {
+    opacity: 0;
+}
