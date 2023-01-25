@@ -39,6 +39,8 @@ interface AzulGamedatas {
     undo: boolean;
     fastScoring: boolean;
     remainingTiles: number;
+
+    specialFactories?: { [factoryNumber: number]: number };
 }
 
 interface AzulGame extends Game {

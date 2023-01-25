@@ -7,7 +7,7 @@ var ZoomManager = /** @class */ (function () {
      */
     function ZoomManager(settings) {
         var _this = this;
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         this.settings = settings;
         if (!settings.element) {
             throw new DOMException('You need to set the element to wrap in the zoom element');
@@ -31,9 +31,18 @@ var ZoomManager = /** @class */ (function () {
         if (this._zoom !== 1) {
             this.setZoom(this._zoom);
         }
-        window.addEventListener('resize', function () { return _this.zoomOrDimensionChanged(); });
+        window.addEventListener('resize', function () {
+            var _a;
+            _this.zoomOrDimensionChanged();
+            if ((_a = _this.settings.autoZoom) === null || _a === void 0 ? void 0 : _a.expectedWidth) {
+                _this.setAutoZoom();
+            }
+        });
         if (window.ResizeObserver) {
             new ResizeObserver(function () { return _this.zoomOrDimensionChanged(); }).observe(settings.element);
+        }
+        if ((_d = this.settings.autoZoom) === null || _d === void 0 ? void 0 : _d.expectedWidth) {
+            this.setAutoZoom();
         }
     }
     Object.defineProperty(ZoomManager.prototype, "zoom", {
@@ -46,6 +55,28 @@ var ZoomManager = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    ZoomManager.prototype.setAutoZoom = function () {
+        var _this = this;
+        var _a, _b, _c;
+        var zoomWrapperWidth = document.getElementById('bga-zoom-wrapper').clientWidth;
+        if (!zoomWrapperWidth) {
+            setTimeout(function () { return _this.setAutoZoom(); }, 200);
+            return;
+        }
+        var expectedWidth = (_a = this.settings.autoZoom) === null || _a === void 0 ? void 0 : _a.expectedWidth;
+        var newZoom = this.zoom;
+        while (newZoom > this.zoomLevels[0] && newZoom > ((_c = (_b = this.settings.autoZoom) === null || _b === void 0 ? void 0 : _b.minZoomLevel) !== null && _c !== void 0 ? _c : 0) && zoomWrapperWidth / newZoom < expectedWidth) {
+            newZoom = this.zoomLevels[this.zoomLevels.indexOf(newZoom) - 1];
+        }
+        if (this._zoom == newZoom) {
+            if (this.settings.localStorageZoomKey) {
+                localStorage.setItem(this.settings.localStorageZoomKey, '' + this._zoom);
+            }
+        }
+        else {
+            this.setZoom(newZoom);
+        }
+    };
     /**
      * Set the zoom level. Ideally, use a zoom level in the zoomLevels range.
      * @param zoom zool level
@@ -69,7 +100,7 @@ var ZoomManager = /** @class */ (function () {
      * If the browsert is recent enough (>= Safari 13.1) it will just be ignored.
      */
     ZoomManager.prototype.manualHeightUpdate = function () {
-        if (window.ResizeObserver) {
+        if (!window.ResizeObserver) {
             this.zoomOrDimensionChanged();
         }
     };
@@ -211,7 +242,7 @@ var FACTORY_RADIUS = 125;
 var HALF_TILE_SIZE = 29;
 var CENTER_FACTORY_TILE_SHIFT = 12;
 var Factories = /** @class */ (function () {
-    function Factories(game, factoryNumber, factories, remainingTiles) {
+    function Factories(game, factoryNumber, factories, remainingTiles, specialFactories) {
         this.game = game;
         this.factoryNumber = factoryNumber;
         this.tilesPositionsInCenter = [[], [], [], [], [], []]; // color, tiles
@@ -234,7 +265,7 @@ var Factories = /** @class */ (function () {
             var angle = (i - 1) * Math.PI * 2 / factoryNumber; // in radians
             var left = radius * Math.sin(angle);
             var top_1 = radius * Math.cos(angle);
-            html += "<div id=\"factory".concat(i, "\" class=\"factory\" style=\"left: ").concat(halfSize - FACTORY_RADIUS + left, "px; top: ").concat(heightShift + halfSize - FACTORY_RADIUS - top_1, "px;\"></div>");
+            html += "<div id=\"factory".concat(i, "\" class=\"factory\" style=\"left: ").concat(halfSize - FACTORY_RADIUS + left, "px; top: ").concat(heightShift + halfSize - FACTORY_RADIUS - top_1, "px;\"\n            ").concat((specialFactories === null || specialFactories === void 0 ? void 0 : specialFactories[i]) ? " data-special-factory=\"".concat(specialFactories[i], "\"") : "", "\n            ></div>");
         }
         html += "</div>";
         dojo.place(html, 'factories');
@@ -643,21 +674,26 @@ var Azul = /** @class */ (function () {
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
         this.createPlayerPanels(gamedatas);
-        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
+        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles, gamedatas.specialFactories);
         this.createPlayerTables(gamedatas);
         // before set
         this.zoomManager = new ZoomManager({
             element: document.getElementById('table'),
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
             zoomLevels: ZOOM_LEVELS,
-            onDimensionsChange: function () { return _this.onTableCenterSizeChange(); },
+            autoZoom: {
+                expectedWidth: this.factories.getWidth(),
+            },
+            onDimensionsChange: function (newZoom) { return _this.onTableCenterSizeChange(newZoom); },
         });
         this.setupNotifications();
         this.setupPreferences();
+        if (gamedatas.specialFactories) {
+            document.getElementsByTagName('html')[0].dataset.chocolatierSkin = 'true';
+        }
         if (gamedatas.endRound) {
             this.notif_lastRound();
         }
-        this.onScreenWidthChange = function () { return _this.setAutoZoom(); };
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -833,7 +869,7 @@ var Azul = /** @class */ (function () {
                 this.playersTables.forEach(function (playerTable) { return playerTable.setFont(prefValue); });
                 break;
             case 210:
-                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = (prefValue == 1).toString();
+                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = (prefValue == 1 || !!this.gamedatas.specialFactories).toString();
                 break;
             case 299:
                 this.toggleZoomNotice(prefValue == 1);
@@ -888,22 +924,8 @@ var Azul = /** @class */ (function () {
     Azul.prototype.getZoom = function () {
         return this.zoom;
     };
-    Azul.prototype.setAutoZoom = function () {
-        var _this = this;
-        var zoomWrapperWidth = document.getElementById('bga-zoom-wrapper').clientWidth;
-        if (!zoomWrapperWidth) {
-            setTimeout(function () { return _this.setAutoZoom(); }, 200);
-            return;
-        }
-        var factoryWidth = this.factories.getWidth();
-        var newZoom = this.zoom;
-        while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth / newZoom < factoryWidth) {
-            newZoom = ZOOM_LEVELS[ZOOM_LEVELS.indexOf(newZoom) - 1];
-        }
-        // zoom will also place player tables. we call setZoom even if this method didn't change it because it might have been changed by localStorage zoom
-        this.zoomManager.setZoom(newZoom);
-    };
-    Azul.prototype.onTableCenterSizeChange = function () {
+    Azul.prototype.onTableCenterSizeChange = function (newZoom) {
+        this.zoom = newZoom;
         var maxWidth = document.getElementById('table').clientWidth;
         var factoriesWidth = document.getElementById('factories').clientWidth;
         var playerTableWidth = 780;

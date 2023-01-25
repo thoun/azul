@@ -451,6 +451,36 @@ html[data-chocolatier-skin=true] {
 html[data-chocolatier-skin=true] #factories .factory {
   background: url("img/chocolatier/factory.png");
 }
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory] {
+  background: url("img/chocolatier/special-factories.png");
+}
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory="1"] {
+  background-position-x: 0%;
+}
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory="2"] {
+  background-position-x: 12.5%;
+}
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory="3"] {
+  background-position-x: 25%;
+}
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory="4"] {
+  background-position-x: 37.5%;
+}
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory="5"] {
+  background-position-x: 50%;
+}
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory="6"] {
+  background-position-x: 62.5%;
+}
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory="7"] {
+  background-position-x: 75%;
+}
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory="8"] {
+  background-position-x: 87.5%;
+}
+html[data-chocolatier-skin=true] #factories .factory[data-special-factory="9"] {
+  background-position-x: 100%;
+}
 html[data-chocolatier-skin=true] #factories #bag {
   background: url("img/chocolatier/bag.png");
 }

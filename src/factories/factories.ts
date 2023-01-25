@@ -12,6 +12,7 @@ class Factories {
         private factoryNumber: number,
         factories: { [factoryId: number]: Tile[] },
         remainingTiles: number,
+        specialFactories?: { [factoryNumber: number]: number }
     ) {
         const factoriesDiv = document.getElementById('factories');
 
@@ -35,7 +36,9 @@ class Factories {
             const left = radius*Math.sin(angle);
             const top = radius*Math.cos(angle);
             
-            html += `<div id="factory${i}" class="factory" style="left: ${halfSize-FACTORY_RADIUS+left}px; top: ${heightShift + halfSize-FACTORY_RADIUS-top}px;"></div>`;
+            html += `<div id="factory${i}" class="factory" style="left: ${halfSize-FACTORY_RADIUS+left}px; top: ${heightShift + halfSize-FACTORY_RADIUS-top}px;"
+            ${specialFactories?.[i] ? ` data-special-factory="${specialFactories[i]}"` : ``}
+            ></div>`;
         }
         html += `</div>`;
 

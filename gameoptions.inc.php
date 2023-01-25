@@ -45,6 +45,23 @@ $game_options = [
         'level' => 'major',
     ],
 
+    /*110 => [
+        'name' => totranslate('Special Factories (Azul Master Chocolatier variant)'),    
+        'values' => [
+                1 => [
+                    'name' => totranslate('Disabled'),
+                ],
+                2 => [
+                    'name' => totranslate('Enabled'), 
+                    'description' => totranslate('Random special factories are placed in the game'),
+                    'tmdisplay' => totranslate('Special Factories'), 
+                    'nobeginner' => true,
+                    'alpha' => true,
+                ]
+            ],
+        'default' => 1,
+    ],*/
+
     101 => [
         'name' => totranslate('Allow Undo/confirm'),    
         'values' => [
@@ -80,7 +97,7 @@ $game_options = [
 $game_preferences = [
 
     210 => [
-        'name' => totranslate('Chocolatier skin'),
+        'name' => totranslate('Azul Master Chocolatier skin'),
         'needReload' => false,
         'values' => [
             1 => [ 'name' => totranslate('Enabled')],

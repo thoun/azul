@@ -67,7 +67,7 @@ class Azul implements AzulGame {
         log('gamedatas', gamedatas);
 
         this.createPlayerPanels(gamedatas);
-        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
+        this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles, gamedatas.specialFactories);
         this.createPlayerTables(gamedatas);
 
         // before set
@@ -75,17 +75,21 @@ class Azul implements AzulGame {
             element: document.getElementById('table'),
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
             zoomLevels: ZOOM_LEVELS,
-            onDimensionsChange: () => this.onTableCenterSizeChange(),
+            autoZoom: {
+                expectedWidth: this.factories.getWidth(),
+            },
+            onDimensionsChange: (newZoom) => this.onTableCenterSizeChange(newZoom),
         });
 
         this.setupNotifications();
         this.setupPreferences();
+        if (gamedatas.specialFactories) {
+            document.getElementsByTagName('html')[0].dataset.chocolatierSkin = 'true';
+        }
 
         if (gamedatas.endRound) {
             this.notif_lastRound();
         }
-
-        (this as any).onScreenWidthChange = () => this.setAutoZoom();
 
         log("Ending game setup");
     }
@@ -290,7 +294,7 @@ class Azul implements AzulGame {
                 this.playersTables.forEach(playerTable => playerTable.setFont(prefValue));
                 break;
             case 210:
-                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = (prefValue == 1).toString();
+                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = (prefValue == 1 || !!this.gamedatas.specialFactories).toString();
                 break;
             case 299: 
                 this.toggleZoomNotice(prefValue == 1);
@@ -356,24 +360,9 @@ class Azul implements AzulGame {
         return this.zoom;
     }
 
-    public setAutoZoom() {
-        const zoomWrapperWidth = document.getElementById('bga-zoom-wrapper').clientWidth;
+    private onTableCenterSizeChange(newZoom: number) {
+        this.zoom = newZoom;
 
-        if (!zoomWrapperWidth) {
-            setTimeout(() => this.setAutoZoom(), 200);
-            return;
-        }
-
-        const factoryWidth = this.factories.getWidth();
-        let newZoom = this.zoom;
-        while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth/newZoom < factoryWidth) {
-            newZoom = ZOOM_LEVELS[ZOOM_LEVELS.indexOf(newZoom) - 1];
-        }
-        // zoom will also place player tables. we call setZoom even if this method didn't change it because it might have been changed by localStorage zoom
-        this.zoomManager.setZoom(newZoom);
-    }
-
-    private onTableCenterSizeChange() {
         const maxWidth = document.getElementById('table').clientWidth;
         const factoriesWidth = document.getElementById('factories').clientWidth;
         const playerTableWidth = 780;

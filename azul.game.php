@@ -52,6 +52,7 @@ class Azul extends Table {
             VARIANT_OPTION => 100,
             UNDO => 101,
             FAST_SCORING => 102,
+            SPECIAL_FACTORIES => 110,
         ]);
 
         $this->tiles = self::getNew("module.common.deck");
@@ -117,6 +118,10 @@ class Azul extends Table {
 
         $this->setupTiles();
 
+        if ($this->isSpecialFactories()) {
+            $this->initSpecialFactories(count($players));
+        }
+
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
@@ -177,6 +182,10 @@ class Azul extends Table {
         $result['undo'] = $this->allowUndo();
         $result['fastScoring'] = $this->isFastScoring();
         $result['remainingTiles'] = intval($this->tiles->countCardInLocation('deck'));
+
+        if ($this->isSpecialFactories()) {
+            $result['specialFactories'] = $this->getSpecialFactories();
+        }
   
         return $result;
     }

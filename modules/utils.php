@@ -46,6 +46,10 @@ trait UtilTrait {
         return intval(self::getGameStateValue(VARIANT_OPTION)) === 2;
     }
 
+    function isSpecialFactories() {
+        return intval(self::getGameStateValue(SPECIAL_FACTORIES)) === 2;
+    }
+
     function allowUndo() {
         return intval(self::getGameStateValue(UNDO)) === 1;
     }
@@ -117,6 +121,32 @@ trait UtilTrait {
         }
         $this->tiles->createCards($cards, 'deck');
         $this->tiles->shuffle('deck');
+    }
+
+    function initSpecialFactories(int $playerCount) {
+        $availableFactories = [];
+        $availableSpecialFactories = [1,2,3,4,5,6,7,8,9];
+        $factoryNumber = $this->getFactoryNumber($playerCount);
+        for ($factory=1; $factory<=$factoryNumber; $factory++) {
+            $availableFactories[] = $factory;
+        }
+
+        $specialFactories = [];
+
+        for ($i = 0; $i < $playerCount; $i++) {
+            $factoryIndex = bga_rand(0, count($availableFactories) - 1);
+            $factoryNumber = array_splice($availableFactories, $factoryIndex, 1)[0];
+            $specialFactoryIndex = bga_rand(0, count($availableSpecialFactories) - 1);
+            $specialFactory = array_splice($availableSpecialFactories, $specialFactoryIndex, 1)[0];
+
+            $specialFactories[$factoryNumber] = $specialFactory;
+        }
+
+        $this->setGlobalVariable(SPECIAL_FACTORIES, $specialFactories);
+    }
+
+    function getSpecialFactories() {
+        return $this->getGlobalVariable(SPECIAL_FACTORIES, true);
     }
 
     function putFirstPlayerTile(array $firstPlayerTokens, int $playerId) {

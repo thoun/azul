@@ -33,6 +33,7 @@ define('END_SCORE', 100);
  */
 
 define('VARIANT_OPTION', 'VariantOption');
+define('SPECIAL_FACTORIES', 'SpecialFactories');
 define('UNDO', 'Undo');
 define('FAST_SCORING', 'FastScoring');
 
