@@ -24,7 +24,7 @@ class Factories {
         const heightShift = (1135 - halfSize*2) / 2 + 35;
 
         const bagDiv = document.getElementById('bag');
-        bagDiv.style.top = `${heightShift}px`;
+        factoriesDiv.style.setProperty('--top', `${heightShift}px`);
         this.bagCounter = new ebg.counter();
         this.bagCounter.create('bag-counter');
         bagDiv.addEventListener('click', () => dojo.toggleClass('bag-counter', 'visible'));

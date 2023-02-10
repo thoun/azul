@@ -91,7 +91,10 @@ class Azul implements AzulGame {
                 (document.getElementById('preference_fontrol_203').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
                 (document.getElementById('preference_control_210').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
                 (document.getElementById('preference_fontrol_210').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
-            } catch (e) {}            
+            } catch (e) {}
+            
+            document.getElementById('factories').insertAdjacentHTML('beforeend', `<button type="button" id="special-factories-help">${_('Special Factories')}</button>`);
+            document.getElementById('special-factories-help').addEventListener('click', () => this.showHelp());
         }
 
         if (gamedatas.endRound) {
@@ -493,6 +496,125 @@ class Azul implements AzulGame {
 
     public removeTiles(tiles: Tile[], fadeOut?: boolean) {
         tiles.forEach(tile => this.removeTile(tile, fadeOut));
+    }
+
+    private showHelp() {
+        const helpDialog = new ebg.popindialog();
+        helpDialog.create('azulChocolatierVariantHelpDialog');
+        helpDialog.setTitle(_("Special Factories"));
+
+        let html = `
+        <div id="help-popin">
+            <div class="row">
+                <div class="picture">
+                    <div class="factory" data-special-factory="9"></div>
+                </div>
+                <span class="title">SF 1.</span> ${
+                    _("After setting up the round, add 1 tile from the bag on this Special Factory display.")
+                }
+            </div>
+            <div class="row">
+                <div class="picture">
+                    <div class="factory" data-special-factory="1"></div>
+                    <div class="factory" data-special-factory="2"></div>
+                    <div class="factory" data-special-factory="3"></div>
+                    <div class="factory" data-special-factory="4"></div>
+                    <div class="factory" data-special-factory="5"></div>
+                </div>
+                <span class="title">SF 2.</span> ${
+                    _("After setting up the round, take 1 tile of the illustrated pattern from both adjacent Factory displays to the immediate left and right (if possible), and place them on this Special factory display.")
+                }
+            </div>
+            <div class="row">
+                <div class="picture">
+                    <div class="factory" data-special-factory="8"></div>
+                </div>
+                <span class="title">SF 3.</span> ${
+                    _("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table but remain on it.")
+                }
+            </div>
+            <div class="row disabled">
+                <div class="picture">
+                    <div class="factory" data-special-factory="7"></div>
+                </div>
+                <span class="title">SF 4.</span> ${
+                    _("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table. Instead, that player moves them to the Factory display (blue or gold) to its immediate left and/or right, dividing the tiles between those 2 displays. The only restriction is that tiles of one color may not be split up.")
+                }
+            </div>
+            <div class="row disabled">
+                <div class="picture">
+                    <div class="factory" data-special-factory="6"></div>
+                </div>
+                <span class="title">SF 5.</span> ${
+                    _("When a player picks tiles from this Special Factory display, the remaining tiles are moved to the center of the table. Then, that player places this Special Factory as an extra space next to their Foundry line until the end of the round. The next tile that must be placed in their foundry line is placed on this Special factory instead, skipping the penalty.")
+                }
+            </div>
+        </div>
+        `;
+
+        /*const baseFighters = [1, 2, 3, 4, 5, 6].map(subType => `
+        <div class="help-section">
+            <div id="help-base-${subType}"></div>
+            <div>${this.cardsManager.getTooltip(subType)}</div>
+        </div>
+        `).join('');
+
+        const mercenaries = [11, 12, 13, 14, 15, 16, 17, 18].map(subType => `
+        <div class="help-section">
+            <div id="help-mercenaries-${subType}"></div>
+            <div>${this.cardsManager.getTooltip(subType)}</div>
+        </div>
+        `).join('');
+
+        const actions = [21, 22, 23].map(subType => `
+        <div class="help-section">
+            <div id="help-actions-${subType}"></div>
+            <div>${this.cardsManager.getTooltip(subType)}</div>
+        </div>
+        `).join('');
+
+        const missions = [31, 32, 33].map(subType => `
+        <div class="help-section">
+            <div id="help-missions-${subType}"></div>
+            <div>${this.cardsManager.getTooltip(subType)}</div>
+        </div>
+        `).join('');
+
+        const discoverTiles = `
+        <div class="help-section">
+            <div id="help-discover-tiles-1-1"></div>
+            <div>${this.discoverTilesManager.getTooltip(1, 1)}</div>
+        </div>
+        ` + [1, 2, 3, 4, 5].map(subType => `
+        <div class="help-section">
+            <div id="help-discover-tiles-2-${subType}"></div>
+            <div>${this.discoverTilesManager.getTooltip(2, subType)}</div>
+        </div>
+        `).join('');
+        
+        let html = `
+        <div id="help-popin">
+            <h1>${_("BASIC FIGHTERS")}</h1>
+            ${baseFighters}
+            <h1>${_("MERCENARY FIGHTERS")}</h1>
+            <div>${_("When you receive a Mercenary Fighter during phase 2 Planning Orders, place it in the slot of your High Command area you just crossed off. This Mercenary Fighter is now part of your clan, and may be deployed during phase 3 Issuing Orders of the current turn or any future turn. When you deploy it to the Battlefield, a Clan marker is placed on it to indicate it belongs to you.")}</div>
+            ${mercenaries}
+            <h1>${_("GLOW ACTIONS")}</h1>
+            <div>${_("When you receive a Glow Action token during phase 2 Planning Orders, place it in the slot of your High Command area you just crossed off. This token can now be used during phase 3 Issuing Orders of the current turn or any future turn.")}</div>
+            ${actions}
+            <h1>${_("SECRET MISSIONS")}</h1>
+            <div>${_("When you receive a Secret Mission token during phase 2 Planning Orders, place it in the slot of your High Command area you just crossed off. At the end of the game, before final scoring, receive a number of Objective tokens based on the success of your Secret Missions.")}</div>
+            ${missions}
+            <h1>${_("DISCOVERY TOKENS")}</h1>
+            <div>${_("When 1 of your Fighters moves into a Territory containing a face-down Discovery token, flip the token face up and apply its effects.")}</div>
+            ${discoverTiles}
+        </div>
+        `;*/
+        
+        // Show the dialog
+        helpDialog.setContent(html);
+
+        helpDialog.show();
     }
 
     public takeTiles(id: number) {
