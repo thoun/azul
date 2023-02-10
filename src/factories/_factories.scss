@@ -36,7 +36,9 @@
         left: 24px;
         width: 128px;
         height: 128px;
-        background: url('img/bag.png');
+        background-image: url('img/bag.png');
+        background-size: contain;
+        background-repeat: none;
         display: flex;
         justify-content: center;
         align-items: center;

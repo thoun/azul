@@ -14,7 +14,10 @@
     }
     
     #bag {
-        background: url('img/chocolatier/bag.png');
+        background-image: url('img/chocolatier/bag.png');
+        width: 164px;
+        height: 164px;
+        margin-left: -32px;
     }
 }
 

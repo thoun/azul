@@ -91,7 +91,9 @@
   left: 24px;
   width: 128px;
   height: 128px;
-  background: url("img/bag.png");
+  background-image: url("img/bag.png");
+  background-size: contain;
+  background-repeat: none;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -486,7 +488,10 @@ html[data-chocolatier-skin=true] #factories .factory[data-special-factory="9"] {
   background-position-x: 100%;
 }
 html[data-chocolatier-skin=true] #factories #bag {
-  background: url("img/chocolatier/bag.png");
+  background-image: url("img/chocolatier/bag.png");
+  width: 164px;
+  height: 164px;
+  margin-left: -32px;
 }
 html[data-chocolatier-skin=true] .tile-count.tile1 {
   color: #040707;
