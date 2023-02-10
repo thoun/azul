@@ -89,6 +89,8 @@ class Azul implements AzulGame {
             try {
                 (document.getElementById('preference_control_203').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
                 (document.getElementById('preference_fontrol_203').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
+                (document.getElementById('preference_control_210').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
+                (document.getElementById('preference_fontrol_210').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
             } catch (e) {}            
         }
 
@@ -648,7 +650,7 @@ class Azul implements AzulGame {
     notif_undoTakeTiles(notif: Notif<NotifUndoArgs>) {
         this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
 
-        this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from).then(
+        this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from, notif.args.factoryTilesBefore).then(
             () => this.getPlayerTable(notif.args.playerId).setHandVisible(false)
         );
     }

@@ -121,6 +121,7 @@ interface UndoSelect {
 interface NotifUndoArgs {
     playerId: number;
     undo: UndoSelect;
+    factoryTilesBefore: Tile[],
 }
 
 interface NotifTilesPlacedOnLineArgs {

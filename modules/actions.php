@@ -38,6 +38,8 @@ trait ActionTrait {
         $discardedTiles = [];
         $hasFirstPlayer = false;
 
+        $specialFactories = null;
+
         if ($factory == 0) {
             $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
             $hasFirstPlayer = count($firstPlayerTokens) > 0;
@@ -54,10 +56,19 @@ trait ActionTrait {
                 $this->putFirstPlayerTile($firstPlayerTokens, $playerId);
             }
         } else {
+            $discardOtherTiles = true;
+
+            if ($this->isSpecialFactories()) {
+                $specialFactories = $this->getSpecialFactories();
+                if ($specialFactories !== null && array_key_exists($factory, $specialFactories) && $specialFactories[$factory] == 8) {
+                    $discardOtherTiles = false;
+                }
+            }
+
             foreach($factoryTiles as $factoryTile) {
                 if ($tile->type == $factoryTile->type) {
                     $selectedTiles[] = $factoryTile;
-                } else {
+                } else if ($discardOtherTiles) {
                     $discardedTiles[] = $factoryTile;
                 }
             }
@@ -106,6 +117,7 @@ trait ActionTrait {
 
         $undo = $this->getGlobalVariable(UNDO_SELECT);
 
+        $factoryTilesBefore = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $undo->from));
         $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'factory', $undo->from);
         self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $undo->previousFirstPlayer);
 
@@ -113,6 +125,7 @@ trait ActionTrait {
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'undo' => $undo,
+            'factoryTilesBefore' => $factoryTilesBefore,
         ]);
 
         $this->gamestate->nextState('undo');

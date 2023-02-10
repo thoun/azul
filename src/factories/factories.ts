@@ -306,11 +306,24 @@ class Factories {
         });
     }
 
-    public undoTakeTiles(tiles: Tile[], from: number): Promise<any> {
+    public undoTakeTiles(tiles: Tile[], from: number, factoryTilesBefore: Tile[]): Promise<any> {
         let promise;
         if (from > 0) {
+            const countBefore = factoryTilesBefore?.length ?? 0;
+            const count = countBefore + tiles.length;
+            if (factoryTilesBefore?.length) {
+                factoryTilesBefore.forEach((tile, index) => {
+                    const coordinates = this.getCoordinatesInFactory(index, count);
+                    const left = coordinates.left;
+                    const top = coordinates.top;
+                    const tileDiv = document.getElementById(`tile${tile.id}`);
+                    tileDiv.style.left = `${left}px`;
+                    tileDiv.style.top = `${top}px`;
+                });
+            }
+
             promise = Promise.all(tiles.map((tile, index) => {
-                const coordinates = this.getCoordinatesInFactory(index, tiles.length);
+                const coordinates = this.getCoordinatesInFactory(countBefore + index, count);
                 this.tilesInFactories[from][tile.type].push(tile);
 
 
