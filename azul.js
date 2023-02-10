@@ -390,6 +390,23 @@ var Factories = /** @class */ (function () {
             });
         }
     };
+    Factories.prototype.factoriesCompleted = function (args) {
+        var _this = this;
+        var factoryTiles = args.factories[args.factory];
+        factoryTiles.forEach(function (tile, index) {
+            var coordinates = _this.getCoordinatesInFactory(index, factoryTiles.length);
+            var left = coordinates.left;
+            var top = coordinates.top;
+            var tileDiv = document.getElementById("tile".concat(tile.id));
+            if (tileDiv) {
+                tileDiv.style.left = "".concat(left, "px");
+                tileDiv.style.top = "".concat(top, "px");
+            }
+            else {
+                _this.game.placeTile(tile, "factory".concat(args.factory), left, top);
+            }
+        });
+    };
     Factories.prototype.discardTiles = function (discardedTiles) {
         var _this = this;
         var promise = discardedTiles.map(function (tile) {
@@ -1111,64 +1128,6 @@ var Azul = /** @class */ (function () {
         helpDialog.create('azulChocolatierVariantHelpDialog');
         helpDialog.setTitle(_("Special Factories"));
         var html = "\n        <div id=\"help-popin\">\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"9\"></div>\n                </div>\n                <span class=\"title\">SF 1.</span> ".concat(_("After setting up the round, add 1 tile from the bag on this Special Factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"1\"></div>\n                    <div class=\"factory\" data-special-factory=\"2\"></div>\n                    <div class=\"factory\" data-special-factory=\"3\"></div>\n                    <div class=\"factory\" data-special-factory=\"4\"></div>\n                    <div class=\"factory\" data-special-factory=\"5\"></div>\n                </div>\n                <span class=\"title\">SF 2.</span> ").concat(_("After setting up the round, take 1 tile of the illustrated pattern from both adjacent Factory displays to the immediate left and right (if possible), and place them on this Special factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"8\"></div>\n                </div>\n                <span class=\"title\">SF 3.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table but remain on it."), "\n            </div>\n            <div class=\"row disabled\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"7\"></div>\n                </div>\n                <span class=\"title\">SF 4.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table. Instead, that player moves them to the Factory display (blue or gold) to its immediate left and/or right, dividing the tiles between those 2 displays. The only restriction is that tiles of one color may not be split up."), "\n            </div>\n            <div class=\"row disabled\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"6\"></div>\n                </div>\n                <span class=\"title\">SF 5.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are moved to the center of the table. Then, that player places this Special Factory as an extra space next to their Foundry line until the end of the round. The next tile that must be placed in their foundry line is placed on this Special factory instead, skipping the penalty."), "\n            </div>\n        </div>\n        ");
-        /*const baseFighters = [1, 2, 3, 4, 5, 6].map(subType => `
-        <div class="help-section">
-            <div id="help-base-${subType}"></div>
-            <div>${this.cardsManager.getTooltip(subType)}</div>
-        </div>
-        `).join('');
-
-        const mercenaries = [11, 12, 13, 14, 15, 16, 17, 18].map(subType => `
-        <div class="help-section">
-            <div id="help-mercenaries-${subType}"></div>
-            <div>${this.cardsManager.getTooltip(subType)}</div>
-        </div>
-        `).join('');
-
-        const actions = [21, 22, 23].map(subType => `
-        <div class="help-section">
-            <div id="help-actions-${subType}"></div>
-            <div>${this.cardsManager.getTooltip(subType)}</div>
-        </div>
-        `).join('');
-
-        const missions = [31, 32, 33].map(subType => `
-        <div class="help-section">
-            <div id="help-missions-${subType}"></div>
-            <div>${this.cardsManager.getTooltip(subType)}</div>
-        </div>
-        `).join('');
-
-        const discoverTiles = `
-        <div class="help-section">
-            <div id="help-discover-tiles-1-1"></div>
-            <div>${this.discoverTilesManager.getTooltip(1, 1)}</div>
-        </div>
-        ` + [1, 2, 3, 4, 5].map(subType => `
-        <div class="help-section">
-            <div id="help-discover-tiles-2-${subType}"></div>
-            <div>${this.discoverTilesManager.getTooltip(2, subType)}</div>
-        </div>
-        `).join('');
-        
-        let html = `
-        <div id="help-popin">
-            <h1>${_("BASIC FIGHTERS")}</h1>
-            ${baseFighters}
-            <h1>${_("MERCENARY FIGHTERS")}</h1>
-            <div>${_("When you receive a Mercenary Fighter during phase 2 Planning Orders, place it in the slot of your High Command area you just crossed off. This Mercenary Fighter is now part of your clan, and may be deployed during phase 3 Issuing Orders of the current turn or any future turn. When you deploy it to the Battlefield, a Clan marker is placed on it to indicate it belongs to you.")}</div>
-            ${mercenaries}
-            <h1>${_("GLOW ACTIONS")}</h1>
-            <div>${_("When you receive a Glow Action token during phase 2 Planning Orders, place it in the slot of your High Command area you just crossed off. This token can now be used during phase 3 Issuing Orders of the current turn or any future turn.")}</div>
-            ${actions}
-            <h1>${_("SECRET MISSIONS")}</h1>
-            <div>${_("When you receive a Secret Mission token during phase 2 Planning Orders, place it in the slot of your High Command area you just crossed off. At the end of the game, before final scoring, receive a number of Objective tokens based on the success of your Secret Missions.")}</div>
-            ${missions}
-            <h1>${_("DISCOVERY TOKENS")}</h1>
-            <div>${_("When 1 of your Fighters moves into a Territory containing a face-down Discovery token, flip the token face up and apply its effects.")}</div>
-            ${discoverTiles}
-        </div>
-        `;*/
         // Show the dialog
         helpDialog.setContent(html);
         helpDialog.show();
@@ -1266,6 +1225,7 @@ var Azul = /** @class */ (function () {
         var notifs = [
             ['factoriesFilled', ANIMATION_MS + REFILL_DELAY[this.gamedatas.factoryNumber]],
             ['factoriesChanged', ANIMATION_MS],
+            ['factoriesCompleted', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
@@ -1277,6 +1237,7 @@ var Azul = /** @class */ (function () {
             ['lastRound', 1],
             ['removeLastRound', 1],
             ['updateSelectColumn', 1],
+            ['moveSpecialFactoryZero', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_".concat(notif[0]));
@@ -1288,6 +1249,9 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.notif_factoriesChanged = function (notif) {
         this.factories.factoriesChanged(notif.args);
+    };
+    Azul.prototype.notif_factoriesCompleted = function (notif) {
+        this.factories.factoriesCompleted(notif.args);
     };
     Azul.prototype.notif_tilesSelected = function (notif) {
         if (notif.args.fromFactory == 0) {
@@ -1381,6 +1345,9 @@ var Azul = /** @class */ (function () {
         if (document.getElementById('last-round')) {
             dojo.destroy('last-round');
         }
+    };
+    Azul.prototype.notif_moveSpecialFactoryZero = function (notif) {
+        console.log('notif_moveSpecialFactoryZero', notif.args.playerId);
     };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */

@@ -60,6 +60,14 @@
   background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M23.8,102.1L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L47.5,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L35.7,90.3" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M51,118C55.2,113.8 57.3,108.7 57.3,102.8C57.3,96.8 55.2,91.8 51,87.6C46.8,83.4 41.7,81.3 35.8,81.3C29.9,81.3 24.8,83.4 20.6,87.6C16.4,91.8 14.3,96.8 14.3,102.8C14.3,108.7 16.4,113.8 20.6,118C24.8,122.2 29.9,124.3 35.8,124.3C41.7,124.3 46.8,122.2 51,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,113.9L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M65.3,132.3L51,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g></g></svg>');
 }
 
+.factory {
+  background: url("img/factory.png");
+  width: 250px;
+  height: 250px;
+  display: inline-block;
+  pointer-events: none;
+}
+
 #factories {
   position: relative;
   --top: 0;
@@ -67,11 +75,6 @@
 }
 #factories .factory {
   position: absolute;
-  background: url("img/factory.png");
-  width: 250px;
-  height: 250px;
-  display: inline-block;
-  pointer-events: none;
 }
 #factories .factory .tile {
   transition: left 0.5s, top 0.5s;
@@ -458,37 +461,37 @@ html[data-chocolatier-skin=true] {
   background: url("img/chocolatier/background.jpg") #fff8f0;
   background-repeat: repeat;
 }
-html[data-chocolatier-skin=true] #factories .factory {
+html[data-chocolatier-skin=true] .factory {
   background: url("img/chocolatier/factory.png");
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory] {
+html[data-chocolatier-skin=true] .factory[data-special-factory] {
   background: url("img/chocolatier/special-factories.png");
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory="1"] {
+html[data-chocolatier-skin=true] .factory[data-special-factory="1"] {
   background-position-x: 0%;
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory="2"] {
+html[data-chocolatier-skin=true] .factory[data-special-factory="2"] {
   background-position-x: 12.5%;
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory="3"] {
+html[data-chocolatier-skin=true] .factory[data-special-factory="3"] {
   background-position-x: 25%;
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory="4"] {
+html[data-chocolatier-skin=true] .factory[data-special-factory="4"] {
   background-position-x: 37.5%;
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory="5"] {
+html[data-chocolatier-skin=true] .factory[data-special-factory="5"] {
   background-position-x: 50%;
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory="6"] {
+html[data-chocolatier-skin=true] .factory[data-special-factory="6"] {
   background-position-x: 62.5%;
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory="7"] {
+html[data-chocolatier-skin=true] .factory[data-special-factory="7"] {
   background-position-x: 75%;
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory="8"] {
+html[data-chocolatier-skin=true] .factory[data-special-factory="8"] {
   background-position-x: 87.5%;
 }
-html[data-chocolatier-skin=true] #factories .factory[data-special-factory="9"] {
+html[data-chocolatier-skin=true] .factory[data-special-factory="9"] {
   background-position-x: 100%;
 }
 html[data-chocolatier-skin=true] #factories #bag {
@@ -619,36 +622,7 @@ html[data-chocolatier-skin=true] #help-popin .row .picture {
 html[data-chocolatier-skin=true] #help-popin .row .picture .factory {
   width: 62.5px;
   height: 62.5px;
-  background-image: url("img/chocolatier/special-factories.png");
   background-size: auto 100%;
-  display: inline-block;
-}
-html[data-chocolatier-skin=true] #help-popin .row .picture .factory[data-special-factory="1"] {
-  background-position-x: 0%;
-}
-html[data-chocolatier-skin=true] #help-popin .row .picture .factory[data-special-factory="2"] {
-  background-position-x: 12.5%;
-}
-html[data-chocolatier-skin=true] #help-popin .row .picture .factory[data-special-factory="3"] {
-  background-position-x: 25%;
-}
-html[data-chocolatier-skin=true] #help-popin .row .picture .factory[data-special-factory="4"] {
-  background-position-x: 37.5%;
-}
-html[data-chocolatier-skin=true] #help-popin .row .picture .factory[data-special-factory="5"] {
-  background-position-x: 50%;
-}
-html[data-chocolatier-skin=true] #help-popin .row .picture .factory[data-special-factory="6"] {
-  background-position-x: 62.5%;
-}
-html[data-chocolatier-skin=true] #help-popin .row .picture .factory[data-special-factory="7"] {
-  background-position-x: 75%;
-}
-html[data-chocolatier-skin=true] #help-popin .row .picture .factory[data-special-factory="8"] {
-  background-position-x: 87.5%;
-}
-html[data-chocolatier-skin=true] #help-popin .row .picture .factory[data-special-factory="9"] {
-  background-position-x: 100%;
 }
 html[data-chocolatier-skin=true] #help-popin .row .picture .factory:not(:first-child) {
   margin-left: -25px;

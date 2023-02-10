@@ -97,9 +97,6 @@ trait StateTrait {
 
         self::incStat(1, 'roundsNumber');
         self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
-        
-        // TODO TEMP
-        //$this->debugPlayRandomlyToTen();
 
         $this->gamestate->nextState('next');
     }

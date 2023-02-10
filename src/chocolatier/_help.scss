@@ -35,15 +35,7 @@
             .factory {
                 width: 62.5px;
                 height: 62.5px;
-                background-image: url('img/chocolatier/special-factories.png');
                 background-size: auto 100%;
-                display: inline-block;
-
-                @for $i from 1 through 9 {
-                    &[data-special-factory="#{$i}"] {
-                        background-position-x: (($i - 1) * 100% / 8) ;
-                    }
-                }
 
                 &:not(:first-child) {
                     margin-left: -25px;

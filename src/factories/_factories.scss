@@ -1,3 +1,11 @@
+.factory {
+    background: url('img/factory.png');
+    width: 250px;
+    height: 250px;
+    display: inline-block;
+    pointer-events: none;
+}
+
 #factories {
     position: relative;
     --top: 0;
@@ -6,12 +14,7 @@
 
     .factory {
         position: absolute;
-        background: url('img/factory.png');
-        width: 250px;
-        height: 250px;
-        display: inline-block;
-        pointer-events: none;
-
+    
         .tile {
             transition: left 0.5s, top 0.5s;
         }

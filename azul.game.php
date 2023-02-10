@@ -48,6 +48,7 @@ class Azul extends Table {
         self::initGameStateLabels([
             FIRST_PLAYER_FOR_NEXT_TURN => 10,
             END_TURN_LOGGED => 12,
+            SPECIAL_FACTORY_ZERO_OWNER => 20,
 
             VARIANT_OPTION => 100,
             UNDO => 101,
@@ -184,6 +185,7 @@ class Azul extends Table {
         $result['remainingTiles'] = intval($this->tiles->countCardInLocation('deck'));
 
         if ($this->isSpecialFactories()) {
+            $result['specialFactoryZeroOwner'] = intval($this->getGameStateValue(SPECIAL_FACTORY_ZERO_OWNER));
             $result['specialFactories'] = $this->getSpecialFactories();
         }
   

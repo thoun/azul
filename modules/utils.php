@@ -134,7 +134,7 @@ trait UtilTrait {
 
     function initSpecialFactories(int $playerCount) {
         $availableFactories = [];
-        $availableSpecialFactories = [1,2,3,4,5/*,6,7*/,8,9];
+        $availableSpecialFactories = /*[6, 9];*/[1,2,3,4,5/*,6,7*/,8,9];
         $factoryNumber = $this->getFactoryNumber($playerCount);
         for ($factory=1; $factory<=$factoryNumber; $factory++) {
             $availableFactories[] = $factory;

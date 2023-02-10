@@ -1,17 +1,18 @@
-#factories {
-    .factory {
-        background: url('img/chocolatier/factory.png');
+.factory {
+    background: url('img/chocolatier/factory.png');
 
-        &[data-special-factory] {
-            background: url('img/chocolatier/special-factories.png');
-        }
+    &[data-special-factory] {
+        background: url('img/chocolatier/special-factories.png');
+    }
 
-        @for $i from 1 through 9 {
-            &[data-special-factory="#{$i}"] {
-                background-position-x: (($i - 1) * 100% / 8) ;
-            }
+    @for $i from 1 through 9 {
+        &[data-special-factory="#{$i}"] {
+            background-position-x: (($i - 1) * 100% / 8) ;
         }
     }
+}
+
+#factories {
     
     #bag {
         background-image: url('img/chocolatier/bag.png');

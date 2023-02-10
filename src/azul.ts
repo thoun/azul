@@ -551,65 +551,6 @@ class Azul implements AzulGame {
             </div>
         </div>
         `;
-
-        /*const baseFighters = [1, 2, 3, 4, 5, 6].map(subType => `
-        <div class="help-section">
-            <div id="help-base-${subType}"></div>
-            <div>${this.cardsManager.getTooltip(subType)}</div>
-        </div>
-        `).join('');
-
-        const mercenaries = [11, 12, 13, 14, 15, 16, 17, 18].map(subType => `
-        <div class="help-section">
-            <div id="help-mercenaries-${subType}"></div>
-            <div>${this.cardsManager.getTooltip(subType)}</div>
-        </div>
-        `).join('');
-
-        const actions = [21, 22, 23].map(subType => `
-        <div class="help-section">
-            <div id="help-actions-${subType}"></div>
-            <div>${this.cardsManager.getTooltip(subType)}</div>
-        </div>
-        `).join('');
-
-        const missions = [31, 32, 33].map(subType => `
-        <div class="help-section">
-            <div id="help-missions-${subType}"></div>
-            <div>${this.cardsManager.getTooltip(subType)}</div>
-        </div>
-        `).join('');
-
-        const discoverTiles = `
-        <div class="help-section">
-            <div id="help-discover-tiles-1-1"></div>
-            <div>${this.discoverTilesManager.getTooltip(1, 1)}</div>
-        </div>
-        ` + [1, 2, 3, 4, 5].map(subType => `
-        <div class="help-section">
-            <div id="help-discover-tiles-2-${subType}"></div>
-            <div>${this.discoverTilesManager.getTooltip(2, subType)}</div>
-        </div>
-        `).join('');
-        
-        let html = `
-        <div id="help-popin">
-            <h1>${_("BASIC FIGHTERS")}</h1>
-            ${baseFighters}
-            <h1>${_("MERCENARY FIGHTERS")}</h1>
-            <div>${_("When you receive a Mercenary Fighter during phase 2 Planning Orders, place it in the slot of your High Command area you just crossed off. This Mercenary Fighter is now part of your clan, and may be deployed during phase 3 Issuing Orders of the current turn or any future turn. When you deploy it to the Battlefield, a Clan marker is placed on it to indicate it belongs to you.")}</div>
-            ${mercenaries}
-            <h1>${_("GLOW ACTIONS")}</h1>
-            <div>${_("When you receive a Glow Action token during phase 2 Planning Orders, place it in the slot of your High Command area you just crossed off. This token can now be used during phase 3 Issuing Orders of the current turn or any future turn.")}</div>
-            ${actions}
-            <h1>${_("SECRET MISSIONS")}</h1>
-            <div>${_("When you receive a Secret Mission token during phase 2 Planning Orders, place it in the slot of your High Command area you just crossed off. At the end of the game, before final scoring, receive a number of Objective tokens based on the success of your Secret Missions.")}</div>
-            ${missions}
-            <h1>${_("DISCOVERY TOKENS")}</h1>
-            <div>${_("When 1 of your Fighters moves into a Territory containing a face-down Discovery token, flip the token face up and apply its effects.")}</div>
-            ${discoverTiles}
-        </div>
-        `;*/
         
         // Show the dialog
         helpDialog.setContent(html);
@@ -731,6 +672,7 @@ class Azul implements AzulGame {
         const notifs = [
             ['factoriesFilled', ANIMATION_MS + REFILL_DELAY[this.gamedatas.factoryNumber]],
             ['factoriesChanged', ANIMATION_MS],
+            ['factoriesCompleted', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
@@ -742,6 +684,7 @@ class Azul implements AzulGame {
             ['lastRound', 1],
             ['removeLastRound', 1],
             ['updateSelectColumn', 1],
+            ['moveSpecialFactoryZero', ANIMATION_MS],
         ];
 
         notifs.forEach((notif) => {
@@ -756,6 +699,10 @@ class Azul implements AzulGame {
 
     notif_factoriesChanged(notif: Notif<NotifFactoriesChangedArgs>) {
         this.factories.factoriesChanged(notif.args);
+    }
+
+    notif_factoriesCompleted(notif: Notif<NotifFactoriesChangedArgs>) {
+        this.factories.factoriesCompleted(notif.args);
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
@@ -869,6 +816,10 @@ class Azul implements AzulGame {
         if (document.getElementById('last-round')) {
             dojo.destroy('last-round');
         }
+    }
+
+    notif_moveSpecialFactoryZero(notif: Notif<NotifFirstPlayerTokenArgs>) {
+        console.log('notif_moveSpecialFactoryZero', notif.args.playerId);
     }
 
     /* This enable to inject translatable styled things to logs or action bar */

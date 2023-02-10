@@ -40,6 +40,8 @@ trait ActionTrait {
 
         $specialFactories = null;
 
+        $takeFromSpecialFactoryZero = false;
+
         if ($factory == 0) {
             $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
             $hasFirstPlayer = count($firstPlayerTokens) > 0;
@@ -60,8 +62,13 @@ trait ActionTrait {
 
             if ($this->isSpecialFactories()) {
                 $specialFactories = $this->getSpecialFactories();
-                if ($specialFactories !== null && array_key_exists($factory, $specialFactories) && $specialFactories[$factory] == 8) {
-                    $discardOtherTiles = false;
+                if (array_key_exists($factory, $specialFactories)) {
+                    if ($specialFactories[$factory] == 6) {
+                        $takeFromSpecialFactoryZero = true;
+                        $this->setGameStateValue(SPECIAL_FACTORY_ZERO_OWNER, $playerId);
+                    } else if ($specialFactories[$factory] == 8) {
+                        $discardOtherTiles = false;
+                    }
                 }
             }
 
@@ -97,10 +104,18 @@ trait ActionTrait {
             'fromFactory' => $factory,
         ]);
 
+        if ($takeFromSpecialFactoryZero) {
+            self::notifyAllPlayers('moveSpecialFactoryZero', '', [
+                'playerId' => $playerId,
+            ]);
+        }
+
         $this->setGlobalVariable(UNDO_SELECT, new Undo(
             array_merge($selectedTiles, $discardedTiles, $firstPlayerTokens),
             $factory, 
-            $previousFirstPlayer
+            $previousFirstPlayer,
+            null,
+            $takeFromSpecialFactoryZero
         ));
 
         $this->gamestate->nextState('placeTiles');
@@ -116,6 +131,13 @@ trait ActionTrait {
         $playerId = intval(self::getActivePlayerId());
 
         $undo = $this->getGlobalVariable(UNDO_SELECT);
+
+        /*if ($undo->takeFromSpecialFactoryZero) {
+            $this->setGameStateValue(SPECIAL_FACTORY_ZERO_OWNER, 0);
+            self::notifyAllPlayers('moveSpecialFactoryZero', '', [
+                'playerId' => 0,
+            ]);
+        }*/
 
         $factoryTilesBefore = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $undo->from));
         $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'factory', $undo->from);

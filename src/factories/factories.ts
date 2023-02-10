@@ -164,6 +164,22 @@ class Factories {
             });
         }
     }
+    
+    public factoriesCompleted(args: NotifFactoriesChangedArgs) {
+        const factoryTiles = args.factories[args.factory];
+            factoryTiles.forEach((tile, index) => {
+                const coordinates = this.getCoordinatesInFactory(index, factoryTiles.length);
+                const left = coordinates.left;
+                const top = coordinates.top;
+                const tileDiv = document.getElementById(`tile${tile.id}`);
+                if (tileDiv) {
+                    tileDiv.style.left = `${left}px`;
+                    tileDiv.style.top = `${top}px`;
+                } else {
+                    this.game.placeTile(tile, `factory${args.factory}`, left, top);
+                }
+            });
+    }
 
     public discardTiles(discardedTiles: Tile[]) {
         const promise = discardedTiles.map(tile => {

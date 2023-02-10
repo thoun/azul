@@ -41,6 +41,7 @@ interface AzulGamedatas {
     remainingTiles: number;
 
     specialFactories?: { [factoryNumber: number]: number };
+    specialFactoryZeroOwner?: number;
 }
 
 interface AzulGame extends Game {

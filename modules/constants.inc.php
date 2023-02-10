@@ -43,6 +43,7 @@ define('FAST_SCORING', 'FastScoring');
 
 define('FIRST_PLAYER_FOR_NEXT_TURN', 'FirstPlayerForNextTurn');
 define('END_TURN_LOGGED', 'EndTurnLogged');
+define('SPECIAL_FACTORY_ZERO_OWNER', 'SpecialFactoryZeroOwner');
 
 /*
  * Global variables
