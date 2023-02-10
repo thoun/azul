@@ -130,6 +130,7 @@ interface NotifTilesPlacedOnLineArgs {
     line: number;
     placedTiles: Tile[];
     discardedTiles: Tile[];
+    discardedTilesToSpecialFactoryZero: Tile[];
     fromHand: boolean;
 }
 
@@ -156,6 +157,7 @@ interface FloorLine {
 
 interface NotifEmptyFloorLineArgs {
     floorLines: { [playerId: number]: FloorLine };
+    specialFactoryZeroTiles: { [playerId: number]: Tile[] };
 }
 
 interface EndScoreTiles {

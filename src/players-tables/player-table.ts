@@ -14,13 +14,15 @@ class PlayerTable {
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
         <div id="player-hand-${this.playerId}" class="player-hand ${player.hand.length ? '' : 'empty'}">
         </div>
-        <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="border-color: #${player.color}; box-shadow: 0 0 5px 2px #${player.color};">
+        <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="--player-color: #${player.color};">
             <div class="player-name-wrapper shift">
-                <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}" style="color: #${player.color};">${player.name}</div>
+                <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
             </div>
             <div class="player-name-wrapper">
                 <div id="player-name-${this.playerId}" class="player-name dark ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
-            </div>`;
+            </div>
+            <div id="player-table-${this.playerId}-line-1" class="special-factory-zero factory" data-special-factory="6"></div>
+            `;
             
         for (let i=1; i<=5; i++) {
             html += `<div id="player-table-${this.playerId}-line${i}" class="line" style="top: ${10 + 70*(i-1)}px; width: ${69*i - 5}px;"></div>`;
@@ -50,7 +52,8 @@ class PlayerTable {
             <div class="score-magnified color">10</div>
         `;
 
-        html += `    </div>
+        html += `   
+            </div>
         </div>`;
 
         dojo.place(html, 'centered-table');
@@ -60,6 +63,7 @@ class PlayerTable {
         for (let i=0; i<=5; i++) {
             document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
         }
+        document.getElementById(`player-table-${this.playerId}-line-1`).addEventListener('click', () => this.game.selectLine(0));
         if (this.game.isVariant()) {
             for (let line=1; line<=5; line++) {
                 for (let column=1; column<=5; column++) {
@@ -71,7 +75,7 @@ class PlayerTable {
             document.getElementById(`player-table-${this.playerId}-column0`).addEventListener('click', () => this.game.selectColumn(0, 0));
         }
 
-        for (let i=0; i<=5; i++) {
+        for (let i=-1; i<=5; i++) {
             const tiles = player.lines.filter(tile => tile.line === i);
             this.placeTilesOnLine(tiles, i);
         }
@@ -95,8 +99,9 @@ class PlayerTable {
 
     public placeTilesOnLine(tiles: Tile[], line: number): Promise<any> {
         return Promise.all(tiles.map(tile => {
-            const left = line ? (line - tile.column) * 69 : 5 + (tile.column-1) * 74;
-            return this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, 0);
+            const left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column-1) * 74);
+            const top = line == -1 ? 9 : 0;
+            return this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top);
         }));
     }
 
@@ -124,5 +129,9 @@ class PlayerTable {
         dojo.toggleClass(`player-name-shift-${this.playerId}`, 'azul', !defaultFont);
         dojo.toggleClass(`player-name-${this.playerId}`, 'standard', defaultFont);
         dojo.toggleClass(`player-name-${this.playerId}`, 'azul', !defaultFont);
+    }
+    
+    public setOwnSpecialFactoryZero(own: boolean) {
+        document.getElementById(`player-table-${this.playerId}`).dataset.specialFactoryZeroOwned = own.toString();
     }
 }

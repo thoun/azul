@@ -95,6 +95,11 @@ class Azul implements AzulGame {
             
             document.getElementById('factories').insertAdjacentHTML('beforeend', `<button type="button" id="special-factories-help">${_('Special Factories')}</button>`);
             document.getElementById('special-factories-help').addEventListener('click', () => this.showHelp());
+
+            if (gamedatas.specialFactoryZeroOwner) {
+                this.getPlayerTable(gamedatas.specialFactoryZeroOwner).setOwnSpecialFactoryZero(true);
+                document.getElementById('factories').dataset.specialFactoryZeroOwned = 'true';
+            }
         }
 
         if (gamedatas.endRound) {
@@ -141,6 +146,7 @@ class Azul implements AzulGame {
     onEnteringChooseLine(args: EnteringChooseLineArgs) {
         if ((this as any).isCurrentPlayerActive()) {
             args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
+            dojo.addClass(`player-table-${this.getPlayerId()}-line-1`, 'selectable');
         }
     }
 
@@ -209,6 +215,7 @@ class Azul implements AzulGame {
         for (let i=0; i<=5; i++) {
             dojo.removeClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
         }
+        dojo.removeClass(`player-table-${this.getPlayerId()}-line-1`, 'selectable');
     }
 
     onLeavingChooseColumns() {        
@@ -541,7 +548,7 @@ class Azul implements AzulGame {
                     _("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table. Instead, that player moves them to the Factory display (blue or gold) to its immediate left and/or right, dividing the tiles between those 2 displays. The only restriction is that tiles of one color may not be split up.")
                 }
             </div>
-            <div class="row disabled">
+            <div class="row">
                 <div class="picture">
                     <div class="factory" data-special-factory="6"></div>
                 </div>
@@ -726,6 +733,7 @@ class Azul implements AzulGame {
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(
             () => { 
                 if (notif.args.fromHand) {
@@ -762,6 +770,7 @@ class Azul implements AzulGame {
     notif_emptyFloorLine(notif: Notif<NotifEmptyFloorLineArgs>) {
         Object.keys(notif.args.floorLines).forEach(playerId => {
             const floorLine: FloorLine = notif.args.floorLines[playerId];
+            this.removeTiles(notif.args.specialFactoryZeroTiles[playerId], true);
             
             setTimeout(() => this.removeTiles(floorLine.tiles, true), SCORE_MS - 50);
             (this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
@@ -819,7 +828,8 @@ class Azul implements AzulGame {
     }
 
     notif_moveSpecialFactoryZero(notif: Notif<NotifFirstPlayerTokenArgs>) {
-        console.log('notif_moveSpecialFactoryZero', notif.args.playerId);
+        document.getElementById('factories').dataset.specialFactoryZeroOwned = (!!notif.args.playerId).toString();
+        this.playersTables.forEach(playerTable => playerTable.setOwnSpecialFactoryZero(notif.args.playerId == playerTable.playerId));
     }
 
     /* This enable to inject translatable styled things to logs or action bar */

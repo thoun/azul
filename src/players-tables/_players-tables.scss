@@ -11,7 +11,7 @@
 .player-table-wrapper {
     position: relative;
     display: inline-block;
-    margin-right: 20px;
+    margin-left: 20px;
 
     .player-hand {
         height: 75px;
@@ -74,6 +74,10 @@
                     display: none;
                 }
             }
+
+            &.color {
+                color: var(--player-color);
+            }
         }
     }
     
@@ -87,6 +91,34 @@
         border-radius: 8px;
         margin: 5px;
         z-index: 1;
+        border-color: var(--player-color);
+        box-shadow: 0 0 5px 2px var(--player-color);
+
+        .special-factory-zero {
+            position: absolute;
+            left: -82px;
+            bottom: 0px;
+            width: 80px;
+            height: 80px;
+            background-position: 61.45% 50% !important;
+            border-radius: 50%;
+            box-shadow: 0 0 5px 2px var(--player-color);
+            visibility: hidden;
+            pointer-events: none;
+            border: 3px dashed transparent;
+        }
+
+        &[data-special-factory-zero-owned="true"] {
+            .special-factory-zero {
+                visibility: unset;
+
+                &.selectable {
+                    border-color: red;
+                    pointer-events: all;
+                    cursor: pointer;
+                }
+            }
+        }
 
         &.variant {            
             background: url('img/playerboard-variant.jpg');

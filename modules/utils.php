@@ -134,7 +134,7 @@ trait UtilTrait {
 
     function initSpecialFactories(int $playerCount) {
         $availableFactories = [];
-        $availableSpecialFactories = /*[6, 9];*/[1,2,3,4,5/*,6,7*/,8,9];
+        $availableSpecialFactories = /*[1, 7];*/[1,2,3,4,5,6,/*7,*/8,9];
         $factoryNumber = $this->getFactoryNumber($playerCount);
         for ($factory=1; $factory<=$factoryNumber; $factory++) {
             $availableFactories[] = $factory;
@@ -173,15 +173,23 @@ trait UtilTrait {
         $startIndex = count($this->getTilesFromLine($playerId, $line));
         $startIndexFloorLine = count($this->getTilesFromLine($playerId, 0));
 
+        $canPlaceOnSpecialFactoryZero = intval($this->getGameStateValue(SPECIAL_FACTORY_ZERO_OWNER)) == $playerId && count($this->getTilesFromLine($playerId, -1)) == 0;
+
         $placedTiles = [];
         $discardedTiles = [];
+        $discardedTilesToSpecialFactoryZero = [];
 
         foreach ($tiles as $tile) {
             $aimColumn = ++$startIndex;
-            if ($line == 0 || $aimColumn <= $line) {
+            if ($line > 0 && $aimColumn <= $line) {
                 $tile->line = $line;
                 $tile->column = $aimColumn;
                 $placedTiles[] = $tile;
+            } else if ($canPlaceOnSpecialFactoryZero) {
+                $tile->line = -1;
+                $tile->column = 0;
+                $discardedTilesToSpecialFactoryZero[] = $tile;
+                $canPlaceOnSpecialFactoryZero = 0;
             } else {
                 $tile->line = 0;
                 $tile->column = ++$startIndexFloorLine;
@@ -208,6 +216,7 @@ trait UtilTrait {
             'lineNumber' => $line,
             'placedTiles' => $placedTiles,
             'discardedTiles' => $discardedTiles,
+            'discardedTilesToSpecialFactoryZero' => $discardedTilesToSpecialFactoryZero,
             'fromHand' => $fromHand,
         ]);
     }
@@ -442,6 +451,7 @@ trait UtilTrait {
 
     function notifFloorLine(array $playersIds) {
         $floorLinesNotif = [];
+        $specialFactoryZeroTiles = [];
         foreach ($playersIds as $playerId) {
             $playerTiles = $this->getTilesFromLine($playerId, 0);
             if (count($playerTiles) > 0) {                
@@ -462,9 +472,13 @@ trait UtilTrait {
                 self::incStat($points, 'pointsLossFloorLine');
                 self::incStat($points, 'pointsLossFloorLine', $playerId);
             } 
+            $playerTilesZero = $this->getTilesFromLine($playerId, -1);
+            $this->tiles->moveCards(array_map('getIdPredicate', $playerTilesZero), 'discard');
+            $specialFactoryZeroTiles[$playerId] = $playerTilesZero;
         }
         self::notifyAllPlayers('emptyFloorLine', '', [
             'floorLines' => $floorLinesNotif,
+            'specialFactoryZeroTiles' => $specialFactoryZeroTiles,
         ]);
 
         foreach ($floorLinesNotif as $playerId => $notif) {

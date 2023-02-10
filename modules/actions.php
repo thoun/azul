@@ -132,12 +132,12 @@ trait ActionTrait {
 
         $undo = $this->getGlobalVariable(UNDO_SELECT);
 
-        /*if ($undo->takeFromSpecialFactoryZero) {
+        if (property_exists($undo, 'takeFromSpecialFactoryZero') && $undo->takeFromSpecialFactoryZero) {
             $this->setGameStateValue(SPECIAL_FACTORY_ZERO_OWNER, 0);
             self::notifyAllPlayers('moveSpecialFactoryZero', '', [
                 'playerId' => 0,
             ]);
-        }*/
+        }
 
         $factoryTilesBefore = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $undo->from));
         $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'factory', $undo->from);

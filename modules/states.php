@@ -214,6 +214,13 @@ trait StateTrait {
         $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
         $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
 
+        if (intval($this->getGameStateValue(SPECIAL_FACTORY_ZERO_OWNER)) > 0) {
+            $this->setGameStateValue(SPECIAL_FACTORY_ZERO_OWNER, 0);
+            self::notifyAllPlayers('moveSpecialFactoryZero', '', [
+                'playerId' => 0,
+            ]);
+        }
+
         if ($this->getGameProgression() == 100) {
             $this->gamestate->nextState('endScore');
         } else {

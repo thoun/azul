@@ -185,7 +185,7 @@
 .player-table-wrapper {
   position: relative;
   display: inline-block;
-  margin-right: 20px;
+  margin-left: 20px;
 }
 .player-table-wrapper .player-hand {
   height: 75px;
@@ -239,6 +239,9 @@
 .player-table-wrapper .player-name-wrapper .player-name.dark.standard {
   display: none;
 }
+.player-table-wrapper .player-name-wrapper .player-name.color {
+  color: var(--player-color);
+}
 .player-table-wrapper .player-table {
   background: url("img/playerboard.jpg");
   width: 740px;
@@ -248,6 +251,29 @@
   border-radius: 8px;
   margin: 5px;
   z-index: 1;
+  border-color: var(--player-color);
+  box-shadow: 0 0 5px 2px var(--player-color);
+}
+.player-table-wrapper .player-table .special-factory-zero {
+  position: absolute;
+  left: -82px;
+  bottom: 0px;
+  width: 80px;
+  height: 80px;
+  background-position: 61.45% 50% !important;
+  border-radius: 50%;
+  box-shadow: 0 0 5px 2px var(--player-color);
+  visibility: hidden;
+  pointer-events: none;
+  border: 3px dashed transparent;
+}
+.player-table-wrapper .player-table[data-special-factory-zero-owned=true] .special-factory-zero {
+  visibility: unset;
+}
+.player-table-wrapper .player-table[data-special-factory-zero-owned=true] .special-factory-zero.selectable {
+  border-color: red;
+  pointer-events: all;
+  cursor: pointer;
 }
 .player-table-wrapper .player-table.variant {
   background: url("img/playerboard-variant.jpg");
@@ -511,6 +537,9 @@ html[data-chocolatier-skin=true] #factories #special-factories-help {
   background: #720d2f;
   color: #f1e5bc;
   border-radius: 5px;
+}
+html[data-chocolatier-skin=true] #factories[data-special-factory-zero-owned=true] .factory[data-special-factory="6"] {
+  visibility: hidden;
 }
 html[data-chocolatier-skin=true] .tile-count.tile1 {
   color: #040707;

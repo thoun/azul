@@ -591,7 +591,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
-        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand ").concat(player.hand.length ? '' : 'empty', "\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table ").concat(this.game.isVariant() ? 'variant' : '', "\" style=\"border-color: #").concat(player.color, "; box-shadow: 0 0 5px 2px #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\" style=\"color: #").concat(player.color, ";\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>");
+        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand ").concat(player.hand.length ? '' : 'empty', "\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table ").concat(this.game.isVariant() ? 'variant' : '', "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div id=\"player-table-").concat(this.playerId, "-line-1\" class=\"special-factory-zero factory\" data-special-factory=\"6\"></div>\n            ");
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-".concat(this.playerId, "-line").concat(i, "\" class=\"line\" style=\"top: ").concat(10 + 70 * (i - 1), "px; width: ").concat(69 * i - 5, "px;\"></div>");
         }
@@ -612,7 +612,7 @@ var PlayerTable = /** @class */ (function () {
             html += "<div id=\"player-table-".concat(this.playerId, "-column0\" class=\"floor wall-spot\"></div>");
         }
         html += "\n            <div class=\"score-magnified row\">2</div>\n            <div class=\"score-magnified column\">7</div>\n            <div class=\"score-magnified color\">10</div>\n        ";
-        html += "    </div>\n        </div>";
+        html += "   \n            </div>\n        </div>";
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
         var _loop_3 = function (i) {
@@ -622,6 +622,7 @@ var PlayerTable = /** @class */ (function () {
         for (var i = 0; i <= 5; i++) {
             _loop_3(i);
         }
+        document.getElementById("player-table-".concat(this.playerId, "-line-1")).addEventListener('click', function () { return _this.game.selectLine(0); });
         if (this.game.isVariant()) {
             var _loop_4 = function (line) {
                 var _loop_6 = function (column) {
@@ -644,7 +645,7 @@ var PlayerTable = /** @class */ (function () {
             this_5.placeTilesOnLine(tiles, i);
         };
         var this_5 = this;
-        for (var i = 0; i <= 5; i++) {
+        for (var i = -1; i <= 5; i++) {
             _loop_5(i);
         }
         this.placeTilesOnWall(player.wall);
@@ -664,8 +665,9 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
         var _this = this;
         return Promise.all(tiles.map(function (tile) {
-            var left = line ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74;
-            return _this.game.placeTile(tile, "player-table-".concat(_this.playerId, "-line").concat(line), left, 0);
+            var left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74);
+            var top = line == -1 ? 9 : 0;
+            return _this.game.placeTile(tile, "player-table-".concat(_this.playerId, "-line").concat(line), left, top);
         }));
     };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
@@ -690,6 +692,9 @@ var PlayerTable = /** @class */ (function () {
         dojo.toggleClass("player-name-shift-".concat(this.playerId), 'azul', !defaultFont);
         dojo.toggleClass("player-name-".concat(this.playerId), 'standard', defaultFont);
         dojo.toggleClass("player-name-".concat(this.playerId), 'azul', !defaultFont);
+    };
+    PlayerTable.prototype.setOwnSpecialFactoryZero = function (own) {
+        document.getElementById("player-table-".concat(this.playerId)).dataset.specialFactoryZeroOwned = own.toString();
     };
     return PlayerTable;
 }());
@@ -774,6 +779,10 @@ var Azul = /** @class */ (function () {
             catch (e) { }
             document.getElementById('factories').insertAdjacentHTML('beforeend', "<button type=\"button\" id=\"special-factories-help\">".concat(_('Special Factories'), "</button>"));
             document.getElementById('special-factories-help').addEventListener('click', function () { return _this.showHelp(); });
+            if (gamedatas.specialFactoryZeroOwner) {
+                this.getPlayerTable(gamedatas.specialFactoryZeroOwner).setOwnSpecialFactoryZero(true);
+                document.getElementById('factories').dataset.specialFactoryZeroOwned = 'true';
+            }
         }
         if (gamedatas.endRound) {
             this.notif_lastRound();
@@ -814,6 +823,7 @@ var Azul = /** @class */ (function () {
         var _this = this;
         if (this.isCurrentPlayerActive()) {
             args.lines.forEach(function (i) { return dojo.addClass("player-table-".concat(_this.getPlayerId(), "-line").concat(i), 'selectable'); });
+            dojo.addClass("player-table-".concat(this.getPlayerId(), "-line-1"), 'selectable');
         }
     };
     Azul.prototype.onEnteringChooseColumnsForPlayer = function (playerId, infos, privateMulti) {
@@ -871,6 +881,7 @@ var Azul = /** @class */ (function () {
         for (var i = 0; i <= 5; i++) {
             dojo.removeClass("player-table-".concat(this.getPlayerId(), "-line").concat(i), 'selectable');
         }
+        dojo.removeClass("player-table-".concat(this.getPlayerId(), "-line-1"), 'selectable');
     };
     Azul.prototype.onLeavingChooseColumns = function () {
         Array.from(document.getElementsByClassName('ghost')).forEach(function (elem) { return elem.parentElement.removeChild(elem); });
@@ -1127,7 +1138,7 @@ var Azul = /** @class */ (function () {
         var helpDialog = new ebg.popindialog();
         helpDialog.create('azulChocolatierVariantHelpDialog');
         helpDialog.setTitle(_("Special Factories"));
-        var html = "\n        <div id=\"help-popin\">\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"9\"></div>\n                </div>\n                <span class=\"title\">SF 1.</span> ".concat(_("After setting up the round, add 1 tile from the bag on this Special Factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"1\"></div>\n                    <div class=\"factory\" data-special-factory=\"2\"></div>\n                    <div class=\"factory\" data-special-factory=\"3\"></div>\n                    <div class=\"factory\" data-special-factory=\"4\"></div>\n                    <div class=\"factory\" data-special-factory=\"5\"></div>\n                </div>\n                <span class=\"title\">SF 2.</span> ").concat(_("After setting up the round, take 1 tile of the illustrated pattern from both adjacent Factory displays to the immediate left and right (if possible), and place them on this Special factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"8\"></div>\n                </div>\n                <span class=\"title\">SF 3.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table but remain on it."), "\n            </div>\n            <div class=\"row disabled\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"7\"></div>\n                </div>\n                <span class=\"title\">SF 4.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table. Instead, that player moves them to the Factory display (blue or gold) to its immediate left and/or right, dividing the tiles between those 2 displays. The only restriction is that tiles of one color may not be split up."), "\n            </div>\n            <div class=\"row disabled\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"6\"></div>\n                </div>\n                <span class=\"title\">SF 5.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are moved to the center of the table. Then, that player places this Special Factory as an extra space next to their Foundry line until the end of the round. The next tile that must be placed in their foundry line is placed on this Special factory instead, skipping the penalty."), "\n            </div>\n        </div>\n        ");
+        var html = "\n        <div id=\"help-popin\">\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"9\"></div>\n                </div>\n                <span class=\"title\">SF 1.</span> ".concat(_("After setting up the round, add 1 tile from the bag on this Special Factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"1\"></div>\n                    <div class=\"factory\" data-special-factory=\"2\"></div>\n                    <div class=\"factory\" data-special-factory=\"3\"></div>\n                    <div class=\"factory\" data-special-factory=\"4\"></div>\n                    <div class=\"factory\" data-special-factory=\"5\"></div>\n                </div>\n                <span class=\"title\">SF 2.</span> ").concat(_("After setting up the round, take 1 tile of the illustrated pattern from both adjacent Factory displays to the immediate left and right (if possible), and place them on this Special factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"8\"></div>\n                </div>\n                <span class=\"title\">SF 3.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table but remain on it."), "\n            </div>\n            <div class=\"row disabled\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"7\"></div>\n                </div>\n                <span class=\"title\">SF 4.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table. Instead, that player moves them to the Factory display (blue or gold) to its immediate left and/or right, dividing the tiles between those 2 displays. The only restriction is that tiles of one color may not be split up."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"6\"></div>\n                </div>\n                <span class=\"title\">SF 5.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are moved to the center of the table. Then, that player places this Special Factory as an extra space next to their Foundry line until the end of the round. The next tile that must be placed in their foundry line is placed on this Special factory instead, skipping the penalty."), "\n            </div>\n        </div>\n        ");
         // Show the dialog
         helpDialog.setContent(html);
         helpDialog.show();
@@ -1272,6 +1283,7 @@ var Azul = /** @class */ (function () {
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
         var _this = this;
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(function () {
             if (notif.args.fromHand) {
                 _this.getPlayerTable(notif.args.playerId).setHandVisible(false);
@@ -1301,6 +1313,7 @@ var Azul = /** @class */ (function () {
         var _this = this;
         Object.keys(notif.args.floorLines).forEach(function (playerId) {
             var floorLine = notif.args.floorLines[playerId];
+            _this.removeTiles(notif.args.specialFactoryZeroTiles[playerId], true);
             setTimeout(function () { return _this.removeTiles(floorLine.tiles, true); }, SCORE_MS - 50);
             _this.displayScoring("player-table-".concat(playerId, "-line0"), _this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
             _this.incScore(Number(playerId), floorLine.points);
@@ -1347,7 +1360,8 @@ var Azul = /** @class */ (function () {
         }
     };
     Azul.prototype.notif_moveSpecialFactoryZero = function (notif) {
-        console.log('notif_moveSpecialFactoryZero', notif.args.playerId);
+        document.getElementById('factories').dataset.specialFactoryZeroOwned = (!!notif.args.playerId).toString();
+        this.playersTables.forEach(function (playerTable) { return playerTable.setOwnSpecialFactoryZero(notif.args.playerId == playerTable.playerId); });
     };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */

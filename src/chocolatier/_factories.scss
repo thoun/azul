@@ -33,6 +33,12 @@
         color: #f1e5bc;
         border-radius: 5px;
     }
+
+    &[data-special-factory-zero-owned="true"] {
+        .factory[data-special-factory="6"] {
+            visibility: hidden;
+        }
+    }
 }
 
 .tile-count {    
