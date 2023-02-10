@@ -45,7 +45,7 @@ $game_options = [
         'level' => 'major',
     ],
 
-    /*110 => [
+    110 => [
         'name' => totranslate('Special Factories (Azul Master Chocolatier variant)'),    
         'values' => [
                 1 => [
@@ -60,7 +60,16 @@ $game_options = [
                 ]
             ],
         'default' => 1,
-    ],*/
+        'startcondition' => [
+            2 => [
+                [ 
+                    'type' => 'minplayers',
+                    'value' => 9,
+                    'message' => 'Soon',
+                ] 
+            ],
+        ],
+    ],
 
     101 => [
         'name' => totranslate('Allow Undo/confirm'),    

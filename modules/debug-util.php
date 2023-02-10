@@ -13,7 +13,8 @@ trait DebugUtilTrait {
         } 
 
         $this->debugEmptyFactories();
-        $this->removeFp();
+        //$this->debugRemoveFp();
+        //$this->stFillFactories();
     }
 
     function debugSetup() {
@@ -38,7 +39,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 2, 5, 5);
 
         $this->debugEmptyFactories();
-        $this->removeFp();*/
+        $this->debugRemoveFp();*/
 
         /*$this->debugSetLineTiles(2343492, 1, 1, 3);
 
@@ -183,15 +184,15 @@ trait DebugUtilTrait {
         $this->placeTilesOnLine($playerId, array_slice($tiles, 0, $number), $line, false);
     }
 
-    function debugEmptyFactories() {
-        $this->removeFp();
+    function debugEmptyFactories($full = true) {
+        $this->debugRemoveFp();
 
         $factoryNumber = $this->getFactoryNumber();
         for ($i = 1; $i<=$factoryNumber; $i++) {
             if (intval($this->tiles->countCardInLocation('factory', $i)) > 0) {
                 $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $i));
                 foreach ($tiles as $key => $tile) {
-                    if ($i > 1 || $key > 0) {
+                    if ($full || $i > 1 || $key > 0) {
                         $this->tiles->moveCard($tile->id, 'discard');
                     }
                 }
@@ -208,7 +209,7 @@ trait DebugUtilTrait {
 
     }
 
-    function removeFp() {
+    function debugRemoveFp() {
         $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', 0));
         $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
         $hasFirstPlayer = count($firstPlayerTokens) > 0;

@@ -18,9 +18,18 @@ trait StateTrait {
         $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
         $factories[0] = [$firstPlayerTile];
 
+        $specialFactories = null;
+        if ($this->isSpecialFactories()) {
+            $specialFactories = $this->getSpecialFactories();
+        }
+
         $factoryNumber = $this->getFactoryNumber();
         for ($factory=1; $factory<=$factoryNumber; $factory++) {
-            $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
+            $tilesNumber = 4;
+            if ($specialFactories !== null && array_key_exists($factory, $specialFactories) && $specialFactories[$factory] == 9) {
+                $tilesNumber = 5;
+            }
+            $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation($tilesNumber, 'deck', 'factory', $factory));
         }
 
         if ($this->isVariant()) {
@@ -37,6 +46,42 @@ trait StateTrait {
             'factories' => $factories,
             'remainingTiles' => intval($this->tiles->countCardInLocation('deck')),
         ]);
+
+        for ($factory=1; $factory<=$factoryNumber; $factory++) {
+            if ($specialFactories !== null && array_key_exists($factory, $specialFactories) && $specialFactories[$factory] <= 5) {
+                $seekedColor = $specialFactories[$factory];
+                $previous = $factory == 1 ? $factoryNumber : $factory - 1;
+                $next = $factory == $factoryNumber ? 1 : $factory + 1;
+                $previousTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $previous));
+                $nextTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $next));
+                $takenPreviousTile = $this->array_find($previousTiles, fn($tile) => $tile->type == $seekedColor);
+                $takenNextTile = $this->array_find($nextTiles, fn($tile) => $tile->type == $seekedColor);
+
+                if ($takenPreviousTile !== null) {
+                    $this->tiles->moveCard($takenPreviousTile->id, 'factory', $factory);
+                }
+                if ($takenNextTile !== null) {
+                    $this->tiles->moveCard($takenNextTile->id, 'factory', $factory);
+                }
+
+                $partialFactories = [
+                    $factory => $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory)),
+                ];
+
+                if ($takenPreviousTile !== null) {
+                    $partialFactories[$previous] = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $previous));
+                }
+                if ($takenNextTile !== null) {
+                    $partialFactories[$next] = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $next));
+                }
+                self::notifyAllPlayers("factoriesChanged", '', [
+                    'factory' => $factory,
+                    'factories' => $partialFactories,
+                    'previousTile' => $takenPreviousTile,
+                    'nextTile' => $takenNextTile,
+                ]);
+            }
+        }
 
         self::incStat(1, 'roundsNumber');
         self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));

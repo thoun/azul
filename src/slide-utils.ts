@@ -20,7 +20,7 @@ function slideToObjectAndAttach(game: AzulGame, object: HTMLElement, destination
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? ''+originalZIndex : 'unset';
             object.style.transform = rotation ? `rotate(${rotation}deg)` : 'unset';
-            object.style.transition = 'unset';
+            object.style.transition = null;
             destination.appendChild(object);
         }
 

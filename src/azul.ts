@@ -606,6 +606,7 @@ class Azul implements AzulGame {
 
         const notifs = [
             ['factoriesFilled', ANIMATION_MS + REFILL_DELAY[this.gamedatas.factoryNumber]],
+            ['factoriesChanged', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
@@ -627,6 +628,10 @@ class Azul implements AzulGame {
 
     notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
         this.factories.fillFactories(notif.args.factories, notif.args.remainingTiles);
+    }
+
+    notif_factoriesChanged(notif: Notif<NotifFactoriesChangedArgs>) {
+        this.factories.factoriesChanged(notif.args);
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {

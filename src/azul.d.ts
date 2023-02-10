@@ -98,6 +98,12 @@ interface NotifFactoriesFilledArgs {
     remainingTiles: number;
 }
 
+interface NotifFactoriesChangedArgs extends NotifFactoriesFilledArgs {
+    factory: number;
+    previousTile: Tile;
+    nextTile: Tile;
+}
+
 interface NotifTilesSelectedArgs {
     playerId: number;
     selectedTiles: Tile[];

@@ -24,6 +24,15 @@ trait UtilTrait {
 //////////// Utility functions
 ////////////
 
+    function array_find(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if($fn($value)) {
+                return $value;
+            }
+        }
+        return null;
+    }
+
     function setGlobalVariable(string $name, /*object|array*/ $obj) {
         /*if ($obj == null) {
             throw new \Error('Global Variable null');
@@ -125,7 +134,7 @@ trait UtilTrait {
 
     function initSpecialFactories(int $playerCount) {
         $availableFactories = [];
-        $availableSpecialFactories = [1,2,3,4,5,6,7,8,9];
+        $availableSpecialFactories = [1,2,3,4,5/*,6,7,8*/,9];
         $factoryNumber = $this->getFactoryNumber($playerCount);
         for ($factory=1; $factory<=$factoryNumber; $factory++) {
             $availableFactories[] = $factory;

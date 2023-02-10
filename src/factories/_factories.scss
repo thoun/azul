@@ -10,6 +10,10 @@
         height: 250px;
         display: inline-block;
         pointer-events: none;
+
+        .tile {
+            transition: left 0.5s, top 0.5s;
+        }
     }
 
     .factory-center {
