@@ -73,6 +73,7 @@ class Azul implements AzulGame {
         // before set
         this.zoomManager = new ZoomManager({
             element: document.getElementById('table'),
+            smooth: false,
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
             zoomLevels: ZOOM_LEVELS,
             autoZoom: {
@@ -85,6 +86,10 @@ class Azul implements AzulGame {
         this.setupPreferences();
         if (gamedatas.specialFactories) {
             document.getElementsByTagName('html')[0].dataset.chocolatierSkin = 'true';
+            try {
+                (document.getElementById('preference_control_203').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
+                (document.getElementById('preference_fontrol_203').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
+            } catch (e) {}            
         }
 
         if (gamedatas.endRound) {
@@ -271,6 +276,7 @@ class Azul implements AzulGame {
 
         try {
             (document.getElementById('preference_control_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
+            (document.getElementById('preference_fontrol_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
         } catch (e) {}
     }
       
@@ -294,7 +300,13 @@ class Azul implements AzulGame {
                 this.playersTables.forEach(playerTable => playerTable.setFont(prefValue));
                 break;
             case 210:
-                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = (prefValue == 1 || !!this.gamedatas.specialFactories).toString();
+                const chocolatierSkin = prefValue == 1 || !!this.gamedatas.specialFactories;
+                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = chocolatierSkin.toString();
+
+                try {
+                    (document.getElementById('preference_control_203').closest(".preference_choice") as HTMLDivElement).style.display = chocolatierSkin ? 'none' : null;
+                    (document.getElementById('preference_fontrol_203').closest(".preference_choice") as HTMLDivElement).style.display = chocolatierSkin ? 'none' : null;
+                } catch (e) {}
                 break;
             case 299: 
                 this.toggleZoomNotice(prefValue == 1);

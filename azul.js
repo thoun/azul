@@ -7,7 +7,7 @@ var ZoomManager = /** @class */ (function () {
      */
     function ZoomManager(settings) {
         var _this = this;
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         this.settings = settings;
         if (!settings.element) {
             throw new DOMException('You need to set the element to wrap in the zoom element');
@@ -25,7 +25,11 @@ var ZoomManager = /** @class */ (function () {
         this.wrapElement(this.wrapper, settings.element);
         this.wrapper.appendChild(settings.element);
         settings.element.classList.add('bga-zoom-inner');
-        if ((_c = (_b = settings.zoomControls) === null || _b === void 0 ? void 0 : _b.visible) !== null && _c !== void 0 ? _c : true) {
+        if ((_b = settings.smooth) !== null && _b !== void 0 ? _b : true) {
+            settings.element.dataset.smooth = 'true';
+            settings.element.addEventListener('transitionend', function () { return _this.zoomOrDimensionChanged(); });
+        }
+        if ((_d = (_c = settings.zoomControls) === null || _c === void 0 ? void 0 : _c.visible) !== null && _d !== void 0 ? _d : true) {
             this.initZoomControls(settings);
         }
         if (this._zoom !== 1) {
@@ -41,7 +45,7 @@ var ZoomManager = /** @class */ (function () {
         if (window.ResizeObserver) {
             new ResizeObserver(function () { return _this.zoomOrDimensionChanged(); }).observe(settings.element);
         }
-        if ((_d = this.settings.autoZoom) === null || _d === void 0 ? void 0 : _d.expectedWidth) {
+        if ((_e = this.settings.autoZoom) === null || _e === void 0 ? void 0 : _e.expectedWidth) {
             this.setAutoZoom();
         }
     }
@@ -679,6 +683,7 @@ var Azul = /** @class */ (function () {
         // before set
         this.zoomManager = new ZoomManager({
             element: document.getElementById('table'),
+            smooth: false,
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
             zoomLevels: ZOOM_LEVELS,
             autoZoom: {
@@ -690,6 +695,11 @@ var Azul = /** @class */ (function () {
         this.setupPreferences();
         if (gamedatas.specialFactories) {
             document.getElementsByTagName('html')[0].dataset.chocolatierSkin = 'true';
+            try {
+                document.getElementById('preference_control_203').closest(".preference_choice").style.display = 'none';
+                document.getElementById('preference_fontrol_203').closest(".preference_choice").style.display = 'none';
+            }
+            catch (e) { }
         }
         if (gamedatas.endRound) {
             this.notif_lastRound();
@@ -846,6 +856,7 @@ var Azul = /** @class */ (function () {
         dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
         try {
             document.getElementById('preference_control_299').closest(".preference_choice").style.display = 'none';
+            document.getElementById('preference_fontrol_299').closest(".preference_choice").style.display = 'none';
         }
         catch (e) { }
     };
@@ -869,7 +880,13 @@ var Azul = /** @class */ (function () {
                 this.playersTables.forEach(function (playerTable) { return playerTable.setFont(prefValue); });
                 break;
             case 210:
-                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = (prefValue == 1 || !!this.gamedatas.specialFactories).toString();
+                var chocolatierSkin = prefValue == 1 || !!this.gamedatas.specialFactories;
+                document.getElementsByTagName('html')[0].dataset.chocolatierSkin = chocolatierSkin.toString();
+                try {
+                    document.getElementById('preference_control_203').closest(".preference_choice").style.display = chocolatierSkin ? 'none' : null;
+                    document.getElementById('preference_fontrol_203').closest(".preference_choice").style.display = chocolatierSkin ? 'none' : null;
+                }
+                catch (e) { }
                 break;
             case 299:
                 this.toggleZoomNotice(prefValue == 1);

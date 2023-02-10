@@ -64,3 +64,8 @@ getDebugWall(88616973)
 JSON.stringify(
 g_gamelogs.map(log => log.data).filter(notifs => notifs.some(notif => notif.type === "factoriesFilled")).map(notifs => notifs.find(notif => notif.type === "factoriesFilled").args)
 )
+
+# TODO
+-The red background should be adjusted, it's very intense and it breaks up the visual of the factory tile outline where we put the tiles.
+-The bag gets lost in the background and is so small! Maybe have it adjusted to the same size and layout as the original version.
+-Would it be possible to make the reverse side variant of the factory tiles available? It's a small variant built into this version.

@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bga-zoom": "thoun/bga-zoom"
+    "bga-zoom": "thoun/bga-zoom#main"
   },
   "devDependencies": {
     "sass": "^1.32.6",
