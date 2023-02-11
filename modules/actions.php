@@ -41,6 +41,7 @@ trait ActionTrait {
         $specialFactories = null;
 
         $takeFromSpecialFactoryZero = false;
+        $specialFactories = $this->isSpecialFactories() ? $this->getSpecialFactories() : null;
 
         if ($factory == 0) {
             $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
@@ -60,15 +61,12 @@ trait ActionTrait {
         } else {
             $discardOtherTiles = true;
 
-            if ($this->isSpecialFactories()) {
-                $specialFactories = $this->getSpecialFactories();
-                if (array_key_exists($factory, $specialFactories)) {
-                    if ($specialFactories[$factory] == 6) {
-                        $takeFromSpecialFactoryZero = true;
-                        $this->setGameStateValue(SPECIAL_FACTORY_ZERO_OWNER, $playerId);
-                    } else if ($specialFactories[$factory] == 8) {
-                        $discardOtherTiles = false;
-                    }
+            if ($specialFactories !== null && array_key_exists($factory, $specialFactories)) {
+                if ($specialFactories[$factory] == 6) {
+                    $takeFromSpecialFactoryZero = true;
+                    $this->setGameStateValue(SPECIAL_FACTORY_ZERO_OWNER, $playerId);
+                } else if (in_array($specialFactories[$factory], [7, 8])) {
+                    $discardOtherTiles = false;
                 }
             }
 
@@ -118,7 +116,17 @@ trait ActionTrait {
             $takeFromSpecialFactoryZero
         ));
 
-        $this->gamestate->nextState('placeTiles');
+        $transition = 'placeTiles';
+        $this->setGlobalVariable(UNDO_FACTORY, null);
+        if ($specialFactories !== null && array_key_exists($factory, $specialFactories) && $specialFactories[$factory] == 7) {
+            $remainingFactoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
+            if (count($remainingFactoryTiles) > 0) {
+                $this->setGlobalVariable(UNDO_FACTORY, new Undo($remainingFactoryTiles, $factory));
+                $transition = 'chooseFactory';
+            }
+        }
+
+        $this->gamestate->nextState($transition);
     }
 
     function undoTakeTiles() {
@@ -129,6 +137,39 @@ trait ActionTrait {
         }
         
         $playerId = intval(self::getActivePlayerId());
+
+        $undoFactory = $this->getGlobalVariable(UNDO_FACTORY);
+        if ($undoFactory != null) {
+            $otherFactories = [];
+            foreach($undoFactory->tiles as $tile) {
+                $currentFactory = $this->getTileFromDb($this->tiles->getCard($tile->id))->column;
+                if ($currentFactory != $undoFactory->from && !in_array($currentFactory, $otherFactories)) {
+                    $otherFactories[] = $currentFactory;
+                }
+            }
+
+            $this->tiles->moveCards(array_map('getIdPredicate', $undoFactory->tiles), 'factory', $undoFactory->from);
+
+            $partialFactories = [
+                $undoFactory->from => $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $undoFactory->from)),
+            ];
+    
+            self::notifyAllPlayers("factoriesChanged", '', [
+                'factory' => $undoFactory->from,
+                'factories' => $partialFactories,
+                'tiles' => $undoFactory->tiles,
+            ]);
+            foreach($otherFactories as $otherFactory) {
+                $partialFactories = [
+                    $otherFactory => $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $otherFactory)),
+                ];    
+                self::notifyAllPlayers("factoriesChanged", '', [
+                    'factory' => $otherFactory,
+                    'factories' => $partialFactories,
+                    'tiles' => [],
+                ]);
+            }
+        }
 
         $undo = $this->getGlobalVariable(UNDO_SELECT);
 
@@ -148,9 +189,31 @@ trait ActionTrait {
             'player_name' => self::getActivePlayerName(),
             'undo' => $undo,
             'factoryTilesBefore' => $factoryTilesBefore,
+            'repositionTiles' => $undoFactory != null,
         ]);
 
         $this->gamestate->nextState('undo');
+    }
+
+    function selectFactory(int $factory) {
+        $this->checkAction('selectFactory');
+
+        $args = $this->argChooseFactory();
+
+        $this->tiles->moveCards(array_map('getIdPredicate', $args['tiles']), 'factory', $factory);
+
+        $partialFactories = [
+            $factory => $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory)),
+        ];
+
+        self::notifyAllPlayers("factoriesChanged", '', [
+            'factory' => $factory,
+            'factories' => $partialFactories,
+            'tiles' => $args['tiles'],
+        ]);
+
+        $args = $this->argChooseFactory();
+        $this->gamestate->nextState($args['type'] !== null ? 'nextFactory' : 'chooseLine');
     }
 
     function selectLine(int $line, $skipActionCheck = false) {

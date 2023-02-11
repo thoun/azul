@@ -122,6 +122,9 @@ class Azul implements AzulGame {
             case 'chooseTile':
                 this.onEnteringChooseTile();
                 break;
+            case 'chooseFactory':
+                this.onEnteringChooseFactory(args.args);
+                break;
             case 'chooseLine':
                 this.onEnteringChooseLine(args.args);
                 break;
@@ -140,6 +143,12 @@ class Azul implements AzulGame {
     onEnteringChooseTile() {
         if ((this as any).isCurrentPlayerActive()) {
             dojo.addClass('factories', 'selectable');
+        }
+    }
+
+    onEnteringChooseFactory(args: EnteringChooseFactoryArgs) {
+        if ((this as any).isCurrentPlayerActive()) {
+            args.possibleFactories.forEach(i => dojo.addClass(`factory${i}`, 'selectable'));
         }
     }
 
@@ -194,6 +203,9 @@ class Azul implements AzulGame {
             case 'chooseTile':
                 this.onLeavingChooseTile();
                 break;
+            case 'chooseFactory':
+                this.onLeavingChooseFactory();
+                break;
             case 'chooseLine':
                 this.onLeavingChooseLine();
                 break;
@@ -205,6 +217,10 @@ class Azul implements AzulGame {
 
     onLeavingChooseTile() {
         dojo.removeClass('factories', 'selectable');
+    }
+
+    onLeavingChooseFactory() {
+        dojo.query('#factories .factory.selectable').removeClass('selectable');
     }
 
     onLeavingChooseLine() {
@@ -229,7 +245,8 @@ class Azul implements AzulGame {
         log('onUpdateActionButtons', stateName, args);
         
         if((this as any).isCurrentPlayerActive()) {
-            switch (stateName) {    
+            switch (stateName) {  
+                case 'chooseFactory':
                 case 'chooseLine':
                     if (this.gamedatas.undo) {
                         (this as any).addActionButton('undoTakeTiles_button', _("Undo tile selection"), () => this.undoTakeTiles());
@@ -540,7 +557,7 @@ class Azul implements AzulGame {
                     _("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table but remain on it.")
                 }
             </div>
-            <div class="row disabled">
+            <div class="row">
                 <div class="picture">
                     <div class="factory" data-special-factory="7"></div>
                 </div>
@@ -581,6 +598,16 @@ class Azul implements AzulGame {
         }
 
         this.takeAction('undoTakeTiles');
+    }
+
+    public selectFactory(factory: number) {
+        if(!(this as any).checkAction('selectFactory', true)) {
+            return;
+        }
+
+        this.takeAction('selectFactory', {
+            factory
+        });
     }
 
     public selectLine(line: number) {

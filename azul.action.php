@@ -53,6 +53,17 @@
       self::ajaxResponse();
     }
 
+    public function selectFactory() {
+      self::setAjaxMode();
+
+      // Retrieve arguments
+      $factory = self::getArg("factory", AT_posint, true);
+
+      $this->game->selectFactory($factory);
+
+      self::ajaxResponse();
+    }
+
     public function selectLine() {
       self::setAjaxMode();
 

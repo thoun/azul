@@ -108,8 +108,27 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "placeTiles" => ST_PLAYER_CHOOSE_LINE,
+            "chooseFactory" => ST_PLAYER_CHOOSE_FACTORY,
             "nextPlayer" => ST_NEXT_PLAYER,
         ]
+    ],
+
+    ST_PLAYER_CHOOSE_FACTORY => [
+        "name" => "chooseFactory",
+        "description" => clienttranslate('${actplayer} must choose a neighbor factory to place remaining ${number} ${color}'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a neighbor factory to place remaining ${number} ${color}'),
+        "type" => "activeplayer",
+        "args" => "argChooseFactory",
+        "possibleactions" => [ 
+            "selectFactory",
+            "undoTakeTiles",
+         ],
+        "transitions" => [
+            "nextFactory" => ST_PLAYER_CHOOSE_FACTORY,
+            "chooseLine" => ST_PLAYER_CHOOSE_LINE,
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "undo" => ST_PLAYER_CHOOSE_TILE,
+        ],
     ],
 
     ST_PLAYER_CHOOSE_LINE => [

@@ -247,6 +247,7 @@ var HALF_TILE_SIZE = 29;
 var CENTER_FACTORY_TILE_SHIFT = 12;
 var Factories = /** @class */ (function () {
     function Factories(game, factoryNumber, factories, remainingTiles, specialFactories) {
+        var _this = this;
         this.game = game;
         this.factoryNumber = factoryNumber;
         this.tilesPositionsInCenter = [[], [], [], [], [], []]; // color, tiles
@@ -273,6 +274,12 @@ var Factories = /** @class */ (function () {
         }
         html += "</div>";
         dojo.place(html, 'factories');
+        var _loop_1 = function (factoryIndex) {
+            document.getElementById("factory".concat(factoryIndex)).addEventListener('click', function () { return _this.game.selectFactory(factoryIndex); });
+        };
+        for (var factoryIndex = 1; factoryIndex <= this.factoryNumber; factoryIndex++) {
+            _loop_1(factoryIndex);
+        }
         this.fillFactories(factories, remainingTiles, false);
     }
     Factories.prototype.getWidth = function () {
@@ -310,7 +317,7 @@ var Factories = /** @class */ (function () {
         var _this = this;
         if (animation === void 0) { animation = true; }
         var tileIndex = 0;
-        var _loop_1 = function (factoryIndex) {
+        var _loop_2 = function (factoryIndex) {
             this_1.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
             var factoryTiles = factories[factoryIndex];
             factoryTiles.forEach(function (tile, index) {
@@ -350,45 +357,29 @@ var Factories = /** @class */ (function () {
         };
         var this_1 = this;
         for (var factoryIndex = 0; factoryIndex <= this.factoryNumber; factoryIndex++) {
-            _loop_1(factoryIndex);
+            _loop_2(factoryIndex);
         }
         this.updateDiscardedTilesNumbers();
         this.setRemainingTiles(remainingTiles);
     };
     Factories.prototype.factoriesChanged = function (args) {
         var _this = this;
-        if (args.previousTile) {
-            var index = args.factories[args.factory].findIndex(function (tile) { return tile.id == args.previousTile.id; });
-            var coordinates = this.getCoordinatesInFactory(index, args.factories[args.factory].length);
-            var left_1 = coordinates.left;
-            var top_2 = coordinates.top;
-            slideToObjectAndAttach(this.game, document.getElementById("tile".concat(args.previousTile.id)), "factory".concat(args.factory), left_1, top_2, Math.round(Math.random() * 90 - 45));
-            var factoryTiles_1 = args.factories[args.factory];
-            factoryTiles_1.filter(function (tile) { var _a; return tile.id != ((_a = args.nextTile) === null || _a === void 0 ? void 0 : _a.id); }).forEach(function (tile, index) {
-                var coordinates = _this.getCoordinatesInFactory(index, factoryTiles_1.length);
-                left_1 = coordinates.left;
-                top_2 = coordinates.top;
-                var tileDiv = document.getElementById("tile".concat(tile.id));
-                tileDiv.style.left = "".concat(left_1, "px");
-                tileDiv.style.top = "".concat(top_2, "px");
-            });
-        }
-        if (args.nextTile) {
-            var index = args.factories[args.factory].findIndex(function (tile) { return tile.id == args.nextTile.id; });
-            var coordinates = this.getCoordinatesInFactory(index, args.factories[args.factory].length);
-            var left_2 = coordinates.left;
-            var top_3 = coordinates.top;
-            slideToObjectAndAttach(this.game, document.getElementById("tile".concat(args.nextTile.id)), "factory".concat(args.factory), left_2, top_3, Math.round(Math.random() * 90 - 45));
-            var factoryTiles_2 = args.factories[args.factory];
-            factoryTiles_2.forEach(function (tile, index) {
-                var coordinates = _this.getCoordinatesInFactory(index, factoryTiles_2.length);
-                left_2 = coordinates.left;
-                top_3 = coordinates.top;
-                var tileDiv = document.getElementById("tile".concat(tile.id));
-                tileDiv.style.left = "".concat(left_2, "px");
-                tileDiv.style.top = "".concat(top_3, "px");
-            });
-        }
+        var factoryTiles = args.factories[args.factory];
+        args.tiles.forEach(function (newTile) {
+            var index = factoryTiles.findIndex(function (tile) { return tile.id == newTile.id; });
+            var coordinates = _this.getCoordinatesInFactory(index, factoryTiles.length);
+            var left = coordinates.left;
+            var top = coordinates.top;
+            slideToObjectAndAttach(_this.game, document.getElementById("tile".concat(newTile.id)), "factory".concat(args.factory), left, top, Math.round(Math.random() * 90 - 45));
+        });
+        factoryTiles.forEach(function (tile, index) {
+            var coordinates = _this.getCoordinatesInFactory(index, factoryTiles.length);
+            var left = coordinates.left;
+            var top = coordinates.top;
+            var tileDiv = document.getElementById("tile".concat(tile.id));
+            tileDiv.style.left = "".concat(left, "px");
+            tileDiv.style.top = "".concat(top, "px");
+        });
     };
     Factories.prototype.factoriesCompleted = function (args) {
         var _this = this;
@@ -476,7 +467,7 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.updateDiscardedTilesNumbers = function () {
         var _this = this;
-        var _loop_2 = function (type) {
+        var _loop_3 = function (type) {
             var number = this_2.tilesPositionsInCenter[type].length;
             var numberDiv = document.getElementById("tileCount".concat(type));
             if (!number) {
@@ -501,7 +492,7 @@ var Factories = /** @class */ (function () {
         };
         var this_2 = this;
         for (var type = 1; type <= 5; type++) {
-            _loop_2(type);
+            _loop_3(type);
         }
     };
     Factories.prototype.getTilesOfSameColorInSameFactory = function (id) {
@@ -615,38 +606,38 @@ var PlayerTable = /** @class */ (function () {
         html += "   \n            </div>\n        </div>";
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
-        var _loop_3 = function (i) {
+        var _loop_4 = function (i) {
             document.getElementById("player-table-".concat(this_3.playerId, "-line").concat(i)).addEventListener('click', function () { return _this.game.selectLine(i); });
         };
         var this_3 = this;
         for (var i = 0; i <= 5; i++) {
-            _loop_3(i);
+            _loop_4(i);
         }
         document.getElementById("player-table-".concat(this.playerId, "-line-1")).addEventListener('click', function () { return _this.game.selectLine(0); });
         if (this.game.isVariant()) {
-            var _loop_4 = function (line) {
-                var _loop_6 = function (column) {
+            var _loop_5 = function (line) {
+                var _loop_7 = function (column) {
                     document.getElementById("player-table-".concat(this_4.playerId, "-wall-spot-").concat(line, "-").concat(column)).addEventListener('click', function () {
                         _this.game.selectColumn(line, column);
                     });
                 };
                 for (var column = 1; column <= 5; column++) {
-                    _loop_6(column);
+                    _loop_7(column);
                 }
             };
             var this_4 = this;
             for (var line = 1; line <= 5; line++) {
-                _loop_4(line);
+                _loop_5(line);
             }
             document.getElementById("player-table-".concat(this.playerId, "-column0")).addEventListener('click', function () { return _this.game.selectColumn(0, 0); });
         }
-        var _loop_5 = function (i) {
+        var _loop_6 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
             this_5.placeTilesOnLine(tiles, i);
         };
         var this_5 = this;
         for (var i = -1; i <= 5; i++) {
-            _loop_5(i);
+            _loop_6(i);
         }
         this.placeTilesOnWall(player.wall);
         if (this.game.isVariant()) {
@@ -800,6 +791,9 @@ var Azul = /** @class */ (function () {
             case 'chooseTile':
                 this.onEnteringChooseTile();
                 break;
+            case 'chooseFactory':
+                this.onEnteringChooseFactory(args.args);
+                break;
             case 'chooseLine':
                 this.onEnteringChooseLine(args.args);
                 break;
@@ -817,6 +811,11 @@ var Azul = /** @class */ (function () {
     Azul.prototype.onEnteringChooseTile = function () {
         if (this.isCurrentPlayerActive()) {
             dojo.addClass('factories', 'selectable');
+        }
+    };
+    Azul.prototype.onEnteringChooseFactory = function (args) {
+        if (this.isCurrentPlayerActive()) {
+            args.possibleFactories.forEach(function (i) { return dojo.addClass("factory".concat(i), 'selectable'); });
         }
     };
     Azul.prototype.onEnteringChooseLine = function (args) {
@@ -863,6 +862,9 @@ var Azul = /** @class */ (function () {
             case 'chooseTile':
                 this.onLeavingChooseTile();
                 break;
+            case 'chooseFactory':
+                this.onLeavingChooseFactory();
+                break;
             case 'chooseLine':
                 this.onLeavingChooseLine();
                 break;
@@ -873,6 +875,9 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.onLeavingChooseTile = function () {
         dojo.removeClass('factories', 'selectable');
+    };
+    Azul.prototype.onLeavingChooseFactory = function () {
+        dojo.query('#factories .factory.selectable').removeClass('selectable');
     };
     Azul.prototype.onLeavingChooseLine = function () {
         if (!this.gamedatas.players[this.getPlayerId()]) {
@@ -894,6 +899,7 @@ var Azul = /** @class */ (function () {
         log('onUpdateActionButtons', stateName, args);
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
+                case 'chooseFactory':
                 case 'chooseLine':
                     if (this.gamedatas.undo) {
                         this.addActionButton('undoTakeTiles_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); });
@@ -1138,7 +1144,7 @@ var Azul = /** @class */ (function () {
         var helpDialog = new ebg.popindialog();
         helpDialog.create('azulChocolatierVariantHelpDialog');
         helpDialog.setTitle(_("Special Factories"));
-        var html = "\n        <div id=\"help-popin\">\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"9\"></div>\n                </div>\n                <span class=\"title\">SF 1.</span> ".concat(_("After setting up the round, add 1 tile from the bag on this Special Factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"1\"></div>\n                    <div class=\"factory\" data-special-factory=\"2\"></div>\n                    <div class=\"factory\" data-special-factory=\"3\"></div>\n                    <div class=\"factory\" data-special-factory=\"4\"></div>\n                    <div class=\"factory\" data-special-factory=\"5\"></div>\n                </div>\n                <span class=\"title\">SF 2.</span> ").concat(_("After setting up the round, take 1 tile of the illustrated pattern from both adjacent Factory displays to the immediate left and right (if possible), and place them on this Special factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"8\"></div>\n                </div>\n                <span class=\"title\">SF 3.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table but remain on it."), "\n            </div>\n            <div class=\"row disabled\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"7\"></div>\n                </div>\n                <span class=\"title\">SF 4.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table. Instead, that player moves them to the Factory display (blue or gold) to its immediate left and/or right, dividing the tiles between those 2 displays. The only restriction is that tiles of one color may not be split up."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"6\"></div>\n                </div>\n                <span class=\"title\">SF 5.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are moved to the center of the table. Then, that player places this Special Factory as an extra space next to their Foundry line until the end of the round. The next tile that must be placed in their foundry line is placed on this Special factory instead, skipping the penalty."), "\n            </div>\n        </div>\n        ");
+        var html = "\n        <div id=\"help-popin\">\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"9\"></div>\n                </div>\n                <span class=\"title\">SF 1.</span> ".concat(_("After setting up the round, add 1 tile from the bag on this Special Factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"1\"></div>\n                    <div class=\"factory\" data-special-factory=\"2\"></div>\n                    <div class=\"factory\" data-special-factory=\"3\"></div>\n                    <div class=\"factory\" data-special-factory=\"4\"></div>\n                    <div class=\"factory\" data-special-factory=\"5\"></div>\n                </div>\n                <span class=\"title\">SF 2.</span> ").concat(_("After setting up the round, take 1 tile of the illustrated pattern from both adjacent Factory displays to the immediate left and right (if possible), and place them on this Special factory display."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"8\"></div>\n                </div>\n                <span class=\"title\">SF 3.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table but remain on it."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"7\"></div>\n                </div>\n                <span class=\"title\">SF 4.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are not moved to the center of the table. Instead, that player moves them to the Factory display (blue or gold) to its immediate left and/or right, dividing the tiles between those 2 displays. The only restriction is that tiles of one color may not be split up."), "\n            </div>\n            <div class=\"row\">\n                <div class=\"picture\">\n                    <div class=\"factory\" data-special-factory=\"6\"></div>\n                </div>\n                <span class=\"title\">SF 5.</span> ").concat(_("When a player picks tiles from this Special Factory display, the remaining tiles are moved to the center of the table. Then, that player places this Special Factory as an extra space next to their Foundry line until the end of the round. The next tile that must be placed in their foundry line is placed on this Special factory instead, skipping the penalty."), "\n            </div>\n        </div>\n        ");
         // Show the dialog
         helpDialog.setContent(html);
         helpDialog.show();
@@ -1156,6 +1162,14 @@ var Azul = /** @class */ (function () {
             return;
         }
         this.takeAction('undoTakeTiles');
+    };
+    Azul.prototype.selectFactory = function (factory) {
+        if (!this.checkAction('selectFactory', true)) {
+            return;
+        }
+        this.takeAction('selectFactory', {
+            factory: factory
+        });
     };
     Azul.prototype.selectLine = function (line) {
         if (!this.checkAction('selectLine')) {

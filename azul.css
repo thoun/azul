@@ -520,6 +520,15 @@ html[data-chocolatier-skin=true] .factory[data-special-factory="8"] {
 html[data-chocolatier-skin=true] .factory[data-special-factory="9"] {
   background-position-x: 100%;
 }
+html[data-chocolatier-skin=true] .factory.selectable {
+  outline: 5px dashed red;
+  border-radius: 50%;
+  pointer-events: all;
+  cursor: pointer;
+}
+html[data-chocolatier-skin=true] .factory.selectable * {
+  pointer-events: none;
+}
 html[data-chocolatier-skin=true] #factories #bag {
   background-image: url("img/chocolatier/bag.png");
   width: 164px;
@@ -637,10 +646,6 @@ html[data-chocolatier-skin=true] #help-popin {
 }
 html[data-chocolatier-skin=true] #help-popin .row {
   padding: 10px 5px;
-}
-html[data-chocolatier-skin=true] #help-popin .row.disabled {
-  background: #666666;
-  filter: grayscale(1);
 }
 html[data-chocolatier-skin=true] #help-popin .row .title {
   color: #A41D44;

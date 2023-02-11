@@ -50,11 +50,16 @@ interface AzulGame extends Game {
     getZoom(): number;
     isVariant(): boolean;
     takeTiles(id: number): void;
+    selectFactory(factoryIndex: number): any;
     selectLine(line: number): void;
     selectColumn(line: number, column: number): void;
     removeTile(tile: Tile): void;
     removeTiles(tiles: Tile[]): void;
     placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean>;
+}
+
+interface EnteringChooseFactoryArgs {
+    possibleFactories: number[];
 }
 
 interface EnteringChooseLineArgs {
@@ -101,8 +106,7 @@ interface NotifFactoriesFilledArgs {
 
 interface NotifFactoriesChangedArgs extends NotifFactoriesFilledArgs {
     factory: number;
-    previousTile: Tile;
-    nextTile: Tile;
+    tiles: Tile[];
 }
 
 interface NotifTilesSelectedArgs {
@@ -123,6 +127,7 @@ interface NotifUndoArgs {
     playerId: number;
     undo: UndoSelect;
     factoryTilesBefore: Tile[],
+    repositionTiles: boolean;
 }
 
 interface NotifTilesPlacedOnLineArgs {

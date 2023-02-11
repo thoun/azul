@@ -44,6 +44,10 @@ class Factories {
 
         dojo.place(html, 'factories');
 
+        for (let factoryIndex=1; factoryIndex<=this.factoryNumber; factoryIndex++) {
+            document.getElementById(`factory${factoryIndex}`).addEventListener('click', () => this.game.selectFactory(factoryIndex));
+        }
+
         this.fillFactories(factories, remainingTiles, false);
     }
 
@@ -129,40 +133,23 @@ class Factories {
     }
 
     public factoriesChanged(args: NotifFactoriesChangedArgs) {
-        if (args.previousTile) {
-            const index = args.factories[args.factory].findIndex(tile => tile.id == args.previousTile.id);
-            const coordinates = this.getCoordinatesInFactory(index, args.factories[args.factory].length);
-            let left = coordinates.left;
-            let top = coordinates.top;
-            slideToObjectAndAttach(this.game, document.getElementById(`tile${args.previousTile.id}`), `factory${args.factory}`, left, top, Math.round(Math.random()*90 - 45));
+        const factoryTiles = args.factories[args.factory];
+        args.tiles.forEach(newTile => {
+            const index = factoryTiles.findIndex(tile => tile.id == newTile.id);
+            const coordinates = this.getCoordinatesInFactory(index, factoryTiles.length);
+            const left = coordinates.left;
+            const top = coordinates.top;
+            slideToObjectAndAttach(this.game, document.getElementById(`tile${newTile.id}`), `factory${args.factory}`, left, top, Math.round(Math.random()*90 - 45));
+        });
 
-            const factoryTiles = args.factories[args.factory];
-            factoryTiles.filter(tile => tile.id != args.nextTile?.id).forEach((tile, index) => {
-                const coordinates = this.getCoordinatesInFactory(index, factoryTiles.length);
-                left = coordinates.left;
-                top = coordinates.top;
-                const tileDiv = document.getElementById(`tile${tile.id}`);
-                tileDiv.style.left = `${left}px`;
-                tileDiv.style.top = `${top}px`;
-            });
-        }
-        if (args.nextTile) {
-            const index = args.factories[args.factory].findIndex(tile => tile.id == args.nextTile.id);
-            const coordinates = this.getCoordinatesInFactory(index, args.factories[args.factory].length);
-            let left = coordinates.left;
-            let top = coordinates.top;
-            slideToObjectAndAttach(this.game, document.getElementById(`tile${args.nextTile.id}`), `factory${args.factory}`, left, top, Math.round(Math.random()*90 - 45));
-
-            const factoryTiles = args.factories[args.factory];
-            factoryTiles.forEach((tile, index) => {
-                const coordinates = this.getCoordinatesInFactory(index, factoryTiles.length);
-                left = coordinates.left;
-                top = coordinates.top;
-                const tileDiv = document.getElementById(`tile${tile.id}`);
-                tileDiv.style.left = `${left}px`;
-                tileDiv.style.top = `${top}px`;
-            });
-        }
+        factoryTiles.forEach((tile, index) => {
+            const coordinates = this.getCoordinatesInFactory(index, factoryTiles.length);
+            const left = coordinates.left;
+            const top = coordinates.top;
+            const tileDiv = document.getElementById(`tile${tile.id}`);
+            tileDiv.style.left = `${left}px`;
+            tileDiv.style.top = `${top}px`;
+        });
     }
     
     public factoriesCompleted(args: NotifFactoriesChangedArgs) {

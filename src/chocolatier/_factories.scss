@@ -10,6 +10,17 @@
             background-position-x: (($i - 1) * 100% / 8) ;
         }
     }
+
+    &.selectable {
+        outline: 5px dashed red;
+        border-radius: 50%;
+        pointer-events: all;
+        cursor: pointer;
+
+        * {
+            pointer-events: none;
+        }
+    }
 }
 
 #factories {

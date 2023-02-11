@@ -65,16 +65,18 @@ trait StateTrait {
 
                         if ($takenPreviousTile !== null) {
                             $partialFactories[$previous] = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $previous));
-                        }
-                        if ($takenNextTile !== null) {
-                            $partialFactories[$next] = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $next));
-                        }
-                        if ($takenPreviousTile !== null || $takenNextTile !== null) {
                             self::notifyAllPlayers("factoriesChanged", '', [
                                 'factory' => $factory,
                                 'factories' => $partialFactories,
-                                'previousTile' => $takenPreviousTile,
-                                'nextTile' => $takenNextTile,
+                                'tiles' => [$takenPreviousTile],
+                            ]);
+                        }
+                        if ($takenNextTile !== null) {
+                            $partialFactories[$next] = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $next));
+                            self::notifyAllPlayers("factoriesChanged", '', [
+                                'factory' => $factory,
+                                'factories' => $partialFactories,
+                                'tiles' => [$takenNextTile],
                             ]);
                         }
                     } else if ($specialFactories[$factory] == 9) {

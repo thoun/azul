@@ -12,6 +12,38 @@ trait ArgsTrait {
         game state.
     */
 
+    function argChooseFactory() {
+        $undo = $this->getGlobalVariable(UNDO_FACTORY);
+        $factory = $undo->from;
+        $remainingFactoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
+        $tiles = array_values(array_filter($remainingFactoryTiles, fn($tile) => $tile->type == $remainingFactoryTiles[0]->type));
+
+        $number = count($tiles);
+
+        $specialFactories = $this->isSpecialFactories() ? $this->getSpecialFactories() : null;
+        $factoryNumber = $this->getFactoryNumber();
+        $specialFactoryZeroOwner = intval($this->getGameStateValue(SPECIAL_FACTORY_ZERO_OWNER));
+        $previous = $factory == 1 ? $factoryNumber : $factory - 1;
+        if ($specialFactoryZeroOwner > 0 && $specialFactories !== null && array_key_exists($previous, $specialFactories) && $specialFactories[$previous] == 6) {
+            $previous = $previous == 1 ? $factoryNumber : $previous - 1;
+        }
+        $next = $factory == $factoryNumber ? 1 : $factory + 1;
+        if ($specialFactoryZeroOwner > 0 && $specialFactories !== null && array_key_exists($next, $specialFactories) && $specialFactories[$next] == 6) {
+            $next = $next == 1 ? $factoryNumber : $next - 1;
+        }
+        $possibleFactories = [$previous, $next];
+
+        return [
+            'factory' => $factory,
+            'number' => $number,
+            'color' => $number > 0 ? $this->getColor($tiles[0]->type) : null,
+            'i18n' => ['color'],
+            'type' => $number > 0 ? $tiles[0]->type : null,
+            'tiles' => $tiles,
+            'possibleFactories' => $possibleFactories,
+        ];
+    }
+
     function argChooseLine() {
         $playerId = self::getActivePlayerId();
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));

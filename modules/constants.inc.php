@@ -9,10 +9,10 @@ define('ST_FILL_FACTORIES', 10);
 
 define('ST_PLAYER_CHOOSE_TILE', 20);
 
+define('ST_PLAYER_CHOOSE_FACTORY', 25);
+
 define('ST_PLAYER_CHOOSE_LINE', 30);
 define('ST_PLAYER_CONFIRM_LINE', 31);
-
-//define('ST_PLAYER_CHOOSE_COLUMN', 40);
 
 define('ST_END_ROUND', 50);
 define('ST_MULTIPLAYER_CHOOSE_COLUMNS', 51);
@@ -50,6 +50,7 @@ define('SPECIAL_FACTORY_ZERO_OWNER', 'SpecialFactoryZeroOwner');
  */
 
 define('UNDO_SELECT', 'UndoSelect');
+define('UNDO_FACTORY', 'UndoFactory');
 define('UNDO_PLACE', 'UndoPlace');
 
 ?>
