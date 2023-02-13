@@ -487,6 +487,14 @@ html[data-chocolatier-skin=true] {
   background: url("img/chocolatier/background.jpg") #fff8f0;
   background-repeat: repeat;
 }
+html[data-chocolatier-skin=true] #loader_mask #game_box_loader_front, html[data-chocolatier-skin=true] #loader_mask #game_box_loader_back {
+  background-image: url("img/chocolatier/game-box.png");
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+  width: 0px;
+  height: 0px;
+  padding: 500px 0 0 500px;
+}
 html[data-chocolatier-skin=true] .factory {
   background: url("img/chocolatier/factory.png");
 }
