@@ -140,6 +140,8 @@ class Factories {
             const left = coordinates.left;
             const top = coordinates.top;
             slideToObjectAndAttach(this.game, document.getElementById(`tile${newTile.id}`), `factory${args.factory}`, left, top, Math.round(Math.random()*90 - 45));
+
+            this.updateTilesInFactories(args.tiles, args.factory);
         });
 
         factoryTiles.forEach((tile, index) => {
@@ -166,6 +168,22 @@ class Factories {
                     this.game.placeTile(tile, `factory${args.factory}`, left, top);
                 }
             });
+            this.updateTilesInFactories(factoryTiles, args.factory);
+    }
+    
+    private updateTilesInFactories(tiles: Tile[], factory: number) {
+        tiles.forEach(tile => {
+            let oldFactory = this.tilesInFactories.findIndex(f => f[tile.type].some(t => t.id == tile.id));
+            if (oldFactory != factory) {
+                this.tilesInFactories[factory][tile.type].push(tile);
+                if (oldFactory !== -1) {
+                    const oldIndex = this.tilesInFactories[oldFactory][tile.type].findIndex(t => t.id == tile.id);
+                    if (oldIndex !== -1) {
+                        this.tilesInFactories[oldFactory][tile.type].splice(oldIndex, 1);
+                    }
+                }
+            }
+        });
     }
 
     public discardTiles(discardedTiles: Tile[]) {

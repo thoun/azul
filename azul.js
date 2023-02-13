@@ -371,6 +371,7 @@ var Factories = /** @class */ (function () {
             var left = coordinates.left;
             var top = coordinates.top;
             slideToObjectAndAttach(_this.game, document.getElementById("tile".concat(newTile.id)), "factory".concat(args.factory), left, top, Math.round(Math.random() * 90 - 45));
+            _this.updateTilesInFactories(args.tiles, args.factory);
         });
         factoryTiles.forEach(function (tile, index) {
             var coordinates = _this.getCoordinatesInFactory(index, factoryTiles.length);
@@ -395,6 +396,22 @@ var Factories = /** @class */ (function () {
             }
             else {
                 _this.game.placeTile(tile, "factory".concat(args.factory), left, top);
+            }
+        });
+        this.updateTilesInFactories(factoryTiles, args.factory);
+    };
+    Factories.prototype.updateTilesInFactories = function (tiles, factory) {
+        var _this = this;
+        tiles.forEach(function (tile) {
+            var oldFactory = _this.tilesInFactories.findIndex(function (f) { return f[tile.type].some(function (t) { return t.id == tile.id; }); });
+            if (oldFactory != factory) {
+                _this.tilesInFactories[factory][tile.type].push(tile);
+                if (oldFactory !== -1) {
+                    var oldIndex = _this.tilesInFactories[oldFactory][tile.type].findIndex(function (t) { return t.id == tile.id; });
+                    if (oldIndex !== -1) {
+                        _this.tilesInFactories[oldFactory][tile.type].splice(oldIndex, 1);
+                    }
+                }
             }
         });
     };
