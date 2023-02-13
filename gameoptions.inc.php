@@ -56,7 +56,7 @@ $game_options = [
                     'description' => totranslate('Random special factories are placed in the game'),
                     'tmdisplay' => totranslate('Special Factories'), 
                     'nobeginner' => true,
-                    'alpha' => true,
+                    'beta' => true,
                 ]
             ],
         'default' => 1,
