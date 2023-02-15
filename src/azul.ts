@@ -25,6 +25,7 @@ const log = isDebug ? console.log.bind(window.console) : function () { };
 class Azul implements AzulGame {
     private gamedatas: AzulGamedatas;
 
+    private animationManager: AnimationManager;
     private zoomManager: ZoomManager;
     private factories: Factories;
     private playersTables: PlayerTable[] = [];
@@ -65,6 +66,8 @@ class Azul implements AzulGame {
         this.gamedatas = gamedatas;
 
         log('gamedatas', gamedatas);
+
+        this.animationManager = new AnimationManager(this, {});
 
         this.createPlayerPanels(gamedatas);
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles, gamedatas.specialFactories);
@@ -674,7 +677,10 @@ class Azul implements AzulGame {
     placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            slideToObjectAndAttach(this, firstPlayerToken, `player_board_${playerId}_firstPlayerWrapper`);
+            this.animationManager.attachWithSlideAnimation(
+                firstPlayerToken, 
+                document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
+            );
         } else {
             dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);
 
