@@ -1410,6 +1410,10 @@ var Azul = /** @class */ (function () {
                     }
                     log = _(log).replace('${number} ${color}', html);
                 }
+                else if (log.indexOf('${color}') !== -1 && typeof args.type === 'number') {
+                    var html = "<div class=\"tile tile".concat(args.type, "\"></div>");
+                    log = _(log).replace('${color}', html);
+                }
             }
         }
         catch (e) {

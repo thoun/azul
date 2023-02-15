@@ -592,8 +592,10 @@ trait UtilTrait {
                 self::notifyAllPlayers('completeColorLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete color ${color}'), [
                     'player_name' => $this->getPlayerName($playerId),
                     'color' => $this->getColor($notif->tiles[0]->type),
+                    'type' => $notif->tiles[0]->type,
                     'i18n' => ['color'],
                     'points' => $notif->points,
+                    'preserve' => [ 2 => 'type' ],
                 ]);
             }
         }

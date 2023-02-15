@@ -877,6 +877,9 @@ class Azul implements AzulGame {
                     }
 
                     log = _(log).replace('${number} ${color}', html);
+                } else if (log.indexOf('${color}') !== -1 && typeof args.type === 'number') {
+                    let html = `<div class="tile tile${args.type}"></div>`;
+                    log = _(log).replace('${color}', html);
                 }
             }
         } catch (e) {

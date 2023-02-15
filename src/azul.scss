@@ -40,11 +40,12 @@ html {
 
 .log {
   .tile {
-    margin: 2px 2px -2px 2px;
+    margin: 2px;
     position: relative;
     width: 16px;
     height: 16px;
     box-shadow: none;
+    vertical-align: middle;
   }
 }
 
