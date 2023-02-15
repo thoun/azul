@@ -23,9 +23,9 @@ const isDebug = window.location.host == 'studio.boardgamearena.com';
 const log = isDebug ? console.log.bind(window.console) : function () { };
 
 class Azul implements AzulGame {
-    private gamedatas: AzulGamedatas;
+    public animationManager: AnimationManager;
 
-    private animationManager: AnimationManager;
+    private gamedatas: AzulGamedatas;
     private zoomManager: ZoomManager;
     private factories: Factories;
     private playersTables: PlayerTable[] = [];
@@ -67,7 +67,7 @@ class Azul implements AzulGame {
 
         log('gamedatas', gamedatas);
 
-        this.animationManager = new AnimationManager(this, {});
+        this.animationManager = new AnimationManager(this);
 
         this.createPlayerPanels(gamedatas);
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles, gamedatas.specialFactories);

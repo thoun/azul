@@ -45,6 +45,8 @@ interface AzulGamedatas {
 }
 
 interface AzulGame extends Game {
+    animationManager: AnimationManager;
+    
     getPlayerId(): number;
     isDefaultFont(): boolean;
     getZoom(): number;
