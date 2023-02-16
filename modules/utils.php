@@ -152,6 +152,10 @@ trait UtilTrait {
         }
 
         $this->setGlobalVariable(SPECIAL_FACTORIES, $specialFactories);
+
+        self::notifyAllPlayers('specialFactories', '', [
+            'specialFactories' => $specialFactories,
+        ]);
     }
 
     function getSpecialFactories() {

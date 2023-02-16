@@ -184,7 +184,7 @@ trait DebugUtilTrait {
         $this->placeTilesOnLine($playerId, array_slice($tiles, 0, $number), $line, false);
     }
 
-    function debugEmptyFactories($full = true) {
+    function debugEmptyFactories($full = false) {
         $this->debugRemoveFp();
 
         $factoryNumber = $this->getFactoryNumber();

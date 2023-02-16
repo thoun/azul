@@ -50,6 +50,17 @@ class Factories {
 
         this.fillFactories(factories, remainingTiles, false);
     }
+    
+    public updateSpecialFactories(specialFactories: SpecialFactories) {
+        for (let i=1; i<=this.factoryNumber; i++) {
+            const div = document.getElementById(`factory${i}`);
+            if (specialFactories?.[i]) {
+                div.dataset.specialFactory = `${specialFactories[i]}`;
+            } else {
+                div.removeAttribute('data-special-factory');
+            }
+        }
+    }
 
     public getWidth(): number {        
         const radius = 175 + this.factoryNumber*25;

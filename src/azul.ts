@@ -724,6 +724,7 @@ class Azul implements AzulGame {
             ['lastRound', 1],
             ['removeLastRound', 1],
             ['updateSelectColumn', 1],
+            ['specialFactories', 1],
             ['moveSpecialFactoryZero', ANIMATION_MS],
         ];
 
@@ -858,6 +859,10 @@ class Azul implements AzulGame {
         if (document.getElementById('last-round')) {
             dojo.destroy('last-round');
         }
+    }
+
+    notif_specialFactories(notif: Notif<NotifSpecialFactoriesArgs>) {
+        this.factories.updateSpecialFactories(notif.args.specialFactories);
     }
 
     notif_moveSpecialFactoryZero(notif: Notif<NotifFirstPlayerTokenArgs>) {

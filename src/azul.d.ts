@@ -14,6 +14,8 @@ interface AzulPlayer extends Player {
     selectedColumns: SelectedColumn[];
 }
 
+type SpecialFactories = { [factoryNumber: number]: number };
+
 /**
  * Your game interfaces
  */
@@ -40,7 +42,7 @@ interface AzulGamedatas {
     fastScoring: boolean;
     remainingTiles: number;
 
-    specialFactories?: { [factoryNumber: number]: number };
+    specialFactories?: SpecialFactories;
     specialFactoryZeroOwner?: number;
 }
 
@@ -165,6 +167,10 @@ interface FloorLine {
 interface NotifEmptyFloorLineArgs {
     floorLines: { [playerId: number]: FloorLine };
     specialFactoryZeroTiles: { [playerId: number]: Tile[] };
+}
+
+interface NotifSpecialFactoriesArgs {
+    specialFactories: SpecialFactories;
 }
 
 interface EndScoreTiles {

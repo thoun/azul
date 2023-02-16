@@ -12,13 +12,19 @@ trait StateTrait {
     */
 
     function stFillFactories() {
+        $playerNumber = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player "));
+
+        /*if ($this->isSpecialFactories()) {
+            $this->initSpecialFactories($playerNumber);
+        }*/
+
         $factories = [];
 
         $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0, null))[0];
         $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
         $factories[0] = [$firstPlayerTile];
 
-        $factoryNumber = $this->getFactoryNumber();
+        $factoryNumber = $this->getFactoryNumber($playerNumber);
         for ($factory=1; $factory<=$factoryNumber; $factory++) {
             $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
         }

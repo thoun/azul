@@ -442,6 +442,17 @@ var Factories = /** @class */ (function () {
         }
         this.fillFactories(factories, remainingTiles, false);
     }
+    Factories.prototype.updateSpecialFactories = function (specialFactories) {
+        for (var i = 1; i <= this.factoryNumber; i++) {
+            var div = document.getElementById("factory".concat(i));
+            if (specialFactories === null || specialFactories === void 0 ? void 0 : specialFactories[i]) {
+                div.dataset.specialFactory = "".concat(specialFactories[i]);
+            }
+            else {
+                div.removeAttribute('data-special-factory');
+            }
+        }
+    };
     Factories.prototype.getWidth = function () {
         var radius = 175 + this.factoryNumber * 25;
         var halfSize = radius + FACTORY_RADIUS;
@@ -1442,6 +1453,7 @@ var Azul = /** @class */ (function () {
             ['lastRound', 1],
             ['removeLastRound', 1],
             ['updateSelectColumn', 1],
+            ['specialFactories', 1],
             ['moveSpecialFactoryZero', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
@@ -1552,6 +1564,9 @@ var Azul = /** @class */ (function () {
         if (document.getElementById('last-round')) {
             dojo.destroy('last-round');
         }
+    };
+    Azul.prototype.notif_specialFactories = function (notif) {
+        this.factories.updateSpecialFactories(notif.args.specialFactories);
     };
     Azul.prototype.notif_moveSpecialFactoryZero = function (notif) {
         document.getElementById('factories').dataset.specialFactoryZeroOwned = (!!notif.args.playerId).toString();
