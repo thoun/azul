@@ -119,10 +119,6 @@ class Azul extends Table {
 
         $this->setupTiles();
 
-        if ($this->isSpecialFactories()) {
-            $this->initSpecialFactories(count($players));
-        }
-
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 

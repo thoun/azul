@@ -14,9 +14,9 @@ trait StateTrait {
     function stFillFactories() {
         $playerNumber = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player "));
 
-        /*if ($this->isSpecialFactories()) {
+        if ($this->isSpecialFactories()) {
             $this->initSpecialFactories($playerNumber);
-        }*/
+        }
 
         $factories = [];
 
