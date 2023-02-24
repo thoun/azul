@@ -596,6 +596,8 @@ html[data-chocolatier-skin=true] .player-table-wrapper .player-table.variant {
 }
 html[data-chocolatier-skin=true] .player-table-wrapper .player-table .wall {
   left: 383px;
+  background: rgba(255, 255, 255, 0.6901960784);
+  box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.6901960784);
 }
 html[data-chocolatier-skin=true] .player-table-wrapper .line:not(.floor) {
   background: rgba(255, 255, 255, 0.6901960784);
