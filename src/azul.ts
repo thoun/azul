@@ -440,12 +440,27 @@ class Azul implements AzulGame {
         }
     }
 
-    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean> {
+    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number, newAnimation: boolean = false): Promise<boolean> {
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         const tileDiv = document.getElementById(`tile${tile.id}`);
         if (tileDiv) {
-            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
+            if (newAnimation) {
+                return this.animationManager.attachWithSlideAnimation(
+                    tileDiv,
+                    document.getElementById(destinationId),
+                    {
+                        afterAttach: () => {
+                            tileDiv.style.position = 'absolute';
+                            tileDiv.style.left = `${left}px`;
+                            tileDiv.style.top = `${top}px`;
+                        },
+                        finalTransform: rotation ? `rotate(${rotation}deg)` : undefined,
+                        scale: this.zoomManager.zoom,
+                    });
+            } else {
+                return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
+            }
         } else {
             dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" data-rotation="${rotation ?? 0}"></div>`, destinationId);
             const newTileDiv = document.getElementById(`tile${tile.id}`);
@@ -766,9 +781,9 @@ class Azul implements AzulGame {
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0, true, true);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1, true, true);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line, false, true).then(
             () => { 
                 if (notif.args.fromHand) {
                     this.getPlayerTable(notif.args.playerId).setHandVisible(false);
@@ -779,7 +794,7 @@ class Azul implements AzulGame {
 
     notif_undoSelectLine(notif: Notif<NotifUndoArgs>) {
         const table = this.getPlayerTable(notif.args.playerId);
-        table.placeTilesOnHand(notif.args.undo.tiles);
+        table.placeTilesOnHand(notif.args.undo.tiles, notif.args.undo.tiles.some(tile => tile.column < 1), true);
 
         if (document.getElementById('last-round') && !notif.args.undo.lastRoundBefore) {
             dojo.destroy('last-round');

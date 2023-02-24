@@ -41,6 +41,8 @@ trait DebugUtilTrait {
         $this->debugEmptyFactories();
         $this->debugRemoveFp();*/
 
+        $this->debugSetLineTiles(2343492, 3, 10, 1);
+        $this->debugSetLineTiles(2343493, 4, 10, 1);
         /*$this->debugSetLineTiles(2343492, 1, 1, 3);
 
         $this->debugSetWallTile(2343492, 5, 2, 1);
@@ -49,7 +51,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 5, 4, 5);
         $this->debugSetLineTiles(2343492, 5, 5, 3);*/
 
-        $this->debugSetLineTiles(2343492, 3, 3, 1);
+        /*$this->debugSetLineTiles(2343492, 3, 3, 1);
         $this->debugSetLineTiles(2343492, 4, 3, 2);
         $this->debugSetLineTiles(2343492, 5, 4, 5);
         $this->debugSetWallTile(2343492, 1, 1, 5);
@@ -70,7 +72,7 @@ trait DebugUtilTrait {
         
         $this->debugSetLineTiles(2343493, 1, 1, 1);
         $this->debugSetLineTiles(2343493, 4, 2, 5);
-        $this->debugSetLineTiles(2343493, 5, 5, 4);
+        $this->debugSetLineTiles(2343493, 5, 5, 4);*/
 
         /*
         case 1: $colorName = _('Black'); break;

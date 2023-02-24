@@ -12,7 +12,7 @@ anymatch@~3.1.2:
 
 bga-animations@thoun/bga-animations:
   version "1.0.0"
-  resolved "https://codeload.github.com/thoun/bga-animations/tar.gz/c4a69d98609205e0c3ba529b70ba3cd4fef703b1"
+  resolved "https://codeload.github.com/thoun/bga-animations/tar.gz/4b7d3f4e3c28d13ead413363b9cf659f83f0576a"
 
 bga-zoom@thoun/bga-zoom#main:
   version "1.0.0"

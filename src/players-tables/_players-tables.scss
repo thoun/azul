@@ -22,6 +22,8 @@
         box-shadow: 0 0 5px 5px #FFFFFFDD;
         opacity: 1;
         transition: opacity 0.5s;
+        //z-index: 1;
+        //position: relative;
 
         &.empty {
             opacity: 0;
