@@ -84,6 +84,7 @@ class Azul implements AzulGame {
             },
             onDimensionsChange: (newZoom) => this.onTableCenterSizeChange(newZoom),
         });
+        this.animationManager.setZoomManager(this.zoomManager);
 
         this.setupNotifications();
         this.setupPreferences();
@@ -456,7 +457,6 @@ class Azul implements AzulGame {
                             tileDiv.style.top = `${top}px`;
                         },
                         finalTransform: rotation ? `rotate(${rotation}deg)` : undefined,
-                        scale: this.zoomManager.zoom,
                     });
             } else {
                 return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
@@ -695,6 +695,9 @@ class Azul implements AzulGame {
             this.animationManager.attachWithSlideAnimation(
                 firstPlayerToken, 
                 document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
+                {
+                    scale: 1, // ignore game zoom
+                }
             );
         } else {
             dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);
