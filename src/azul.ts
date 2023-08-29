@@ -180,7 +180,7 @@ class Azul implements AzulGame {
             
             if (!privateMulti) {
                 if (!document.getElementById('confirmColumns_button')) {
-                    (this as any).addActionButton('confirmColumns_button', _("Confirm"), () => this.confirmColumns());
+                    (this as any).addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
                     (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
                 }
                 dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect);
@@ -263,7 +263,7 @@ class Azul implements AzulGame {
                 case 'privateChooseColumns':
                 case 'privateConfirmColumns':
                     const privateChooseColumnArgs = args as ChooseColumnsForPlayer;
-                    (this as any).addActionButton('confirmColumns_button', _("Confirm"), () => this.confirmColumns());
+                    (this as any).addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
                     (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
                     dojo.toggleClass('confirmColumns_button', 'disabled', !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns');
                     break;
