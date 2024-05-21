@@ -1078,7 +1078,7 @@ var Azul = /** @class */ (function () {
             }
             if (!privateMulti) {
                 if (!document.getElementById('confirmColumns_button')) {
-                    this.addActionButton('confirmColumns_button', _("Confirm"), function () { return _this.confirmColumns(); });
+                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), function () { return _this.confirmColumns(); });
                     this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
                 }
                 dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect_1);
@@ -1152,7 +1152,7 @@ var Azul = /** @class */ (function () {
                 case 'privateChooseColumns':
                 case 'privateConfirmColumns':
                     var privateChooseColumnArgs = args;
-                    this.addActionButton('confirmColumns_button', _("Confirm"), function () { return _this.confirmColumns(); });
+                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), function () { return _this.confirmColumns(); });
                     this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
                     dojo.toggleClass('confirmColumns_button', 'disabled', !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns');
                     break;
@@ -1169,30 +1169,15 @@ var Azul = /** @class */ (function () {
     ///////////////////////////////////////////////////
     Azul.prototype.setupPreferences = function () {
         var _this = this;
-        // Extract the ID and value from the UI control
-        var onchange = function (e) {
-            var match = e.target.id.match(/^preference_control_(\d+)$/);
-            if (!match) {
-                return;
-            }
-            var prefId = +match[1];
-            var prefValue = +e.target.value;
-            _this.prefs[prefId].value = prefValue;
-            _this.onPreferenceChange(prefId, prefValue);
-        };
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        // Call onPreferenceChange() now
-        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
         try {
             document.getElementById('preference_control_299').closest(".preference_choice").style.display = 'none';
             document.getElementById('preference_fontrol_299').closest(".preference_choice").style.display = 'none';
         }
         catch (e) { }
+        [201, 202, 203, 205, 206, 210, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.getGameUserPreference(prefId)); });
     };
-    Azul.prototype.onPreferenceChange = function (prefId, prefValue) {
+    Azul.prototype.onGameUserPreferenceChanged = function (prefId, prefValue) {
         switch (prefId) {
-            // KEEP
             case 201:
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
                 break;
@@ -1224,15 +1209,13 @@ var Azul = /** @class */ (function () {
         }
     };
     Azul.prototype.toggleZoomNotice = function (visible) {
+        var _this = this;
         var elem = document.getElementById('zoom-notice');
         if (visible) {
             if (!elem) {
                 dojo.place("\n                <div id=\"zoom-notice\">\n                    ".concat(_("Use zoom controls to adapt players board size !"), "\n                    <div style=\"text-align: center; margin-top: 10px;\"><a id=\"hide-zoom-notice\">").concat(_("Dismiss"), "</a></div>\n                    <div class=\"arrow-right\"></div>\n                </div>\n                "), 'bga-zoom-controls');
                 document.getElementById('hide-zoom-notice').addEventListener('click', function () {
-                    var select = document.getElementById('preference_control_299');
-                    select.value = '2';
-                    var event = new Event('change');
-                    select.dispatchEvent(event);
+                    return _this.setGameUserPreference(299, 2);
                 });
             }
         }
