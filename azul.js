@@ -857,19 +857,46 @@ var PlayerTable = /** @class */ (function () {
             }
         }
     }
-    PlayerTable.prototype.placeTilesOnHand = function (tiles) {
+    PlayerTable.prototype.placeTilesOnHand = function (tiles, temporarilyRemoveOverflow, newAnimation) {
         var _this = this;
+        if (temporarilyRemoveOverflow === void 0) { temporarilyRemoveOverflow = false; }
+        if (newAnimation === void 0) { newAnimation = false; }
+        if (!(tiles === null || tiles === void 0 ? void 0 : tiles.length)) {
+            return Promise.resolve();
+        }
         var startX = HAND_CENTER - tiles.length * (HALF_TILE_SIZE + 5);
-        tiles.forEach(function (tile, index) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId), startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5); });
+        var line0 = temporarilyRemoveOverflow ? document.getElementById("player-table-".concat(this.playerId, "-line0")) : null;
+        if (temporarilyRemoveOverflow) {
+            line0.style.overflow = 'unset';
+        }
+        Promise.all(tiles.map(function (tile, index) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId), startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5, undefined, newAnimation); })).then(function () {
+            if (temporarilyRemoveOverflow) {
+                line0.style.overflow = null;
+            }
+        });
         this.setHandVisible(tiles.length > 0);
     };
-    PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
+    PlayerTable.prototype.placeTilesOnLine = function (tiles, line, temporarilyRemoveOverflow, newAnimation) {
         var _this = this;
+        if (temporarilyRemoveOverflow === void 0) { temporarilyRemoveOverflow = false; }
+        if (newAnimation === void 0) { newAnimation = false; }
+        if (!(tiles === null || tiles === void 0 ? void 0 : tiles.length)) {
+            return Promise.resolve();
+        }
+        var lineId = "player-table-".concat(this.playerId, "-line").concat(line);
+        var line0 = temporarilyRemoveOverflow ? document.getElementById(lineId) : null;
+        if (temporarilyRemoveOverflow) {
+            line0.style.overflow = 'unset';
+        }
         return Promise.all(tiles.map(function (tile) {
             var left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74);
             var top = line == -1 ? 9 : 0;
-            return _this.game.placeTile(tile, "player-table-".concat(_this.playerId, "-line").concat(line), left, top);
-        }));
+            return _this.game.placeTile(tile, lineId, left, top, undefined, newAnimation);
+        })).then(function () {
+            if (temporarilyRemoveOverflow) {
+                line0.style.overflow = null;
+            }
+        });
     };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
         var _this = this;
@@ -968,6 +995,7 @@ var Azul = /** @class */ (function () {
             },
             onDimensionsChange: function (newZoom) { return _this.onTableCenterSizeChange(newZoom); },
         });
+        this.animationManager.setZoomManager(this.zoomManager);
         this.setupNotifications();
         this.setupPreferences();
         if (gamedatas.specialFactories) {
@@ -1256,13 +1284,26 @@ var Azul = /** @class */ (function () {
             (_c = this.scoreCtrl[playerId]) === null || _c === void 0 ? void 0 : _c.incValue(incScore);
         }
     };
-    Azul.prototype.placeTile = function (tile, destinationId, left, top, rotation) {
+    Azul.prototype.placeTile = function (tile, destinationId, left, top, rotation, newAnimation) {
         var _this = this;
+        if (newAnimation === void 0) { newAnimation = false; }
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         var tileDiv = document.getElementById("tile".concat(tile.id));
         if (tileDiv) {
-            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
+            if (newAnimation) {
+                return this.animationManager.attachWithSlideAnimation(tileDiv, document.getElementById(destinationId), {
+                    afterAttach: function () {
+                        tileDiv.style.position = 'absolute';
+                        tileDiv.style.left = "".concat(left, "px");
+                        tileDiv.style.top = "".concat(top, "px");
+                    },
+                    finalTransform: rotation ? "rotate(".concat(rotation, "deg)") : undefined,
+                });
+            }
+            else {
+                return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
+            }
         }
         else {
             dojo.place("<div id=\"tile".concat(tile.id, "\" class=\"tile tile").concat(tile.type, "\" style=\"").concat(left !== undefined ? "left: ".concat(left, "px;") : '').concat(top !== undefined ? "top: ".concat(top, "px;") : '').concat(rotation ? "transform: rotate(".concat(rotation, "deg)") : '', "\" data-rotation=\"").concat(rotation !== null && rotation !== void 0 ? rotation : 0, "\"></div>"), destinationId);
@@ -1415,7 +1456,9 @@ var Azul = /** @class */ (function () {
     Azul.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            this.animationManager.attachWithSlideAnimation(firstPlayerToken, document.getElementById("player_board_".concat(playerId, "_firstPlayerWrapper")));
+            this.animationManager.attachWithSlideAnimation(firstPlayerToken, document.getElementById("player_board_".concat(playerId, "_firstPlayerWrapper")), {
+                scale: 1, // ignore game zoom
+            });
         }
         else {
             dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', "player_board_".concat(playerId, "_firstPlayerWrapper"));
@@ -1491,9 +1534,9 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
         var _this = this;
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(function () {
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0, true, true);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1, true, true);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line, false, true).then(function () {
             if (notif.args.fromHand) {
                 _this.getPlayerTable(notif.args.playerId).setHandVisible(false);
             }
@@ -1501,7 +1544,7 @@ var Azul = /** @class */ (function () {
     };
     Azul.prototype.notif_undoSelectLine = function (notif) {
         var table = this.getPlayerTable(notif.args.playerId);
-        table.placeTilesOnHand(notif.args.undo.tiles);
+        table.placeTilesOnHand(notif.args.undo.tiles, notif.args.undo.tiles.some(function (tile) { return tile.column < 1; }), true);
         if (document.getElementById('last-round') && !notif.args.undo.lastRoundBefore) {
             dojo.destroy('last-round');
         }

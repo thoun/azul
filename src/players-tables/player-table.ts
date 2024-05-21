@@ -91,18 +91,43 @@ class PlayerTable {
         }
     }
 
-    public placeTilesOnHand(tiles: Tile[]) {
+    public placeTilesOnHand(tiles: Tile[], temporarilyRemoveOverflow: boolean = false, newAnimation: boolean = false) {
+        if (!tiles?.length) {
+            return Promise.resolve();
+        }
+
         const startX = HAND_CENTER - tiles.length * (HALF_TILE_SIZE + 5);
-        tiles.forEach((tile, index) => this.game.placeTile(tile, `player-hand-${this.playerId}`, startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5));
+        const line0 = temporarilyRemoveOverflow ? document.getElementById(`player-table-${this.playerId}-line0`) : null;
+        if (temporarilyRemoveOverflow) {
+            line0.style.overflow = 'unset';
+        }
+        Promise.all(tiles.map((tile, index) => this.game.placeTile(tile, `player-hand-${this.playerId}`, startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5, undefined, newAnimation))).then(() => {
+            if (temporarilyRemoveOverflow) {
+                line0.style.overflow = null;
+            }
+        });
         this.setHandVisible(tiles.length > 0);
     }
 
-    public placeTilesOnLine(tiles: Tile[], line: number): Promise<any> {
+    public placeTilesOnLine(tiles: Tile[], line: number, temporarilyRemoveOverflow: boolean = false, newAnimation: boolean = false): Promise<any> {
+        if (!tiles?.length) {
+            return Promise.resolve();
+        }
+
+        const lineId = `player-table-${this.playerId}-line${line}`;
+        const line0 = temporarilyRemoveOverflow ? document.getElementById(lineId) : null;
+        if (temporarilyRemoveOverflow) {
+            line0.style.overflow = 'unset';
+        }
         return Promise.all(tiles.map(tile => {
             const left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column-1) * 74);
             const top = line == -1 ? 9 : 0;
-            return this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top);
-        }));
+            return this.game.placeTile(tile, lineId, left, top, undefined, newAnimation);
+        })).then(() => {
+            if (temporarilyRemoveOverflow) {
+                line0.style.overflow = null;
+            }
+        });
     }
 
     public placeTilesOnWall(tiles: Tile[]) {
