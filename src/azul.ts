@@ -425,17 +425,19 @@ class Azul implements AzulGame {
         const tileDiv = document.getElementById(`tile${tile.id}`);
         if (tileDiv) {
             if (newAnimation) {
-                return this.animationManager.attachWithSlideAnimation(
-                    tileDiv,
-                    document.getElementById(destinationId),
-                    {
-                        afterAttach: () => {
-                            tileDiv.style.position = 'absolute';
-                            tileDiv.style.left = `${left}px`;
-                            tileDiv.style.top = `${top}px`;
-                        },
-                        finalTransform: rotation ? `rotate(${rotation}deg)` : undefined,
-                    });
+                const animation = new BgaSlideAnimation({
+                    element: tileDiv,
+                });
+            
+                const fromRect = tileDiv.getBoundingClientRect();
+                animation.settings.fromRect = fromRect;
+                document.getElementById(destinationId).appendChild(tileDiv);
+                
+                tileDiv.style.position = 'absolute';
+                tileDiv.style.left = `${left}px`;
+                tileDiv.style.top = `${top}px`;
+
+                return this.animationManager.play(animation).then(() => true);
             } else {
                 return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
             }
@@ -670,12 +672,12 @@ class Azul implements AzulGame {
     placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            this.animationManager.attachWithSlideAnimation(
-                firstPlayerToken, 
-                document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
-                {
+            this.animationManager.attachWithAnimation(
+                new BgaSlideAnimation({
+                    element: firstPlayerToken,
                     scale: 1, // ignore game zoom
-                }
+                }),
+                document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
             );
         } else {
             dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);

@@ -10,13 +10,13 @@ anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-bga-animations@thoun/bga-animations#main:
-  version "1.0.0"
-  resolved "https://codeload.github.com/thoun/bga-animations/tar.gz/ce1a7210e8fd38b2d5b8b59b1ce19665b9345f6a"
+bga-animations@thoun/bga-animations#1.1.1:
+  version "1.1.1"
+  resolved "https://codeload.github.com/thoun/bga-animations/tar.gz/91a2747fa5f5a7402a5adfa84d976d8216269f6b"
 
-bga-zoom@thoun/bga-zoom#main:
-  version "1.0.0"
-  resolved "https://codeload.github.com/thoun/bga-zoom/tar.gz/5965fff329655cafa2faba40e0647cbc4a958f60"
+bga-zoom@thoun/bga-zoom#1.0.2:
+  version "1.0.2"
+  resolved "https://codeload.github.com/thoun/bga-zoom/tar.gz/3668486f5445085bddbb1a8dd054bcf987bc9f41"
 
 binary-extensions@^2.0.0:
   version "2.2.0"

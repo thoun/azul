@@ -1,34 +1,81 @@
+var BgaAnimation = /** @class */ (function () {
+    function BgaAnimation(animationFunction, settings) {
+        this.animationFunction = animationFunction;
+        this.settings = settings;
+        this.played = null;
+        this.result = null;
+        this.playWhenNoAnimation = false;
+    }
+    return BgaAnimation;
+}());
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 /**
- * Linear slide of the card from origin to destination.
+ * Just use playSequence from animationManager
  *
- * @param element the element to animate. The element should be attached to the destination element before the animation starts.
- * @param settings an `AnimationSettings` object
+ * @param animationManager the animation manager
+ * @param animation a `BgaAnimation` object
  * @returns a promise when animation ends
  */
-function slideAnimation(element, settings) {
+function attachWithAnimation(animationManager, animation) {
+    var _a;
+    var settings = animation.settings;
+    var element = settings.animation.settings.element;
+    var fromRect = element.getBoundingClientRect();
+    settings.animation.settings.fromRect = fromRect;
+    settings.attachElement.appendChild(element);
+    console.log('settings.afterAttach', settings.afterAttach, settings.animation.settings);
+    (_a = settings.afterAttach) === null || _a === void 0 ? void 0 : _a.call(settings, element, settings.attachElement);
+    return animationManager.play(settings.animation);
+}
+var BgaAttachWithAnimation = /** @class */ (function (_super) {
+    __extends(BgaAttachWithAnimation, _super);
+    function BgaAttachWithAnimation(settings) {
+        var _this = _super.call(this, attachWithAnimation, settings) || this;
+        _this.playWhenNoAnimation = true;
+        return _this;
+    }
+    return BgaAttachWithAnimation;
+}(BgaAnimation));
+/**
+ * Slide of the element from origin to destination.
+ *
+ * @param animationManager the animation manager
+ * @param animation a `BgaAnimation` object
+ * @returns a promise when animation ends
+ */
+function slideAnimation(animationManager, animation) {
     var promise = new Promise(function (success) {
         var _a, _b, _c, _d, _e;
-        // should be checked at the beginning of every animation
-        if (!shouldAnimate(settings)) {
-            success(false);
-            return promise;
-        }
+        var settings = animation.settings;
+        var element = settings.element;
         var _f = getDeltaCoordinates(element, settings), x = _f.x, y = _f.y;
-        var duration = (_a = settings === null || settings === void 0 ? void 0 : settings.duration) !== null && _a !== void 0 ? _a : 500;
+        var duration = (_a = settings.duration) !== null && _a !== void 0 ? _a : 500;
         var originalZIndex = element.style.zIndex;
         var originalTransition = element.style.transition;
-        element.style.zIndex = "".concat((_b = settings === null || settings === void 0 ? void 0 : settings.zIndex) !== null && _b !== void 0 ? _b : 10);
+        var transitionTimingFunction = (_b = settings.transitionTimingFunction) !== null && _b !== void 0 ? _b : 'linear';
+        element.style.zIndex = "".concat((_c = settings === null || settings === void 0 ? void 0 : settings.zIndex) !== null && _c !== void 0 ? _c : 10);
         element.style.transition = null;
         element.offsetHeight;
-        element.style.transform = "translate(".concat(-x, "px, ").concat(-y, "px) rotate(").concat((_c = settings === null || settings === void 0 ? void 0 : settings.rotationDelta) !== null && _c !== void 0 ? _c : 0, "deg)");
-        (_d = settings.animationStart) === null || _d === void 0 ? void 0 : _d.call(settings, element);
+        element.style.transform = "translate(".concat(-x, "px, ").concat(-y, "px) rotate(").concat((_d = settings === null || settings === void 0 ? void 0 : settings.rotationDelta) !== null && _d !== void 0 ? _d : 0, "deg)");
         var timeoutId = null;
         var cleanOnTransitionEnd = function () {
-            var _a;
             element.style.zIndex = originalZIndex;
             element.style.transition = originalTransition;
-            (_a = settings.animationEnd) === null || _a === void 0 ? void 0 : _a.call(settings, element);
-            success(true);
+            success();
             element.removeEventListener('transitioncancel', cleanOnTransitionEnd);
             element.removeEventListener('transitionend', cleanOnTransitionEnd);
             document.removeEventListener('visibilitychange', cleanOnTransitionEnd);
@@ -48,7 +95,7 @@ function slideAnimation(element, settings) {
         element.addEventListener('transitionend', cleanOnTransitionEnd);
         document.addEventListener('visibilitychange', cleanOnTransitionCancel);
         element.offsetHeight;
-        element.style.transition = "transform ".concat(duration, "ms linear");
+        element.style.transition = "transform ".concat(duration, "ms ").concat(transitionTimingFunction);
         element.offsetHeight;
         element.style.transform = (_e = settings === null || settings === void 0 ? void 0 : settings.finalTransform) !== null && _e !== void 0 ? _e : null;
         // safety in case transitionend and transitioncancel are not called
@@ -56,6 +103,13 @@ function slideAnimation(element, settings) {
     });
     return promise;
 }
+var BgaSlideAnimation = /** @class */ (function (_super) {
+    __extends(BgaSlideAnimation, _super);
+    function BgaSlideAnimation(settings) {
+        return _super.call(this, slideAnimation, settings) || this;
+    }
+    return BgaSlideAnimation;
+}(BgaAnimation));
 function shouldAnimate(settings) {
     var _a;
     return document.visibilityState !== 'hidden' && !((_a = settings === null || settings === void 0 ? void 0 : settings.game) === null || _a === void 0 ? void 0 : _a.instantaneousMode);
@@ -93,8 +147,15 @@ function getDeltaCoordinates(element, settings) {
     }
     return { x: x, y: y };
 }
-function logAnimation(element, settings) {
-    console.log(element, element.getBoundingClientRect(), element.style.transform, settings);
+function logAnimation(animationManager, animation) {
+    var settings = animation.settings;
+    var element = settings.element;
+    if (element) {
+        console.log(animation, settings, element, element.getBoundingClientRect(), element.style.transform);
+    }
+    else {
+        console.log(animation, settings);
+    }
     return Promise.resolve(false);
 }
 var __assign = (this && this.__assign) || function () {
@@ -108,6 +169,51 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var AnimationManager = /** @class */ (function () {
     /**
      * @param game the BGA game class, usually it will be `this`
@@ -117,56 +223,12 @@ var AnimationManager = /** @class */ (function () {
         this.game = game;
         this.settings = settings;
         this.zoomManager = settings === null || settings === void 0 ? void 0 : settings.zoomManager;
+        if (!game) {
+            throw new Error('You must set your game as the first parameter of AnimationManager');
+        }
     }
-    /**
-     * Attach an element to a parent, then play animation from element's origin to its new position.
-     *
-     * @param element the element to animate
-     * @param toElement the destination parent
-     * @param fn the animation function
-     * @param settings the animation settings
-     * @returns a promise when animation ends
-     */
-    AnimationManager.prototype.attachWithAnimation = function (element, toElement, fn, settings) {
-        var _a, _b, _c, _d, _e, _f;
-        var fromRect = element.getBoundingClientRect();
-        toElement.appendChild(element);
-        (_a = settings === null || settings === void 0 ? void 0 : settings.afterAttach) === null || _a === void 0 ? void 0 : _a.call(settings, element, toElement);
-        return (_f = fn(element, __assign(__assign({ duration: (_c = (_b = this.settings) === null || _b === void 0 ? void 0 : _b.duration) !== null && _c !== void 0 ? _c : 500, scale: (_e = (_d = this.zoomManager) === null || _d === void 0 ? void 0 : _d.zoom) !== null && _e !== void 0 ? _e : undefined }, settings !== null && settings !== void 0 ? settings : {}), { game: this.game, fromRect: fromRect }))) !== null && _f !== void 0 ? _f : Promise.resolve(false);
-    };
-    /**
-     * Attach an element to a parent with a slide animation.
-     *
-     * @param card the card informations
-     */
-    AnimationManager.prototype.attachWithSlideAnimation = function (element, toElement, settings) {
-        return this.attachWithAnimation(element, toElement, slideAnimation, settings);
-    };
-    /**
-     * Attach an element to a parent with a slide animation.
-     *
-     * @param card the card informations
-     */
-    AnimationManager.prototype.attachWithShowToScreenAnimation = function (element, toElement, settingsOrSettingsArray) {
-        var _this = this;
-        var cumulatedAnimation = function (element, settings) { return cumulatedAnimations(element, [
-            showScreenCenterAnimation,
-            pauseAnimation,
-            function (element) { return _this.attachWithSlideAnimation(element, toElement); },
-        ], settingsOrSettingsArray); };
-        return this.attachWithAnimation(element, toElement, cumulatedAnimation, null);
-    };
-    /**
-     * Slide from an element.
-     *
-     * @param element the element to animate
-     * @param fromElement the origin element
-     * @param settings the animation settings
-     * @returns a promise when animation ends
-     */
-    AnimationManager.prototype.slideFromElement = function (element, fromElement, settings) {
-        var _a, _b, _c, _d, _e;
-        return (_e = slideAnimation(element, __assign(__assign({ duration: (_b = (_a = this.settings) === null || _a === void 0 ? void 0 : _a.duration) !== null && _b !== void 0 ? _b : 500, scale: (_d = (_c = this.zoomManager) === null || _c === void 0 ? void 0 : _c.zoom) !== null && _d !== void 0 ? _d : undefined }, settings !== null && settings !== void 0 ? settings : {}), { game: this.game, fromElement: fromElement }))) !== null && _e !== void 0 ? _e : Promise.resolve(false);
+    AnimationManager.prototype.getZoomManager = function () {
+        return this.zoomManager;
     };
     /**
      * Set the zoom manager, to get the scale of the current game.
@@ -176,9 +238,194 @@ var AnimationManager = /** @class */ (function () {
     AnimationManager.prototype.setZoomManager = function (zoomManager) {
         this.zoomManager = zoomManager;
     };
+    AnimationManager.prototype.getSettings = function () {
+        return this.settings;
+    };
+    /**
+     * Returns if the animations are active. Animation aren't active when the window is not visible (`document.visibilityState === 'hidden'`), or `game.instantaneousMode` is true.
+     *
+     * @returns if the animations are active.
+     */
+    AnimationManager.prototype.animationsActive = function () {
+        return document.visibilityState !== 'hidden' && !this.game.instantaneousMode;
+    };
+    /**
+     * Plays an animation if the animations are active. Animation aren't active when the window is not visible (`document.visibilityState === 'hidden'`), or `game.instantaneousMode` is true.
+     *
+     * @param animation the animation to play
+     * @returns the animation promise.
+     */
+    AnimationManager.prototype.play = function (animation) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+        return __awaiter(this, void 0, void 0, function () {
+            var settings, _r;
+            return __generator(this, function (_s) {
+                switch (_s.label) {
+                    case 0:
+                        animation.played = animation.playWhenNoAnimation || this.animationsActive();
+                        if (!animation.played) return [3 /*break*/, 2];
+                        settings = animation.settings;
+                        (_a = settings.animationStart) === null || _a === void 0 ? void 0 : _a.call(settings, animation);
+                        (_b = settings.element) === null || _b === void 0 ? void 0 : _b.classList.add((_c = settings.animationClass) !== null && _c !== void 0 ? _c : 'bga-animations_animated');
+                        animation.settings = __assign({ duration: (_g = (_e = (_d = animation.settings) === null || _d === void 0 ? void 0 : _d.duration) !== null && _e !== void 0 ? _e : (_f = this.settings) === null || _f === void 0 ? void 0 : _f.duration) !== null && _g !== void 0 ? _g : 500, scale: (_l = (_j = (_h = animation.settings) === null || _h === void 0 ? void 0 : _h.scale) !== null && _j !== void 0 ? _j : (_k = this.zoomManager) === null || _k === void 0 ? void 0 : _k.zoom) !== null && _l !== void 0 ? _l : undefined }, animation.settings);
+                        _r = animation;
+                        return [4 /*yield*/, animation.animationFunction(this, animation)];
+                    case 1:
+                        _r.result = _s.sent();
+                        (_o = (_m = animation.settings).animationEnd) === null || _o === void 0 ? void 0 : _o.call(_m, animation);
+                        (_p = settings.element) === null || _p === void 0 ? void 0 : _p.classList.remove((_q = settings.animationClass) !== null && _q !== void 0 ? _q : 'bga-animations_animated');
+                        return [3 /*break*/, 3];
+                    case 2: return [2 /*return*/, Promise.resolve(animation)];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Plays multiple animations in parallel.
+     *
+     * @param animations the animations to play
+     * @returns a promise for all animations.
+     */
+    AnimationManager.prototype.playParallel = function (animations) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, Promise.all(animations.map(function (animation) { return _this.play(animation); }))];
+            });
+        });
+    };
+    /**
+     * Plays multiple animations in sequence (the second when the first ends, ...).
+     *
+     * @param animations the animations to play
+     * @returns a promise for all animations.
+     */
+    AnimationManager.prototype.playSequence = function (animations) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result, others;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!animations.length) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.play(animations[0])];
+                    case 1:
+                        result = _a.sent();
+                        return [4 /*yield*/, this.playSequence(animations.slice(1))];
+                    case 2:
+                        others = _a.sent();
+                        return [2 /*return*/, __spreadArray([result], others, true)];
+                    case 3: return [2 /*return*/, Promise.resolve([])];
+                }
+            });
+        });
+    };
+    /**
+     * Plays multiple animations with a delay between each animation start.
+     *
+     * @param animations the animations to play
+     * @param delay the delay (in ms)
+     * @returns a promise for all animations.
+     */
+    AnimationManager.prototype.playWithDelay = function (animations, delay) {
+        return __awaiter(this, void 0, void 0, function () {
+            var promise;
+            var _this = this;
+            return __generator(this, function (_a) {
+                promise = new Promise(function (success) {
+                    var promises = [];
+                    var _loop_1 = function (i) {
+                        setTimeout(function () {
+                            promises.push(_this.play(animations[i]));
+                            if (i == animations.length - 1) {
+                                Promise.all(promises).then(function (result) {
+                                    success(result);
+                                });
+                            }
+                        }, i * delay);
+                    };
+                    for (var i = 0; i < animations.length; i++) {
+                        _loop_1(i);
+                    }
+                });
+                return [2 /*return*/, promise];
+            });
+        });
+    };
+    /**
+     * Attach an element to a parent, then play animation from element's origin to its new position.
+     *
+     * @param animation the animation function
+     * @param attachElement the destination parent
+     * @returns a promise when animation ends
+     */
+    AnimationManager.prototype.attachWithAnimation = function (animation, attachElement) {
+        console.log('attachWithAnimation', animation);
+        var attachWithAnimation = new BgaAttachWithAnimation({
+            animation: animation,
+            attachElement: attachElement
+        });
+        return this.play(attachWithAnimation);
+    };
     return AnimationManager;
 }());
 var DEFAULT_ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
+function throttle(callback, delay) {
+    var last;
+    var timer;
+    return function () {
+        var context = this;
+        var now = +new Date();
+        var args = arguments;
+        if (last && now < last + delay) {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                last = now;
+                callback.apply(context, args);
+            }, delay);
+        }
+        else {
+            last = now;
+            callback.apply(context, args);
+        }
+    };
+}
+var advThrottle = function (func, delay, options) {
+    if (options === void 0) { options = { leading: true, trailing: false }; }
+    var timer = null, lastRan = null, trailingArgs = null;
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (timer) { //called within cooldown period
+            lastRan = this; //update context
+            trailingArgs = args; //save for later
+            return;
+        }
+        if (options.leading) { // if leading
+            func.call.apply(// if leading
+            func, __spreadArray([this], args, false)); //call the 1st instance
+        }
+        else { // else it's trailing
+            lastRan = this; //update context
+            trailingArgs = args; //save for later
+        }
+        var coolDownPeriodComplete = function () {
+            if (options.trailing && trailingArgs) { // if trailing and the trailing args exist
+                func.call.apply(// if trailing and the trailing args exist
+                func, __spreadArray([lastRan], trailingArgs, false)); //invoke the instance with stored context "lastRan"
+                lastRan = null; //reset the status of lastRan
+                trailingArgs = null; //reset trailing arguments
+                timer = setTimeout(coolDownPeriodComplete, delay); //clear the timout
+            }
+            else {
+                timer = null; // reset timer
+            }
+        };
+        timer = setTimeout(coolDownPeriodComplete, delay);
+    };
+};
 var ZoomManager = /** @class */ (function () {
     /**
      * Place the settings.element in a zoom wrapper and init zoomControls.
@@ -187,12 +434,12 @@ var ZoomManager = /** @class */ (function () {
      */
     function ZoomManager(settings) {
         var _this = this;
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f;
         this.settings = settings;
         if (!settings.element) {
             throw new DOMException('You need to set the element to wrap in the zoom element');
         }
-        this.zoomLevels = (_a = settings.zoomLevels) !== null && _a !== void 0 ? _a : DEFAULT_ZOOM_LEVELS;
+        this._zoomLevels = (_a = settings.zoomLevels) !== null && _a !== void 0 ? _a : DEFAULT_ZOOM_LEVELS;
         this._zoom = this.settings.defaultZoom || 1;
         if (this.settings.localStorageZoomKey) {
             var zoomStr = localStorage.getItem(this.settings.localStorageZoomKey);
@@ -207,7 +454,7 @@ var ZoomManager = /** @class */ (function () {
         settings.element.classList.add('bga-zoom-inner');
         if ((_b = settings.smooth) !== null && _b !== void 0 ? _b : true) {
             settings.element.dataset.smooth = 'true';
-            settings.element.addEventListener('transitionend', function () { return _this.zoomOrDimensionChanged(); });
+            settings.element.addEventListener('transitionend', advThrottle(function () { return _this.zoomOrDimensionChanged(); }, this.throttleTime, { leading: true, trailing: true, }));
         }
         if ((_d = (_c = settings.zoomControls) === null || _c === void 0 ? void 0 : _c.visible) !== null && _d !== void 0 ? _d : true) {
             this.initZoomControls(settings);
@@ -215,17 +462,18 @@ var ZoomManager = /** @class */ (function () {
         if (this._zoom !== 1) {
             this.setZoom(this._zoom);
         }
-        window.addEventListener('resize', function () {
+        this.throttleTime = (_e = settings.throttleTime) !== null && _e !== void 0 ? _e : 100;
+        window.addEventListener('resize', advThrottle(function () {
             var _a;
             _this.zoomOrDimensionChanged();
             if ((_a = _this.settings.autoZoom) === null || _a === void 0 ? void 0 : _a.expectedWidth) {
                 _this.setAutoZoom();
             }
-        });
+        }, this.throttleTime, { leading: true, trailing: true, }));
         if (window.ResizeObserver) {
-            new ResizeObserver(function () { return _this.zoomOrDimensionChanged(); }).observe(settings.element);
+            new ResizeObserver(advThrottle(function () { return _this.zoomOrDimensionChanged(); }, this.throttleTime, { leading: true, trailing: true, })).observe(settings.element);
         }
-        if ((_e = this.settings.autoZoom) === null || _e === void 0 ? void 0 : _e.expectedWidth) {
+        if ((_f = this.settings.autoZoom) === null || _f === void 0 ? void 0 : _f.expectedWidth) {
             this.setAutoZoom();
         }
     }
@@ -235,6 +483,16 @@ var ZoomManager = /** @class */ (function () {
          */
         get: function () {
             return this._zoom;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(ZoomManager.prototype, "zoomLevels", {
+        /**
+         * Returns the zoom levels
+         */
+        get: function () {
+            return this._zoomLevels;
         },
         enumerable: false,
         configurable: true
@@ -249,8 +507,8 @@ var ZoomManager = /** @class */ (function () {
         }
         var expectedWidth = (_a = this.settings.autoZoom) === null || _a === void 0 ? void 0 : _a.expectedWidth;
         var newZoom = this.zoom;
-        while (newZoom > this.zoomLevels[0] && newZoom > ((_c = (_b = this.settings.autoZoom) === null || _b === void 0 ? void 0 : _b.minZoomLevel) !== null && _c !== void 0 ? _c : 0) && zoomWrapperWidth / newZoom < expectedWidth) {
-            newZoom = this.zoomLevels[this.zoomLevels.indexOf(newZoom) - 1];
+        while (newZoom > this._zoomLevels[0] && newZoom > ((_c = (_b = this.settings.autoZoom) === null || _b === void 0 ? void 0 : _b.minZoomLevel) !== null && _c !== void 0 ? _c : 0) && zoomWrapperWidth / newZoom < expectedWidth) {
+            newZoom = this._zoomLevels[this._zoomLevels.indexOf(newZoom) - 1];
         }
         if (this._zoom == newZoom) {
             if (this.settings.localStorageZoomKey) {
@@ -260,6 +518,19 @@ var ZoomManager = /** @class */ (function () {
         else {
             this.setZoom(newZoom);
         }
+    };
+    /**
+     * Sets the available zoomLevels and new zoom to the provided values.
+     * @param zoomLevels the new array of zoomLevels that can be used.
+     * @param newZoom if provided the zoom will be set to this value, if not the last element of the zoomLevels array will be set as the new zoom
+     */
+    ZoomManager.prototype.setZoomLevels = function (zoomLevels, newZoom) {
+        if (!zoomLevels || zoomLevels.length <= 0) {
+            return;
+        }
+        this._zoomLevels = zoomLevels;
+        var zoomIndex = newZoom && zoomLevels.includes(newZoom) ? this._zoomLevels.indexOf(newZoom) : this._zoomLevels.length - 1;
+        this.setZoom(this._zoomLevels[zoomIndex]);
     };
     /**
      * Set the zoom level. Ideally, use a zoom level in the zoomLevels range.
@@ -272,8 +543,8 @@ var ZoomManager = /** @class */ (function () {
         if (this.settings.localStorageZoomKey) {
             localStorage.setItem(this.settings.localStorageZoomKey, '' + this._zoom);
         }
-        var newIndex = this.zoomLevels.indexOf(this._zoom);
-        (_a = this.zoomInButton) === null || _a === void 0 ? void 0 : _a.classList.toggle('disabled', newIndex === this.zoomLevels.length - 1);
+        var newIndex = this._zoomLevels.indexOf(this._zoom);
+        (_a = this.zoomInButton) === null || _a === void 0 ? void 0 : _a.classList.toggle('disabled', newIndex === this._zoomLevels.length - 1);
         (_b = this.zoomOutButton) === null || _b === void 0 ? void 0 : _b.classList.toggle('disabled', newIndex === 0);
         this.settings.element.style.transform = zoom === 1 ? '' : "scale(".concat(zoom, ")");
         (_d = (_c = this.settings).onZoomChange) === null || _d === void 0 ? void 0 : _d.call(_c, this._zoom);
@@ -290,6 +561,7 @@ var ZoomManager = /** @class */ (function () {
     };
     /**
      * Everytime the element dimensions changes, we update the style. And call the optional callback.
+     * Unsafe method as this is not protected by throttle. Surround with  `advThrottle(() => this.zoomOrDimensionChanged(), this.throttleTime, { leading: true, trailing: true, })` to avoid spamming recomputation.
      */
     ZoomManager.prototype.zoomOrDimensionChanged = function () {
         var _a, _b;
@@ -301,21 +573,21 @@ var ZoomManager = /** @class */ (function () {
      * Simulates a click on the Zoom-in button.
      */
     ZoomManager.prototype.zoomIn = function () {
-        if (this._zoom === this.zoomLevels[this.zoomLevels.length - 1]) {
+        if (this._zoom === this._zoomLevels[this._zoomLevels.length - 1]) {
             return;
         }
-        var newIndex = this.zoomLevels.indexOf(this._zoom) + 1;
-        this.setZoom(newIndex === -1 ? 1 : this.zoomLevels[newIndex]);
+        var newIndex = this._zoomLevels.indexOf(this._zoom) + 1;
+        this.setZoom(newIndex === -1 ? 1 : this._zoomLevels[newIndex]);
     };
     /**
      * Simulates a click on the Zoom-out button.
      */
     ZoomManager.prototype.zoomOut = function () {
-        if (this._zoom === this.zoomLevels[0]) {
+        if (this._zoom === this._zoomLevels[0]) {
             return;
         }
-        var newIndex = this.zoomLevels.indexOf(this._zoom) - 1;
-        this.setZoom(newIndex === -1 ? 1 : this.zoomLevels[newIndex]);
+        var newIndex = this._zoomLevels.indexOf(this._zoom) - 1;
+        this.setZoom(newIndex === -1 ? 1 : this._zoomLevels[newIndex]);
     };
     /**
      * Changes the color of the zoom controls.
@@ -454,11 +726,11 @@ var Factories = /** @class */ (function () {
         }
         html += "</div>";
         dojo.place(html, 'factories');
-        var _loop_1 = function (factoryIndex) {
+        var _loop_2 = function (factoryIndex) {
             document.getElementById("factory".concat(factoryIndex)).addEventListener('click', function () { return _this.game.selectFactory(factoryIndex); });
         };
         for (var factoryIndex = 1; factoryIndex <= this.factoryNumber; factoryIndex++) {
-            _loop_1(factoryIndex);
+            _loop_2(factoryIndex);
         }
         this.fillFactories(factories, remainingTiles, false);
     }
@@ -508,7 +780,7 @@ var Factories = /** @class */ (function () {
         var _this = this;
         if (animation === void 0) { animation = true; }
         var tileIndex = 0;
-        var _loop_2 = function (factoryIndex) {
+        var _loop_3 = function (factoryIndex) {
             this_1.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
             var factoryTiles = factories[factoryIndex];
             factoryTiles.forEach(function (tile, index) {
@@ -548,7 +820,7 @@ var Factories = /** @class */ (function () {
         };
         var this_1 = this;
         for (var factoryIndex = 0; factoryIndex <= this.factoryNumber; factoryIndex++) {
-            _loop_2(factoryIndex);
+            _loop_3(factoryIndex);
         }
         this.updateDiscardedTilesNumbers();
         this.setRemainingTiles(remainingTiles);
@@ -677,7 +949,7 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.updateDiscardedTilesNumbers = function () {
         var _this = this;
-        var _loop_3 = function (type) {
+        var _loop_4 = function (type) {
             var number = this_2.tilesPositionsInCenter[type].length;
             var numberDiv = document.getElementById("tileCount".concat(type));
             if (!number) {
@@ -702,7 +974,7 @@ var Factories = /** @class */ (function () {
         };
         var this_2 = this;
         for (var type = 1; type <= 5; type++) {
-            _loop_3(type);
+            _loop_4(type);
         }
     };
     Factories.prototype.getTilesOfSameColorInSameFactory = function (id) {
@@ -816,38 +1088,38 @@ var PlayerTable = /** @class */ (function () {
         html += "   \n            </div>\n        </div>";
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
-        var _loop_4 = function (i) {
+        var _loop_5 = function (i) {
             document.getElementById("player-table-".concat(this_3.playerId, "-line").concat(i)).addEventListener('click', function () { return _this.game.selectLine(i); });
         };
         var this_3 = this;
         for (var i = 0; i <= 5; i++) {
-            _loop_4(i);
+            _loop_5(i);
         }
         document.getElementById("player-table-".concat(this.playerId, "-line-1")).addEventListener('click', function () { return _this.game.selectLine(0); });
         if (this.game.isVariant()) {
-            var _loop_5 = function (line) {
-                var _loop_7 = function (column) {
+            var _loop_6 = function (line) {
+                var _loop_8 = function (column) {
                     document.getElementById("player-table-".concat(this_4.playerId, "-wall-spot-").concat(line, "-").concat(column)).addEventListener('click', function () {
                         _this.game.selectColumn(line, column);
                     });
                 };
                 for (var column = 1; column <= 5; column++) {
-                    _loop_7(column);
+                    _loop_8(column);
                 }
             };
             var this_4 = this;
             for (var line = 1; line <= 5; line++) {
-                _loop_5(line);
+                _loop_6(line);
             }
             document.getElementById("player-table-".concat(this.playerId, "-column0")).addEventListener('click', function () { return _this.game.selectColumn(0, 0); });
         }
-        var _loop_6 = function (i) {
+        var _loop_7 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
             this_5.placeTilesOnLine(tiles, i);
         };
         var this_5 = this;
         for (var i = -1; i <= 5; i++) {
-            _loop_6(i);
+            _loop_7(i);
         }
         this.placeTilesOnWall(player.wall);
         if (this.game.isVariant()) {
@@ -926,15 +1198,6 @@ var PlayerTable = /** @class */ (function () {
     };
     return PlayerTable;
 }());
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 var ANIMATION_MS = 500;
 var SCORE_MS = 1500;
 var SLOW_SCORE_MS = 2000;
@@ -1291,14 +1554,16 @@ var Azul = /** @class */ (function () {
         var tileDiv = document.getElementById("tile".concat(tile.id));
         if (tileDiv) {
             if (newAnimation) {
-                return this.animationManager.attachWithSlideAnimation(tileDiv, document.getElementById(destinationId), {
-                    afterAttach: function () {
-                        tileDiv.style.position = 'absolute';
-                        tileDiv.style.left = "".concat(left, "px");
-                        tileDiv.style.top = "".concat(top, "px");
-                    },
-                    finalTransform: rotation ? "rotate(".concat(rotation, "deg)") : undefined,
+                var animation = new BgaSlideAnimation({
+                    element: tileDiv,
                 });
+                var fromRect = tileDiv.getBoundingClientRect();
+                animation.settings.fromRect = fromRect;
+                document.getElementById(destinationId).appendChild(tileDiv);
+                tileDiv.style.position = 'absolute';
+                tileDiv.style.left = "".concat(left, "px");
+                tileDiv.style.top = "".concat(top, "px");
+                return this.animationManager.play(animation).then(function () { return true; });
             }
             else {
                 return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
@@ -1455,9 +1720,10 @@ var Azul = /** @class */ (function () {
     Azul.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            this.animationManager.attachWithSlideAnimation(firstPlayerToken, document.getElementById("player_board_".concat(playerId, "_firstPlayerWrapper")), {
+            this.animationManager.attachWithAnimation(new BgaSlideAnimation({
+                element: firstPlayerToken,
                 scale: 1, // ignore game zoom
-            });
+            }), document.getElementById("player_board_".concat(playerId, "_firstPlayerWrapper")));
         }
         else {
             dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', "player_board_".concat(playerId, "_firstPlayerWrapper"));
