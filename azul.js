@@ -1224,11 +1224,10 @@ var Azul = /** @class */ (function () {
         }
     };
     Azul.prototype.isDefaultFont = function () {
-        return Number(this.prefs[206].value) == 1;
+        return this.getGameUserPreference(206) == 1;
     };
     Azul.prototype.startActionTimer = function (buttonId, time) {
-        var _a;
-        if (((_a = this.prefs[204]) === null || _a === void 0 ? void 0 : _a.value) === 2) {
+        if (this.getGameUserPreference(204) == 2) {
             return;
         }
         var button = document.getElementById(buttonId);

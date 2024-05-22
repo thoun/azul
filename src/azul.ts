@@ -351,11 +351,11 @@ class Azul implements AzulGame {
     }
 
     public isDefaultFont(): boolean {
-        return Number((this as any).prefs[206].value) == 1;
+        return (this as any).getGameUserPreference(206) == 1;
     }
 
     private startActionTimer(buttonId: string, time: number) {
-        if ((this as any).prefs[204]?.value === 2) {
+        if ((this as any).getGameUserPreference(204) == 2) {
             return;
         }
 
