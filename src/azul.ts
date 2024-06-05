@@ -424,7 +424,7 @@ class Azul implements AzulGame {
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         const tileDiv = document.getElementById(`tile${tile.id}`);
         if (tileDiv) {
-            if (newAnimation) {
+            /*if (newAnimation) {
                 const animation = new BgaSlideAnimation({
                     element: tileDiv,
                 });
@@ -438,9 +438,9 @@ class Azul implements AzulGame {
                 tileDiv.style.top = `${top}px`;
 
                 return this.animationManager.play(animation).then(() => true);
-            } else {
+            } else {*/
                 return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
-            }
+            //}
         } else {
             dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" data-rotation="${rotation ?? 0}"></div>`, destinationId);
             const newTileDiv = document.getElementById(`tile${tile.id}`);

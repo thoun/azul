@@ -37,7 +37,6 @@ function attachWithAnimation(animationManager, animation) {
     var fromRect = element.getBoundingClientRect();
     settings.animation.settings.fromRect = fromRect;
     settings.attachElement.appendChild(element);
-    console.log('settings.afterAttach', settings.afterAttach, settings.animation.settings);
     (_a = settings.afterAttach) === null || _a === void 0 ? void 0 : _a.call(settings, element, settings.attachElement);
     return animationManager.play(settings.animation);
 }
@@ -360,7 +359,6 @@ var AnimationManager = /** @class */ (function () {
      * @returns a promise when animation ends
      */
     AnimationManager.prototype.attachWithAnimation = function (animation, attachElement) {
-        console.log('attachWithAnimation', animation);
         var attachWithAnimation = new BgaAttachWithAnimation({
             animation: animation,
             attachElement: attachElement
@@ -1553,21 +1551,23 @@ var Azul = /** @class */ (function () {
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         var tileDiv = document.getElementById("tile".concat(tile.id));
         if (tileDiv) {
-            if (newAnimation) {
-                var animation = new BgaSlideAnimation({
+            /*if (newAnimation) {
+                const animation = new BgaSlideAnimation({
                     element: tileDiv,
                 });
-                var fromRect = tileDiv.getBoundingClientRect();
+            
+                const fromRect = tileDiv.getBoundingClientRect();
                 animation.settings.fromRect = fromRect;
                 document.getElementById(destinationId).appendChild(tileDiv);
+                
                 tileDiv.style.position = 'absolute';
-                tileDiv.style.left = "".concat(left, "px");
-                tileDiv.style.top = "".concat(top, "px");
-                return this.animationManager.play(animation).then(function () { return true; });
-            }
-            else {
-                return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
-            }
+                tileDiv.style.left = `${left}px`;
+                tileDiv.style.top = `${top}px`;
+
+                return this.animationManager.play(animation).then(() => true);
+            } else {*/
+            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
+            //}
         }
         else {
             dojo.place("<div id=\"tile".concat(tile.id, "\" class=\"tile tile").concat(tile.type, "\" style=\"").concat(left !== undefined ? "left: ".concat(left, "px;") : '').concat(top !== undefined ? "top: ".concat(top, "px;") : '').concat(rotation ? "transform: rotate(".concat(rotation, "deg)") : '', "\" data-rotation=\"").concat(rotation !== null && rotation !== void 0 ? rotation : 0, "\"></div>"), destinationId);
