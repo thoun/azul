@@ -176,7 +176,6 @@ class Azul extends Table {
         }
 
         $result['endRound'] = $endRound;
-        $result['undo'] = $this->allowUndo();
         $result['fastScoring'] = $this->isFastScoring();
         $result['remainingTiles'] = intval($this->tiles->countCardInLocation('deck'));
 

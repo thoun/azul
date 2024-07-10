@@ -132,11 +132,10 @@ trait ActionTrait {
     function undoTakeTiles() {
         self::checkAction('undoTakeTiles'); 
 
-        if (!$this->allowUndo()) {
+        /*if (!$this->isUndoActivated()) {
             throw new BgaUserException('Undo is disabled');
-        }
-        
-        $playerId = intval(self::getActivePlayerId());
+        }*/        
+        $playerId = self::getActivePlayerId();
 
         $undoFactory = $this->getGlobalVariable(UNDO_FACTORY);
         if ($undoFactory != null) {
@@ -241,7 +240,7 @@ trait ActionTrait {
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, $lastRoundLogged));
 
-        if ($this->allowUndo()) {
+        if ($this->isUndoActivated($playerId)) {
             $this->gamestate->nextState('confirm');
         } else {
             $this->gamestate->nextState('nextPlayer');
@@ -259,9 +258,9 @@ trait ActionTrait {
     function undoSelectLine() {
         self::checkAction('undoSelectLine'); 
 
-        if (!$this->allowUndo()) {
+        /*if (!$this->isUndoActivated()) {
             throw new BgaUserException('Undo is disabled');
-        }
+        }*/
         
         $playerId = intval(self::getActivePlayerId());       
 

@@ -1401,9 +1401,9 @@ var Azul = /** @class */ (function () {
             switch (stateName) {
                 case 'chooseFactory':
                 case 'chooseLine':
-                    if (this.gamedatas.undo) {
-                        this.addActionButton('undoTakeTiles_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); });
-                    }
+                    //if ((this as any).getGameUserPreference(101) !== 2) {
+                    this.addActionButton('undoTakeTiles_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); });
+                    //}
                     break;
                 case 'confirmLine':
                     this.addActionButton('confirmLine_button', _("Confirm"), function () { return _this.confirmLine(); });

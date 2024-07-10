@@ -38,7 +38,6 @@ interface AzulGamedatas {
     firstPlayerTokenPlayerId: number;
     variant: boolean;
     endRound: boolean;
-    undo: boolean;
     fastScoring: boolean;
     remainingTiles: number;
 

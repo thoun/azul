@@ -60,20 +60,6 @@ $game_options = [
         'default' => 1,
     ],
 
-    101 => [
-        'name' => totranslate('Allow Undo/confirm'),    
-        'values' => [
-                1 => [
-                    'name' => totranslate('Enabled'),
-                ],
-                2 => [
-                    'name' => totranslate('Disabled'),
-                    'tmdisplay' => totranslate('Undo/confirm disabled'), 
-                ]
-            ],
-        'default' => 1
-    ],
-
     102 => [
         'name' => totranslate('Fast scoring'),    
         'values' => [
@@ -93,6 +79,19 @@ $game_options = [
 
 
 $game_preferences = [
+    101 => [
+        'name' => totranslate('Allow Undo/confirm'),   
+        'needReload' => false, 
+        'values' => [
+                1 => [
+                    'name' => totranslate('Enabled'),
+                ],
+                2 => [
+                    'name' => totranslate('Disabled'),
+                ]
+            ],
+        'default' => 1
+    ],
 
     210 => [
         'name' => totranslate('Azul Master Chocolatier skin'),

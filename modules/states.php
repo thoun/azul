@@ -110,7 +110,8 @@ trait StateTrait {
     }
 
     function stConfirmLine() {
-        if (!$this->allowUndo()) {
+        $playerId = (int)self::getActivePlayerId();
+        if (!$this->isUndoActivated($playerId)) {
             $this->gamestate->nextState('nextPlayer');
         }
     }

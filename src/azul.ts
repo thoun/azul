@@ -252,9 +252,9 @@ class Azul implements AzulGame {
             switch (stateName) {  
                 case 'chooseFactory':
                 case 'chooseLine':
-                    if (this.gamedatas.undo) {
+                    //if ((this as any).getGameUserPreference(101) !== 2) {
                         (this as any).addActionButton('undoTakeTiles_button', _("Undo tile selection"), () => this.undoTakeTiles());
-                    }
+                    //}
                     break;     
                 case 'confirmLine':
                     (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmLine());
