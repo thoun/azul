@@ -14,9 +14,9 @@ bga-animations@thoun/bga-animations#1.1.1:
   version "1.1.1"
   resolved "https://codeload.github.com/thoun/bga-animations/tar.gz/91a2747fa5f5a7402a5adfa84d976d8216269f6b"
 
-bga-zoom@thoun/bga-zoom#1.0.3:
+bga-zoom@thoun/bga-zoom#1.0.4:
   version "1.0.3"
-  resolved "https://codeload.github.com/thoun/bga-zoom/tar.gz/35183a0c170e787116574f84325fb9c83159fabb"
+  resolved "https://codeload.github.com/thoun/bga-zoom/tar.gz/8b5fd458c3d9c92da4d66891a5b07b9e894d89f0"
 
 binary-extensions@^2.0.0:
   version "2.3.0"

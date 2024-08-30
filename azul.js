@@ -109,6 +109,25 @@ var BgaSlideAnimation = /** @class */ (function (_super) {
     }
     return BgaSlideAnimation;
 }(BgaAnimation));
+/**
+ * Just use playSequence from animationManager
+ *
+ * @param animationManager the animation manager
+ * @param animation a `BgaAnimation` object
+ * @returns a promise when animation ends
+ */
+function cumulatedAnimations(animationManager, animation) {
+    return animationManager.playSequence(animation.settings.animations);
+}
+var BgaCumulatedAnimation = /** @class */ (function (_super) {
+    __extends(BgaCumulatedAnimation, _super);
+    function BgaCumulatedAnimation(settings) {
+        var _this = _super.call(this, cumulatedAnimations, settings) || this;
+        _this.playWhenNoAnimation = true;
+        return _this;
+    }
+    return BgaCumulatedAnimation;
+}(BgaAnimation));
 function shouldAnimate(settings) {
     var _a;
     return document.visibilityState !== 'hidden' && !((_a = settings === null || settings === void 0 ? void 0 : settings.game) === null || _a === void 0 ? void 0 : _a.instantaneousMode);
@@ -564,7 +583,7 @@ var ZoomManager = /** @class */ (function () {
     ZoomManager.prototype.zoomOrDimensionChanged = function () {
         var _a, _b;
         this.settings.element.style.width = "".concat(this.wrapper.offsetWidth / this._zoom, "px");
-        this.wrapper.style.height = "".concat(this.settings.element.offsetHeight, "px");
+        this.wrapper.style.height = "".concat(this.settings.element.offsetHeight * this._zoom, "px");
         (_b = (_a = this.settings).onDimensionsChange) === null || _b === void 0 ? void 0 : _b.call(_a, this._zoom);
     };
     /**
