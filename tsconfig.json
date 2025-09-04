@@ -8,9 +8,7 @@
       "outFile": "azul.js",
     },
     "files": [
-        "src/framework.d.ts",
-        "src/counter.d.ts",
-        "src/stock.d.ts",
+        "bga-framework.d.ts",
         "node_modules/bga-animations/src/animations.ts",
         "node_modules/bga-animations/src/animations/attach-with-animation.ts",
         "node_modules/bga-animations/src/animations/slide-animation.ts",

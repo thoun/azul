@@ -1225,14 +1225,22 @@ var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 var LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
 var isDebug = window.location.host == 'studio.boardgamearena.com';
 var log = isDebug ? console.log.bind(window.console) : function () { };
-var Azul = /** @class */ (function () {
+// @ts-ignore
+GameGui = (function () {
+    function GameGui() { }
+    return GameGui;
+})();
+var Azul = /** @class */ (function (_super) {
+    __extends(Azul, _super);
     function Azul() {
-        this.playersTables = [];
-        this.zoom = 0.75;
+        var _this = _super.call(this) || this;
+        _this.playersTables = [];
+        _this.zoom = 0.75;
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
-            this.zoom = Number(zoomStr);
+            _this.zoom = Number(zoomStr);
         }
+        return _this;
     }
     /*
         setup:
@@ -1419,7 +1427,7 @@ var Azul = /** @class */ (function () {
             switch (stateName) {
                 case 'chooseFactory':
                 case 'chooseLine':
-                    //if ((this as any).getGameUserPreference(101) !== 2) {
+                    //if (this.getGameUserPreference(101) !== 2) {
                     this.addActionButton('undoTakeTiles_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); });
                     //}
                     break;
@@ -1667,73 +1675,44 @@ var Azul = /** @class */ (function () {
         helpDialog.show();
     };
     Azul.prototype.takeTiles = function (id) {
-        if (!this.checkAction('takeTiles')) {
-            return;
-        }
-        this.takeAction('takeTiles', {
+        this.bgaPerformAction('takeTiles', {
             id: id
         });
     };
     Azul.prototype.undoTakeTiles = function () {
-        if (!this.checkAction('undoTakeTiles')) {
-            return;
-        }
-        this.takeAction('undoTakeTiles');
+        this.bgaPerformAction('undoTakeTiles');
     };
     Azul.prototype.selectFactory = function (factory) {
         if (!this.checkAction('selectFactory', true)) {
             return;
         }
-        this.takeAction('selectFactory', {
+        this.bgaPerformAction('selectFactory', {
             factory: factory
         });
     };
     Azul.prototype.selectLine = function (line) {
-        if (!this.checkAction('selectLine')) {
-            return;
-        }
-        this.takeAction('selectLine', {
+        this.bgaPerformAction('selectLine', {
             line: line
         });
     };
     Azul.prototype.confirmLine = function () {
-        if (!this.checkAction('confirmLine')) {
-            return;
-        }
-        this.takeAction('confirmLine');
+        this.bgaPerformAction('confirmLine');
     };
     Azul.prototype.undoSelectLine = function () {
-        if (!this.checkAction('undoSelectLine')) {
-            return;
-        }
-        this.takeAction('undoSelectLine');
+        this.bgaPerformAction('undoSelectLine');
     };
     Azul.prototype.selectColumn = function (line, column) {
-        if (!this.checkAction('selectColumn')) {
-            return;
-        }
-        this.takeAction('selectColumn', {
+        this.bgaPerformAction('selectColumn', {
             line: line,
             column: column
         });
         this.removeColumnSelection();
     };
     Azul.prototype.confirmColumns = function () {
-        if (!this.checkAction('confirmColumns')) {
-            return;
-        }
-        this.takeAction('confirmColumns');
+        this.bgaPerformAction('confirmColumns');
     };
     Azul.prototype.undoColumns = function () {
-        if (!this.checkAction('undoColumns')) {
-            return;
-        }
-        this.takeAction('undoColumns');
-    };
-    Azul.prototype.takeAction = function (action, data) {
-        data = data || {};
-        data.lock = true;
-        this.ajaxcall("/azul/azul/".concat(action, ".html"), data, this, function () { });
+        this.bgaPerformAction('undoColumns');
     };
     Azul.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
@@ -1929,7 +1908,7 @@ var Azul = /** @class */ (function () {
         return this.inherited(arguments);
     };
     return Azul;
-}());
+}(GameGui));
 define([
     "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",

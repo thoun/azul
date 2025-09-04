@@ -1,10 +1,3 @@
-declare const define;
-declare const ebg;
-declare const $;
-declare const dojo: Dojo;
-declare const _;
-declare const g_gamethemeurl;
-
 declare const board: HTMLDivElement;
 
 const ANIMATION_MS = 500;
@@ -22,17 +15,25 @@ const LOCAL_STORAGE_ZOOM_KEY = 'Azul-zoom';
 const isDebug = window.location.host == 'studio.boardgamearena.com';
 const log = isDebug ? console.log.bind(window.console) : function () { };
 
-class Azul implements AzulGame {
+// @ts-ignore
+GameGui = (function () { // this hack required so we fake extend GameGui
+  function GameGui() {}
+  return GameGui;
+})();
+
+class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     public animationManager: AnimationManager;
 
-    private gamedatas: AzulGamedatas;
+    public gamedatas: AzulGamedatas;
     private zoomManager: ZoomManager;
     private factories: Factories;
     private playersTables: PlayerTable[] = [];
 
     public zoom: number = 0.75;
 
-    constructor() {    
+    constructor() {   
+        super();
+
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -55,11 +56,11 @@ class Azul implements AzulGame {
     public setup(gamedatas: AzulGamedatas) {
         // ignore loading of some pictures
         if (this.isVariant()) {
-            (this as any).dontPreloadImage('playerboard.jpg');
+            this.dontPreloadImage('playerboard.jpg');
         } else {
-            (this as any).dontPreloadImage('playerboard-variant.jpg');
+            this.dontPreloadImage('playerboard-variant.jpg');
         }
-        (this as any).dontPreloadImage('publisher.png');
+        this.dontPreloadImage('publisher.png');
 
         log("Starting game setup");
         
@@ -145,19 +146,19 @@ class Azul implements AzulGame {
     }
 
     onEnteringChooseTile() {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             dojo.addClass('factories', 'selectable');
         }
     }
 
     onEnteringChooseFactory(args: EnteringChooseFactoryArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             args.possibleFactories.forEach(i => dojo.addClass(`factory${i}`, 'selectable'));
         }
     }
 
     onEnteringChooseLine(args: EnteringChooseLineArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
             dojo.addClass(`player-table-${this.getPlayerId()}-line-1`, 'selectable');
         }
@@ -168,7 +169,7 @@ class Azul implements AzulGame {
 
         infos.selectedColumns.forEach(selectedColumn => table.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));
 
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             const nextColumnToSelect = infos.nextColumnToSelect;
             if (nextColumnToSelect) {
                 nextColumnToSelect.availableColumns.forEach(column =>
@@ -181,8 +182,8 @@ class Azul implements AzulGame {
             
             if (!privateMulti) {
                 if (!document.getElementById('confirmColumns_button')) {
-                    (this as any).addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
-                    (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
+                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
+                    this.addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
                 }
                 dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect);
             }
@@ -248,24 +249,24 @@ class Azul implements AzulGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         log('onUpdateActionButtons', stateName, args);
         
-        if((this as any).isCurrentPlayerActive()) {
+        if(this.isCurrentPlayerActive()) {
             switch (stateName) {  
                 case 'chooseFactory':
                 case 'chooseLine':
-                    //if ((this as any).getGameUserPreference(101) !== 2) {
-                        (this as any).addActionButton('undoTakeTiles_button', _("Undo tile selection"), () => this.undoTakeTiles());
+                    //if (this.getGameUserPreference(101) !== 2) {
+                        this.addActionButton('undoTakeTiles_button', _("Undo tile selection"), () => this.undoTakeTiles());
                     //}
                     break;     
                 case 'confirmLine':
-                    (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmLine());
-                    (this as any).addActionButton('undoSelectLine_button', _("Undo line selection"), () => this.undoSelectLine(), null, null, 'gray');
+                    this.addActionButton('confirmLine_button', _("Confirm"), () => this.confirmLine());
+                    this.addActionButton('undoSelectLine_button', _("Undo line selection"), () => this.undoSelectLine(), null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
                 case 'privateChooseColumns':
                 case 'privateConfirmColumns':
                     const privateChooseColumnArgs = args as ChooseColumnsForPlayer;
-                    (this as any).addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
-                    (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
+                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
+                    this.addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
                     dojo.toggleClass('confirmColumns_button', 'disabled', !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns');
                     break;
             }
@@ -292,7 +293,7 @@ class Azul implements AzulGame {
         } catch (e) {}
 
         [201, 202, 203, 205, 206, 210, 299].forEach(
-            prefId => this.onGameUserPreferenceChanged(prefId, (this as any).getGameUserPreference(prefId))
+            prefId => this.onGameUserPreferenceChanged(prefId, this.getGameUserPreference(prefId))
         );
     }
       
@@ -342,7 +343,7 @@ class Azul implements AzulGame {
                 `, 'bga-zoom-controls');
 
                 document.getElementById('hide-zoom-notice').addEventListener('click', () => 
-                    (this as any).setGameUserPreference(299, 2)
+                    this.setGameUserPreference(299, 2)
                 );
             }
         } else if (elem) {
@@ -351,11 +352,11 @@ class Azul implements AzulGame {
     }
 
     public isDefaultFont(): boolean {
-        return (this as any).getGameUserPreference(206) == 1;
+        return this.getGameUserPreference(206) == 1;
     }
 
     private startActionTimer(buttonId: string, time: number) {
-        if ((this as any).getGameUserPreference(204) == 2) {
+        if (this.getGameUserPreference(204) == 2) {
             return;
         }
 
@@ -400,7 +401,7 @@ class Azul implements AzulGame {
     }
 
     public getPlayerId(): number {
-        return Number((this as any).player_id);
+        return Number(this.player_id);
     }
 
     private getPlayerColor(playerId: number): string {
@@ -412,10 +413,10 @@ class Azul implements AzulGame {
     }
 
     private incScore(playerId: number, incScore: number) {
-        if ((this as any).scoreCtrl[playerId]?.getValue() + incScore < 0) {
-            (this as any).scoreCtrl[playerId]?.toValue(0);
+        if (this.scoreCtrl[playerId]?.getValue() + incScore < 0) {
+            this.scoreCtrl[playerId]?.toValue(0);
         } else {
-            (this as any).scoreCtrl[playerId]?.incValue(incScore);
+            this.scoreCtrl[playerId]?.incValue(incScore);
         }
     }
 
@@ -485,7 +486,7 @@ class Azul implements AzulGame {
 
     private createPlayerTables(gamedatas: AzulGamedatas) {
         const players = Object.values(gamedatas.players).sort((a, b) => a.playerNo - b.playerNo);
-        const playerIndex = players.findIndex(player => Number(player.id) === Number((this as any).player_id));
+        const playerIndex = players.findIndex(player => Number(player.id) === Number(this.player_id));
         const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
 
         orderedPlayers.forEach(player => 
@@ -508,7 +509,7 @@ class Azul implements AzulGame {
                 if (fadeOut) {
                     const destroyedId = `${divElement.id}-to-be-destroyed`;
                     divElement.id = destroyedId;
-                    (this as any).fadeOutAndDestroy(destroyedId);
+                    this.fadeOutAndDestroy(destroyedId);
                 } else {
                     divElement.parentElement.removeChild(divElement);
                 }
@@ -581,65 +582,41 @@ class Azul implements AzulGame {
     }
 
     public takeTiles(id: number) {
-        if(!(this as any).checkAction('takeTiles')) {
-            return;
-        }
-
-        this.takeAction('takeTiles', {
+        this.bgaPerformAction('takeTiles', {
             id
         });
     }
 
     public undoTakeTiles() {
-        if(!(this as any).checkAction('undoTakeTiles')) {
-            return;
-        }
-
-        this.takeAction('undoTakeTiles');
+        this.bgaPerformAction('undoTakeTiles');
     }
 
     public selectFactory(factory: number) {
-        if(!(this as any).checkAction('selectFactory', true)) {
+        if(!this.checkAction('selectFactory', true)) {
             return;
         }
 
-        this.takeAction('selectFactory', {
+        this.bgaPerformAction('selectFactory', {
             factory
         });
     }
 
     public selectLine(line: number) {
-        if(!(this as any).checkAction('selectLine')) {
-            return;
-        }
-
-        this.takeAction('selectLine', {
+        this.bgaPerformAction('selectLine', {
             line
         });
     }
 
     public confirmLine() {
-        if(!(this as any).checkAction('confirmLine')) {
-            return;
-        }
-
-        this.takeAction('confirmLine');
+        this.bgaPerformAction('confirmLine');
     }
 
     public undoSelectLine() {
-        if(!(this as any).checkAction('undoSelectLine')) {
-            return;
-        }
-
-        this.takeAction('undoSelectLine');
+        this.bgaPerformAction('undoSelectLine');
     }
 
     public selectColumn(line: number, column: number) {
-        if(!(this as any).checkAction('selectColumn')) {
-            return;
-        }
-
-        this.takeAction('selectColumn', {
+        this.bgaPerformAction('selectColumn', {
             line,
             column
         });
@@ -648,25 +625,11 @@ class Azul implements AzulGame {
     }
 
     public confirmColumns() {
-        if(!(this as any).checkAction('confirmColumns')) {
-            return;
-        }
-
-        this.takeAction('confirmColumns');
+        this.bgaPerformAction('confirmColumns');
     }
 
     public undoColumns() {
-        if(!(this as any).checkAction('undoColumns')) {
-            return;
-        }
-
-        this.takeAction('undoColumns');
-    }
-
-    public takeAction(action: string, data?: any) {
-        data = data || {};
-        data.lock = true;
-        (this as any).ajaxcall(`/azul/azul/${action}.html`, data, this, () => {});
+        this.bgaPerformAction('undoColumns');
     }
 
     placeFirstPlayerToken(playerId: number) {
@@ -682,14 +645,14 @@ class Azul implements AzulGame {
         } else {
             dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);
 
-            (this as any).addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
+            this.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
     }
 
     private displayScoringOnTile(tile: Tile, playerId: string | number, points: number) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
         dojo.place(`<div id="tile${tile.id}-scoring" class="scoring-tile"></div>`, `player-table-${playerId}-wall-spot-${tile.line}-${tile.column}`);
-        (this as any).displayScoring(`tile${tile.id}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+        this.displayScoring(`tile${tile.id}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     }
 
     ///////////////////////////////////////////////////
@@ -805,7 +768,7 @@ class Azul implements AzulGame {
             this.removeTiles(notif.args.specialFactoryZeroTiles[playerId], true);
             
             setTimeout(() => this.removeTiles(floorLine.tiles, true), SCORE_MS - 50);
-            (this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
+            this.displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
             this.incScore(Number(playerId), floorLine.points);
         });
     }
