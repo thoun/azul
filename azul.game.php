@@ -288,6 +288,13 @@ class Azul extends \Bga\GameFramework\Table {
             return $possibleAnswerPoints;
         }
 
+        public function zombieTurn_chooseFactory(int $playerId) {
+            $args = $this->argChooseFactory();
+            $possibleFactories = $args['possibleFactories'];
+            $zombieChoice = $possibleFactories[bga_rand(0, count($possibleFactories) - 1)];
+            $this->selectFactory($zombieChoice, true);
+        }
+
         public function zombieTurn_chooseLine(int $playerId) {
             $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
             $playerLines = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
@@ -299,8 +306,8 @@ class Azul extends \Bga\GameFramework\Table {
             $maxPointsAnswers = array_keys($possibleAnswerPoints, $maxPoints);
             $zombieChoice = $maxPointsAnswers[bga_rand(0, count($maxPointsAnswers) - 1)];
             $this->selectLine($zombieChoice, true);
-
         }
+
         public function zombieTurn_confirmLine(int $playerId) {
             $this->confirmLine(true);
         }
@@ -312,6 +319,9 @@ class Azul extends \Bga\GameFramework\Table {
                 switch ($statename) {
                     case 'chooseTile':
                         $this->zombieTurn_chooseTile((int)$active_player);
+                        break;
+                    case 'chooseFactory':
+                        $this->zombieTurn_chooseFactory((int)$active_player);
                         break;
                     case 'chooseLine':
                         $this->zombieTurn_chooseLine((int)$active_player);

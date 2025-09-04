@@ -194,8 +194,10 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function selectFactory(int $factory) {
-        $this->checkAction('selectFactory');
+    function selectFactory(int $factory, $skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('selectFactory');
+        }
 
         $args = $this->argChooseFactory();
 

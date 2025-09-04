@@ -255,7 +255,10 @@ trait DebugUtilTrait {
         switch ($state) {
           case ST_PLAYER_CHOOSE_TILE:
             $this->zombieTurn_chooseTile($playerId);
-            break;    
+            break;     
+          case ST_PLAYER_CHOOSE_FACTORY:
+            $this->zombieTurn_chooseFactory($playerId);
+            break;
           case ST_PLAYER_CHOOSE_LINE:
             $this->zombieTurn_chooseLine($playerId);
             break;
