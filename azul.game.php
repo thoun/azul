@@ -28,13 +28,15 @@ require_once('modules/args.php');
 require_once('modules/states.php');
 require_once('modules/debug-util.php');
 
-class Azul extends Table {
+class Azul extends \Bga\GameFramework\Table {
 
     use UtilTrait;
     use ActionTrait;
     use ArgsTrait;
     use StateTrait;
     use DebugUtilTrait;
+
+    public \Bga\GameFramework\Components\Deck $tiles;
 
 	function __construct() {
         // Your global variables labels:
@@ -59,12 +61,7 @@ class Azul extends Table {
         $this->tiles = self::getNew("module.common.deck");
         $this->tiles->init("tile");
         $this->tiles->autoreshuffle = true;      
-	}
-	
-    protected function getGameName() {
-		// Used for translations and stuff. Please do not modify.
-        return "azul";
-    }	
+	}	
 
     /*
         setupNewGame:
@@ -137,7 +134,7 @@ class Azul extends Table {
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas() {
+    protected function getAllDatas(): array {
         $result = [];
     
         // Get information about players
@@ -230,22 +227,97 @@ class Azul extends Table {
             As a consequence, there is no current player associated to this action. In your zombieTurn function,
             you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
         */
+
+        public function zombieTurn_chooseTile(int $playerId) {
+            $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory'));
+            $tiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type > 0));
+
+            $playerLines = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
+            $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+
+            $possibleAnswerPoints = [];
+            foreach ($tiles as $tile) {
+                $tilesOfSameColorInFactory = array_values(array_filter($tiles, fn($t) => $tile->column == $t->column && $tile->type == $t->type));
+                $possibleAnswerPoints[$tile->id] = $this->zombieTurn_chooseLineAnswerPoints($tile->type, count($tilesOfSameColorInFactory), $playerLines, $playerWallTiles);
+            }
+
+            $maxPoints = max($possibleAnswerPoints);
+            $maxPointsAnswers = array_keys($possibleAnswerPoints, $maxPoints);
+            $zombieChoice = $maxPointsAnswers[bga_rand(0, count($maxPointsAnswers) - 1)];
+
+            $this->takeTiles($zombieChoice, true);
+        }
+
+        private function zombieTurn_chooseLineAnswerPoints(int $tileColor, int $tileCount, array $playerLines, array $playerWallTiles): array {
+            /*
+            Not real points, but considered effectiveness.
+            Number of played tiles for the row, or -9999 if unplayable. x2 if completing an already started row. -0.4 for each discarded tile.
+            */
+            $possibleAnswerPoints = [
+                0 => 0,
+            ];
+
+            for ($line=1; $line<=5; $line++) {
+                $tilesOfLine = array_values(array_filter($playerLines, fn($tile) => $tile->line == $line));
+                if (count($tilesOfLine) > 0) {
+                    $lineColor = $tilesOfLine[0]->type;
+                    if (count($tilesOfLine) < $line && $tileColor == $lineColor) {
+                        $possibleAnswerPoints[$line] = $tileCount * 2;
+                        $discarded = $tileCount - ($line - count($tilesOfLine));
+                        if ($discarded > 0) {
+                            $possibleAnswerPoints[$line] -= $discarded * 0.4;
+                        }
+                    } else {
+                        $possibleAnswerPoints[$line] = -9999;
+                    }
+                } else {
+                    $playerWallTileLine = array_values(array_filter($playerWallTiles, fn($tile) => $tile->line == $line));
+
+                    if ($this->someOfColor($playerWallTileLine, $tileColor)) {
+                        $possibleAnswerPoints[$line] = -9999;
+                    } else {
+                        $possibleAnswerPoints[$line] = $tileCount;
+                        $discarded = $tileCount - $line;
+                        if ($discarded > 0) {
+                            $possibleAnswerPoints[$line] -= $discarded * 0.4;
+                        }
+                    }
+                }
+            }
+
+            return $possibleAnswerPoints;
+        }
+
+        public function zombieTurn_chooseLine(int $playerId) {
+            $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+            $playerLines = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
+            $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+
+            $possibleAnswerPoints = $this->zombieTurn_chooseLineAnswerPoints($hand[0]->type, count($hand), $playerLines, $playerWallTiles);
+
+            $maxPoints = max($possibleAnswerPoints);
+            $maxPointsAnswers = array_keys($possibleAnswerPoints, $maxPoints);
+            $zombieChoice = $maxPointsAnswers[bga_rand(0, count($maxPointsAnswers) - 1)];
+            $this->selectLine($zombieChoice, true);
+
+        }
+        public function zombieTurn_confirmLine(int $playerId) {
+            $this->confirmLine(true);
+        }
     
-        function zombieTurn($state, $active_player) {
+        function zombieTurn($state, $active_player): void {
             $statename = $state['name'];
             
             if ($state['type'] === "activeplayer") {
                 switch ($statename) {
                     case 'chooseTile':
-                        $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory'));
-                        $tiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type > 0));
-                        $this->takeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id, true);
+                        $this->zombieTurn_chooseTile((int)$active_player);
                         break;
                     case 'chooseLine':
-                        $this->selectLine(0, true);
+                        $this->zombieTurn_chooseLine((int)$active_player);
                         break;
                     case 'confirmLine':
-                        $this->confirmLine(true);
+                        $this->zombieTurn_confirmLine((int)$active_player);
                         break;
                     default:
                         $this->gamestate->nextState("nextPlayer"); // all player actions got nextPlayer action as a "zombiePass"

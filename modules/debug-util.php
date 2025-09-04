@@ -247,34 +247,22 @@ trait DebugUtilTrait {
         //}
     }
 
-    public function debug_ReplacePlayersIds() {
-        if ($this->getBgaEnvironment() != 'studio') { 
-            return;
-        } 
-
-        $ids = array_map(fn($dbPlayer) => intval($dbPlayer['player_id']), array_values($this->getCollectionFromDb('select player_id from player order by player_no')));
-
-		// Id of the first player in BGA Studio
-		$sid = 2343492;
-		
-		foreach ($ids as $id) {
-			// basic tables
-			self::DbQuery("UPDATE player SET player_id=$sid WHERE player_id = $id" );
-			self::DbQuery("UPDATE global SET global_value=$sid WHERE global_value = $id" );
-			self::DbQuery("UPDATE stats SET stats_player_id=$sid WHERE stats_player_id = $id" );
-
-			// 'other' game specific tables. example:
-			// tables specific to your schema that use player_ids
-			self::DbQuery("UPDATE tile SET card_location='line$sid' WHERE card_location = 'line$id'" );
-			self::DbQuery("UPDATE tile SET card_location='wall$sid' WHERE card_location = 'wall$id'" );
-			
-			++$sid;
-		}
-	}
-
-    function debug_($debugData) {
-        if ($this->getBgaEnvironment() != 'studio') { 
-            return;
-        }die('debug data : '.json_encode($debugData));
+    function debug_playToEndRound() {
+      $round = $this->getStat('roundsNumber');
+      while (intval($this->gamestate->state_id()) < ST_END_ROUND && $this->getStat('roundsNumber') == $round) {
+        $state = intval($this->gamestate->state_id());
+        $playerId = intval($this->getActivePlayerId());
+        switch ($state) {
+          case ST_PLAYER_CHOOSE_TILE:
+            $this->zombieTurn_chooseTile($playerId);
+            break;    
+          case ST_PLAYER_CHOOSE_LINE:
+            $this->zombieTurn_chooseLine($playerId);
+            break;
+          case ST_PLAYER_CONFIRM_LINE:
+            $this->zombieTurn_confirmLine($playerId);
+            break;
+        }
+      }
     }
 }

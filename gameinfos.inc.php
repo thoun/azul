@@ -16,13 +16,13 @@ $gameinfos = [
 'game_name' => "Azul",        
 
 // Game publisher (use empty string if there is no publisher)
-'publisher' => 'Plan B Games',                     
+'publisher' => 'Next Move',
 
 // Url of game publisher website
-'publisher_website' => 'http://planbgames.com/',   
+'publisher_website' => 'https://www.nextmove-games.com',
 
 // Board Game Geek ID of the publisher
-'publisher_bgg_id' => 34188,
+'publisher_bgg_id' => 38363,
 
 // Board game geek ID of the game
 'bgg_id' => 230802,
