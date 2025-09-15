@@ -107,7 +107,7 @@ trait ArgsTrait {
         $playerArg->nextColumnToSelect = $this->nextColumnToSelect($playerId);
         $playerArg->selectedColumns = $this->getSelectedColumnsArray($playerId);
 
-        return $playerArg;
+        return (array)$playerArg;
     }
 
     function argChooseColumns() {

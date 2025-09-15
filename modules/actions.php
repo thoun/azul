@@ -289,7 +289,7 @@ trait ActionTrait {
 
         $this->setSelectedColumn($playerId, $line, $column);
 
-        $arg = $this->argChooseColumnForPlayer($playerId);
+        $arg = (object)$this->argChooseColumnForPlayer($playerId);
 
         self::notifyPlayer($playerId, 'updateSelectColumn', '', [
             'playerId' => $playerId,
