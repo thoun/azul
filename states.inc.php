@@ -228,6 +228,7 @@ $playerActionsGameStates = [
         "name" => "privateConfirmColumns",
         "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
         "type" => "private",
+        "args" => "argChooseColumnForPlayer",
         "possibleactions" => [
             "confirmColumns",
             "undoColumns"
