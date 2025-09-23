@@ -18,9 +18,9 @@ class EndRound extends \Bga\GameFramework\States\GameState
 
     function onEnteringState() {        
         if ($this->game->isVariant()) {
-            return ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS;
+            return MultiChooseColumns::class;
         } else {
-            return ST_PLACE_TILES;
+            return PlaceTiles::class;
         }
     }
 }

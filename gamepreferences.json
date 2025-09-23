@@ -1,0 +1,119 @@
+{
+    "101": {
+        "name": "Allow Undo\/confirm",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Enabled"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 1
+    },
+    "210": {
+        "name": "Azul Master Chocolatier skin",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Enabled"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 2
+    },
+    "201": {
+        "name": "Tile shimmer",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Enabled"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 1
+    },
+    "202": {
+        "name": "Dark background",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Disabled"
+            },
+            "2": {
+                "name": "Enabled"
+            }
+        },
+        "default": 1
+    },
+    "203": {
+        "name": "Add pattern for red tile (color-blind help)",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Enabled"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 2
+    },
+    "204": {
+        "name": "Countdown timer for confirm button",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Enabled"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 1
+    },
+    "205": {
+        "name": "Display tile count in factory center",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Enabled"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 1
+    },
+    "206": {
+        "name": "Font style for player names",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Default font"
+            },
+            "2": {
+                "name": "Azul font"
+            }
+        },
+        "default": 2
+    },
+    "299": {
+        "name": "",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Enabled"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 1
+    }
+}

@@ -24,14 +24,14 @@ class NextPlayer extends \Bga\GameFramework\States\GameState
         $this->game->incStat(1, 'turnsNumber', $activePlayerId);
 
         if ($factoriesAllEmpty) {
-            return ST_END_ROUND;
+            return EndRound::class;
         } else {
             $this->game->activeNextPlayer();
         
             $playerId = (int)$this->game->getActivePlayerId();
             $this->game->giveExtraTime($playerId);
 
-            return ST_PLAYER_CHOOSE_TILE;
+            return ChooseTile::class;
         }
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Bga\Games\Azul\States;
 
 use Bga\GameFramework\StateType;
+use Bga\GameFrameworkPrototype\Helpers\Arrays;
 use Bga\Games\Azul\Game;
 
 class EndScore extends \Bga\GameFramework\States\GameState
@@ -54,8 +55,8 @@ class EndScore extends \Bga\GameFramework\States\GameState
     function notifCompleteLines(array $playersIds, array $walls, int $line) {        
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile)=> $tile->line == $line));
-            usort($playerTiles, 'sortByColumn');
+            $playerTiles = Arrays::filter($walls[$playerId], fn($tile)=> $tile->line == $line);
+            usort($playerTiles, fn($a, $b) => $this->game->sortByColumn($a, $b));
 
             if (count($playerTiles) == 5) {
 
@@ -88,11 +89,18 @@ class EndScore extends \Bga\GameFramework\States\GameState
         }
     }
 
+    function sortByLine($a, $b) {
+        if ($a->line == $b->line) {
+            return 0;
+        }
+        return ($a->line < $b->line) ? -1 : 1;
+    }
+
     function notifCompleteColumns(array $playersIds, array $walls, int $column) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->column == $column));
-            usort($playerTiles, 'sortByLine');
+            $playerTiles = Arrays::filter($walls[$playerId], fn($tile) => $tile->column == $column);
+            usort($playerTiles, fn($a, $b) => $this->sortByLine($a, $b));
             
             if (count($playerTiles) == 5) {
 
@@ -127,8 +135,8 @@ class EndScore extends \Bga\GameFramework\States\GameState
     function notifCompleteColors(array $playersIds, array $walls, int $color) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->type == $color));
-            usort($playerTiles, 'sortByLine');
+            $playerTiles = Arrays::filter($walls[$playerId], fn($tile) => $tile->type == $color);
+            usort($playerTiles, fn($a, $b) => $this->sortByLine($a, $b));
             
             if (count($playerTiles) == 5) {
 

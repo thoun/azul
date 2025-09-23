@@ -1256,6 +1256,7 @@ var Azul = /** @class */ (function (_super) {
     */
     Azul.prototype.setup = function (gamedatas) {
         var _this = this;
+        this.getGameAreaElement().insertAdjacentHTML('beforeend', "\n            <div id=\"table\">\n                <div id=\"centered-table\">\n                    <div id=\"factories\">\n                        <div id=\"bag\">\n                            <span id=\"bag-counter\"></span>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        ");
         // ignore loading of some pictures
         if (this.isVariant()) {
             this.dontPreloadImage('playerboard.jpg');
@@ -1459,6 +1460,7 @@ var Azul = /** @class */ (function (_super) {
         catch (e) { }
         [201, 202, 203, 205, 206, 210, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.getGameUserPreference(prefId)); });
     };
+    /** @ts-ignore */
     Azul.prototype.onGameUserPreferenceChanged = function (prefId, prefValue) {
         switch (prefId) {
             case 201:
@@ -1671,7 +1673,6 @@ var Azul = /** @class */ (function (_super) {
         helpDialog.show();
     };
     Azul.prototype.takeTiles = function (id) {
-        console.warn('takeTiles', id);
         this.bgaPerformAction('actTakeTiles', {
             id: id
         });

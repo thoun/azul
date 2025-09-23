@@ -19,27 +19,22 @@ declare(strict_types=1);
 
 namespace Bga\Games\Azul;
 
+use Bga\GameFrameworkPrototype\Helpers\Arrays;
+use Bga\Games\Azul\States\ChooseTile;
+use Tile;
+
 require_once('framework-prototype/Helpers/Arrays.php');
 
 require_once('constants.inc.php');
 require_once('tile.php');
 require_once('undo.php');
-require_once('utils.php');
-require_once('actions.php');
-require_once('args.php');
-require_once('states.php');
 
 class Game extends \Bga\GameFramework\Table {
 
-    use \UtilTrait;
-    use \ActionTrait;
-    use \ArgsTrait;
-    use \StateTrait;
     use DebugUtilTrait;
 
     public \Bga\GameFramework\Components\Deck $tiles;
     public array $factoriesByPlayers;
-    public array $indexForDefaultWall;
 
 	function __construct() {
         // Your global variables labels:
@@ -54,11 +49,6 @@ class Game extends \Bga\GameFramework\Table {
             FIRST_PLAYER_FOR_NEXT_TURN => 10,
             END_TURN_LOGGED => 12,
             SPECIAL_FACTORY_ZERO_OWNER => 20,
-
-            VARIANT_OPTION => 100,
-            UNDO => 101,
-            FAST_SCORING => 102,
-            SPECIAL_FACTORIES => 110,
         ]);
 
 
@@ -66,15 +56,6 @@ class Game extends \Bga\GameFramework\Table {
             2 => 5,
             3 => 7,
             4 => 9,
-        ];
-
-
-        $this->indexForDefaultWall = [
-            1 => 3,
-            2 => 4,
-            3 => 0,
-            4 => 1,
-            5 => 2,
         ];
 
         $this->tiles = $this->getNew("module.common.deck");
@@ -220,7 +201,7 @@ class Game extends \Bga\GameFramework\Table {
         foreach ($playerIds as $playerId) {
             $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
             for ($i=1; $i<=5; $i++) {
-                $playerWallTileLineCount = count(array_values(array_filter($playerWallTiles, fn($tile) => $tile->line == $i)));
+                $playerWallTileLineCount = Arrays::count($playerWallTiles, fn($tile) => $tile->line == $i);
                 if ($playerWallTileLineCount > $maxColumns) {
                     $maxColumns = $playerWallTileLineCount;
                 }
@@ -228,6 +209,366 @@ class Game extends \Bga\GameFramework\Table {
         }
         
         return $maxColumns * 20;
+    }
+
+    function actUndoTakeTiles(int $activePlayerId) { 
+        $undoFactory = $this->getGlobalVariable(UNDO_FACTORY);
+        if ($undoFactory != null) {
+            $otherFactories = [];
+            foreach($undoFactory->tiles as $tile) {
+                $currentFactory = $this->getTileFromDb($this->tiles->getCard($tile->id))->column;
+                if ($currentFactory != $undoFactory->from && !in_array($currentFactory, $otherFactories)) {
+                    $otherFactories[] = $currentFactory;
+                }
+            }
+
+            $this->tiles->moveCards(array_map(fn($t) => $t->id, $undoFactory->tiles), 'factory', $undoFactory->from);
+
+            $partialFactories = [
+                $undoFactory->from => $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $undoFactory->from)),
+            ];
+    
+            $this->notify->all("factoriesChanged", '', [
+                'factory' => $undoFactory->from,
+                'factories' => $partialFactories,
+                'tiles' => $undoFactory->tiles,
+            ]);
+            foreach($otherFactories as $otherFactory) {
+                $partialFactories = [
+                    $otherFactory => $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $otherFactory)),
+                ];    
+                $this->notify->all("factoriesChanged", '', [
+                    'factory' => $otherFactory,
+                    'factories' => $partialFactories,
+                    'tiles' => [],
+                ]);
+            }
+        }
+
+        $undo = $this->getGlobalVariable(UNDO_SELECT);
+
+        if (property_exists($undo, 'takeFromSpecialFactoryZero') && $undo->takeFromSpecialFactoryZero) {
+            $this->setGameStateValue(SPECIAL_FACTORY_ZERO_OWNER, 0);
+            $this->notify->all('moveSpecialFactoryZero', '', [
+                'playerId' => 0,
+            ]);
+        }
+
+        $factoryTilesBefore = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $undo->from));
+        $this->tiles->moveCards(array_map(fn($t) => $t->id, $undo->tiles), 'factory', $undo->from);
+        $this->setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $undo->previousFirstPlayer);
+
+        $this->notify->all('undoTakeTiles', clienttranslate('${player_name} cancels tile selection'), [
+            'playerId' => $activePlayerId,
+            'player_name' => $this->getPlayerNameById($activePlayerId),
+            'undo' => $undo,
+            'factoryTilesBefore' => $factoryTilesBefore,
+            'repositionTiles' => $undoFactory != null,
+        ]);
+
+        return ChooseTile::class;
+    }
+
+    function actUndoColumns(int $currentPlayerId) {
+        $this->DbQuery("UPDATE player SET selected_columns = '[]' WHERE player_id = $currentPlayerId");
+        
+        $this->notify->player($currentPlayerId, 'updateSelectColumn', '', [
+            'playerId' => $currentPlayerId,
+            'arg' => $this->argChooseColumnForPlayer($currentPlayerId),
+            'undo' => true,
+        ]);
+
+        $this->gamestate->nextPrivateState($currentPlayerId, 'undo');
+    }
+
+    function nextColumnToSelect(int $playerId) {
+        $selectedColumns = $this->getSelectedColumns($playerId);
+
+        for ($line = 1; $line <= 5; $line++) {
+            if (!array_key_exists($line, $selectedColumns)) {
+                $playerTiles = $this->getTilesFromLine($playerId, $line);
+                if (count($playerTiles) == $line) {
+                    $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
+
+                    if (count($availableColumns) > 1) {
+                        $lineInfos = new \stdClass();
+                        $lineInfos->color = $playerTiles[0]->type;
+                        $lineInfos->availableColumns = $availableColumns;
+                        $lineInfos->line = $line;
+                        return $lineInfos;
+                    } else {
+                        // if only one possibility, it's automaticaly selected
+                        $this->setSelectedColumn($playerId, $line, $availableColumns[0]);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    function getSelectedColumnsArray(int $playerId) {
+        $result = [];
+        $selectedColumns = $this->getSelectedColumns($playerId);
+        foreach($selectedColumns as $line => $column) {
+            $selectedColumn = new \stdClass();
+            $selectedColumn->line = $line;
+            $selectedColumn->column = $column;
+            $tiles = $this->getTilesFromLine($playerId, $line);
+            if (count($tiles) > 0) {
+                $selectedColumn->type = $tiles[0]->type;
+                $selectedColumn->color = $selectedColumn->type;
+            }
+            $result[] = $selectedColumn;
+        }
+
+        return $result;
+    }
+
+    function argChooseColumnForPlayer(int $playerId) {
+        $playerArg = new \stdClass();
+        $playerArg->nextColumnToSelect = $this->nextColumnToSelect($playerId);
+        $playerArg->selectedColumns = $this->getSelectedColumnsArray($playerId);
+
+        return $playerArg;
+    }
+
+    function setGlobalVariable(string $name, /*object|array*/ $obj) {
+        /*if ($obj == null) {
+            throw new \Error('Global Variable null');
+        }*/
+        $jsonObj = json_encode($obj);
+        $this->DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('$name', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
+    }
+
+    function getGlobalVariable(string $name, $asArray = null) {
+        $json_obj = $this->getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = '$name'");
+        if ($json_obj) {
+            $object = json_decode($json_obj, $asArray);
+            return $object;
+        } else {
+            return null;
+        }
+    }
+
+    function isVariant(): bool {
+        return $this->tableOptions->get(100) === 2;
+    }
+
+    function isSpecialFactories(): bool {
+        return $this->tableOptions->get(110) === 2;
+    }
+
+    function isUndoActivated(int $player): bool {
+        return $this->userPreferences->get($player, 101) !== 2;
+    }
+
+    function isFastScoring(): bool {
+        return $this->tableOptions->get(102) === 1;
+    }
+
+    function getFactoryNumber($playerNumber = null): int {
+        if ($playerNumber == null) {
+            $playerNumber = intval($this->getUniqueValueFromDB("SELECT count(*) FROM player "));
+        }
+
+        return $this->factoriesByPlayers[$playerNumber];
+    }
+
+    function getPlayerScore(int $playerId) {
+        return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+    }
+
+    function incPlayerScore(int $playerId, int $incScore) {
+        $this->DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+    }
+
+    function decPlayerScore(int $playerId, int $decScore) {
+        $newScore = max(0, $this->getPlayerScore($playerId) - $decScore);
+        $this->DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
+        return $newScore;
+    }
+
+    function incPlayerScoreAux(int $playerId, int $incScoreAux) {
+        $this->DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
+    }
+
+    function getSelectedColumns(int $playerId) {
+        $json_obj = $this->getUniqueValueFromDB("SELECT `selected_columns` FROM `player` where `player_id` = $playerId");
+        $object = json_decode($json_obj, true);
+        return $object ?? [];
+    }
+
+    function setSelectedColumn(int $playerId, int $line, int $column) {
+        $object = $this->getSelectedColumns($playerId);
+        $object[$line] = $column;
+        
+        $jsonObj = json_encode($object);        
+        $this->DbQuery("UPDATE player SET selected_columns = '$jsonObj' WHERE player_id = $playerId");
+    }
+
+    function getTileFromDb($dbTile) {
+        if (!$dbTile || !array_key_exists('id', $dbTile)) {
+            throw new \Error('tile doesn\'t exists '.json_encode($dbTile));
+        }
+        return new Tile($dbTile);
+    }
+
+    function getTilesFromDb(array $dbTiles) {
+        return array_map(fn($dbTile) => $this->getTileFromDb($dbTile), array_values($dbTiles));
+    }
+
+    function setupTiles() {
+        $cards = [];
+        $cards[] = [ 'type' => 0, 'type_arg' => null, 'nbr' => 1 ];
+        for ($color=1; $color<=5; $color++) {
+            $cards[] = [ 'type' => $color, 'type_arg' => null, 'nbr' => 20 ];
+        }
+        $this->tiles->createCards($cards, 'deck');
+        $this->tiles->shuffle('deck');
+    }
+
+    function getSpecialFactories() {
+        return $this->getGlobalVariable(SPECIAL_FACTORIES, true);
+    }
+
+    function putFirstPlayerTile(array $firstPlayerTokens, int $playerId) {
+        $this->setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
+
+        $this->placeTilesOnLine($playerId, $firstPlayerTokens, 0, false);
+
+        $this->notify->all('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerNameById($playerId),
+        ]);
+    }
+
+    function placeTilesOnLine(int $playerId, array $tiles, int $line, bool $fromHand) {
+        $startIndex = count($this->getTilesFromLine($playerId, $line));
+        $startIndexFloorLine = count($this->getTilesFromLine($playerId, 0));
+
+        $canPlaceOnSpecialFactoryZero = intval($this->getGameStateValue(SPECIAL_FACTORY_ZERO_OWNER)) == $playerId && count($this->getTilesFromLine($playerId, -1)) == 0;
+
+        $placedTiles = [];
+        $discardedTiles = [];
+        $discardedTilesToSpecialFactoryZero = [];
+
+        foreach ($tiles as $tile) {
+            $aimColumn = ++$startIndex;
+            if ($line > 0 && $aimColumn <= $line) {
+                $tile->line = $line;
+                $tile->column = $aimColumn;
+                $placedTiles[] = $tile;
+            } else if ($canPlaceOnSpecialFactoryZero) {
+                $tile->line = -1;
+                $tile->column = 0;
+                $discardedTilesToSpecialFactoryZero[] = $tile;
+                $canPlaceOnSpecialFactoryZero = 0;
+            } else {
+                $tile->line = 0;
+                $tile->column = ++$startIndexFloorLine;
+                $discardedTiles[] = $tile;
+            }
+
+            $this->tiles->moveCard($tile->id, 'line'.$playerId, $tile->line * 100 + $tile->column);
+        }
+
+        $message = $tiles[0]->type == 0 ? '' : 
+            ($line == 0 ?
+                clienttranslate('${player_name} places ${number} ${color} on floor line') :
+                clienttranslate('${player_name} places ${number} ${color} on line ${lineNumber}'));
+
+        $this->notify->all('tilesPlacedOnLine', $message, [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerNameById($playerId),
+            'number' => count($tiles),
+            'color' => $this->getColor($tiles[0]->type),
+            'i18n' => ['color'],
+            'type' => $tiles[0]->type,
+            'preserve' => [ 2 => 'type' ],
+            'line' => $line,
+            'lineNumber' => $line,
+            'placedTiles' => $placedTiles,
+            'discardedTiles' => $discardedTiles,
+            'discardedTilesToSpecialFactoryZero' => $discardedTilesToSpecialFactoryZero,
+            'fromHand' => $fromHand,
+        ]);
+    }
+
+    function getColor(int $type) {
+        $colorName = null;
+        switch ($type) {
+            case 1: $colorName = clienttranslate('Black'); break;
+            case 2: $colorName = clienttranslate('Cyan'); break;
+            case 3: $colorName = clienttranslate('Blue'); break;
+            case 4: $colorName = clienttranslate('Yellow'); break;
+            case 5: $colorName = clienttranslate('Red'); break;
+        }
+        return $colorName;
+    }
+
+    function getTilesFromLine(int $playerId, int $line) {
+        $tiles = Arrays::filter(
+            $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), fn($tile) => $tile->line == $line
+        );
+        usort($tiles, fn($a, $b) => $this->sortByColumn($a, $b));
+
+        return $tiles;
+    }
+
+    function someOfColor(array $tiles, int $type) {
+        foreach ($tiles as $tile) {
+            if ($tile->type == $type) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getPlayersIds() {
+        return array_keys($this->loadPlayersBasicInfos());
+    }
+
+    function getAvailableColumnForColor(int $playerId, int $color, int $line) {
+        $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+
+        $ghostTiles = $this->getSelectedColumnsArray($playerId);
+        $wallAndGhost = array_merge($wall, $ghostTiles);
+
+        $availableColumns = [];
+        for ($column = 1; $column <= 5; $column++) {
+
+            $tilesSameColorSameColumnOrSamePosition = Arrays::filter(
+                $wallAndGhost, fn($tile) => $tile->column == $column && ($tile->type == $color || $tile->line == $line)
+            );
+
+            if (count($tilesSameColorSameColumnOrSamePosition) == 0) {
+                $availableColumns[] = $column;
+            }
+        }
+
+        return count($availableColumns) > 0 ? $availableColumns : [0];
+    }
+
+    function lineWillBeComplete(int $playerId, int $line) {
+        if (count($this->getTilesFromLine($playerId, $line)) == $line) {
+            // construction line is complete
+            
+            $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+            $playerWallTileLineCount = Arrays::count($playerWallTiles, fn($tile) => $tile->line == $line);
+            
+            // wall has only on spot left
+            if ($playerWallTileLineCount >= 4) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function sortByColumn($a, $b) {
+        if ($a->column == $b->column) {
+            return 0;
+        }
+        return ($a->column < $b->column) ? -1 : 1;
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -247,27 +588,7 @@ class Game extends \Bga\GameFramework\Table {
             you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
         */
 
-        public function zombieTurn_chooseTile(int $playerId) {
-            $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory'));
-            $tiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type > 0));
-
-            $playerLines = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
-            $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
-
-            $possibleAnswerPoints = [];
-            foreach ($tiles as $tile) {
-                $tilesOfSameColorInFactory = array_values(array_filter($tiles, fn($t) => $tile->column == $t->column && $tile->type == $t->type));
-                $possibleAnswerPoints[$tile->id] = $this->zombieTurn_chooseLineAnswerPoints($tile->type, count($tilesOfSameColorInFactory), $playerLines, $playerWallTiles);
-            }
-
-            $maxPoints = max($possibleAnswerPoints);
-            $maxPointsAnswers = array_keys($possibleAnswerPoints, $maxPoints);
-            $zombieChoice = $maxPointsAnswers[bga_rand(0, count($maxPointsAnswers) - 1)];
-
-            $this->actTakeTiles($zombieChoice);
-        }
-
-        private function zombieTurn_chooseLineAnswerPoints(int $tileColor, int $tileCount, array $playerLines, array $playerWallTiles): array {
+        function zombieTurn_chooseLineAnswerPoints(int $tileColor, int $tileCount, array $playerLines, array $playerWallTiles): array {
             /*
             Not real points, but considered effectiveness.
             Number of played tiles for the row, or -9999 if unplayable. x2 if completing an already started row. -0.4 for each discarded tile.
@@ -277,7 +598,7 @@ class Game extends \Bga\GameFramework\Table {
             ];
 
             for ($line=1; $line<=5; $line++) {
-                $tilesOfLine = array_values(array_filter($playerLines, fn($tile) => $tile->line == $line));
+                $tilesOfLine = Arrays::filter($playerLines, fn($tile) => $tile->line == $line);
                 if (count($tilesOfLine) > 0) {
                     $lineColor = $tilesOfLine[0]->type;
                     if (count($tilesOfLine) < $line && $tileColor == $lineColor) {
@@ -290,7 +611,7 @@ class Game extends \Bga\GameFramework\Table {
                         $possibleAnswerPoints[$line] = -9999;
                     }
                 } else {
-                    $playerWallTileLine = array_values(array_filter($playerWallTiles, fn($tile) => $tile->line == $line));
+                    $playerWallTileLine = Arrays::filter($playerWallTiles, fn($tile) => $tile->line == $line);
 
                     if ($this->someOfColor($playerWallTileLine, $tileColor)) {
                         $possibleAnswerPoints[$line] = -9999;
@@ -305,65 +626,6 @@ class Game extends \Bga\GameFramework\Table {
             }
 
             return $possibleAnswerPoints;
-        }
-
-        public function zombieTurn_chooseFactory(int $playerId) {
-            $args = $this->argChooseFactory();
-            $possibleFactories = $args['possibleFactories'];
-            $zombieChoice = $possibleFactories[bga_rand(0, count($possibleFactories) - 1)];
-            $this->actSelectFactory($zombieChoice);
-        }
-
-        public function zombieTurn_chooseLine(int $playerId) {
-            $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-            $playerLines = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
-            $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
-
-            $possibleAnswerPoints = $this->zombieTurn_chooseLineAnswerPoints($hand[0]->type, count($hand), $playerLines, $playerWallTiles);
-
-            $maxPoints = max($possibleAnswerPoints);
-            $maxPointsAnswers = array_keys($possibleAnswerPoints, $maxPoints);
-            $zombieChoice = $maxPointsAnswers[bga_rand(0, count($maxPointsAnswers) - 1)];
-            $this->actSelectLine($zombieChoice);
-        }
-
-        public function zombieTurn_confirmLine(int $playerId) {
-            $this->actConfirmLine();
-        }
-    
-        function zombieTurn($state, $active_player): void {
-            $statename = $state['name'];
-            
-            if ($state['type'] === "activeplayer") {
-                switch ($statename) {
-                    case 'chooseTile':
-                        $this->zombieTurn_chooseTile((int)$active_player);
-                        break;
-                    case 'chooseFactory':
-                        $this->zombieTurn_chooseFactory((int)$active_player);
-                        break;
-                    case 'chooseLine':
-                        $this->zombieTurn_chooseLine((int)$active_player);
-                        break;
-                    case 'confirmLine':
-                        $this->zombieTurn_confirmLine((int)$active_player);
-                        break;
-                    default:
-                        $this->gamestate->nextState("nextPlayer"); // all player actions got nextPlayer action as a "zombiePass"
-                        break;
-                }
-    
-                return;
-            }
-    
-            if ($state['type'] === "multipleactiveplayer") {
-                // Make sure player is in a non blocking status for role turn
-                $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
-                
-                return;
-            }
-    
-            throw new \feException( "Zombie mode not supported at this game state: ".$statename );
         }
         
     ///////////////////////////////////////////////////////////////////////////////////:

@@ -1,0 +1,86 @@
+{
+    "table": {
+        "turnsNumber": {
+            "id": 10,
+            "name": "Number of turns",
+            "type": "int"
+        },
+        "pointsWallTile": {
+            "id": 20,
+            "name": "Points gained with placed tiles",
+            "type": "int"
+        },
+        "pointsLossFloorLine": {
+            "id": 21,
+            "name": "Points lost with floor line",
+            "type": "int"
+        },
+        "pointsCompleteLine": {
+            "id": 22,
+            "name": "Points gained with complete lines",
+            "type": "int"
+        },
+        "pointsCompleteColumn": {
+            "id": 23,
+            "name": "Points gained with complete columns",
+            "type": "int"
+        },
+        "pointsCompleteColor": {
+            "id": 24,
+            "name": "Points gained with complete color",
+            "type": "int"
+        },
+        "incompleteLinesAtEndRound": {
+            "id": 25,
+            "name": "Incomplete lines at the end of rounds",
+            "type": "int"
+        },
+        "roundsNumber": {
+            "id": 11,
+            "name": "Number of rounds",
+            "type": "int"
+        }
+    },
+    "player": {
+        "turnsNumber": {
+            "id": 10,
+            "name": "Number of turns",
+            "type": "int"
+        },
+        "pointsWallTile": {
+            "id": 20,
+            "name": "Points gained with placed tiles",
+            "type": "int"
+        },
+        "pointsLossFloorLine": {
+            "id": 21,
+            "name": "Points lost with floor line",
+            "type": "int"
+        },
+        "pointsCompleteLine": {
+            "id": 22,
+            "name": "Points gained with complete lines",
+            "type": "int"
+        },
+        "pointsCompleteColumn": {
+            "id": 23,
+            "name": "Points gained with complete columns",
+            "type": "int"
+        },
+        "pointsCompleteColor": {
+            "id": 24,
+            "name": "Points gained with complete color",
+            "type": "int"
+        },
+        "incompleteLinesAtEndRound": {
+            "id": 25,
+            "name": "Incomplete lines at the end of rounds",
+            "type": "int"
+        },
+        "firstPlayer": {
+            "id": 30,
+            "name": "Number of rounds as first player",
+            "type": "int"
+        }
+    }
+}

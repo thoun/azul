@@ -23,7 +23,7 @@ class FillFactories extends \Bga\GameFramework\States\GameState
         $playerNumber = intval($this->game->getUniqueValueFromDB("SELECT count(*) FROM player "));
 
         if ($this->game->isSpecialFactories()) {
-            $this->game->initSpecialFactories($playerNumber);
+            $this->initSpecialFactories($playerNumber);
         }
 
         $factories = [];
@@ -114,6 +114,32 @@ class FillFactories extends \Bga\GameFramework\States\GameState
         $this->game->incStat(1, 'roundsNumber');
         $this->game->incStat(1, 'firstPlayer', intval($this->game->getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
 
-        return ST_PLAYER_CHOOSE_TILE;
+        return ChooseTile::class;
+    }
+
+    function initSpecialFactories(int $playerCount) {
+        $availableFactories = [];
+        $availableSpecialFactories = [1,2,3,4,5,6,7,8,9];
+        $factoryNumber = $this->game->getFactoryNumber($playerCount);
+        for ($factory=1; $factory<=$factoryNumber; $factory++) {
+            $availableFactories[] = $factory;
+        }
+
+        $specialFactories = [];
+
+        for ($i = 0; $i < $playerCount; $i++) {
+            $factoryIndex = bga_rand(0, count($availableFactories) - 1);
+            $factoryNumber = array_splice($availableFactories, $factoryIndex, 1)[0];
+            $specialFactoryIndex = bga_rand(0, count($availableSpecialFactories) - 1);
+            $specialFactory = array_splice($availableSpecialFactories, $specialFactoryIndex, 1)[0];
+
+            $specialFactories[$factoryNumber] = $specialFactory;
+        }
+
+        $this->game->setGlobalVariable(SPECIAL_FACTORIES, $specialFactories);
+
+        $this->notify->all('specialFactories', '', [
+            'specialFactories' => $specialFactories,
+        ]);
     }
 }

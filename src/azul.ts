@@ -54,6 +54,18 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     */
 
     public setup(gamedatas: AzulGamedatas) {
+        this.getGameAreaElement().insertAdjacentHTML('beforeend', `
+            <div id="table">
+                <div id="centered-table">
+                    <div id="factories">
+                        <div id="bag">
+                            <span id="bag-counter"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+
         // ignore loading of some pictures
         if (this.isVariant()) {
             this.dontPreloadImage('playerboard.jpg');
@@ -293,6 +305,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
         );
     }
       
+    /** @ts-ignore */
     public onGameUserPreferenceChanged(prefId: number, prefValue: number) {
         switch (prefId) {
             case 201: 
@@ -578,7 +591,6 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     }
 
     public takeTiles(id: number) {
-        console.warn('takeTiles', id);
         this.bgaPerformAction('actTakeTiles', {
             id
         });

@@ -28,7 +28,7 @@ trait DebugUtilTrait {
 
         /*$tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('deck'));
         $tiles = array_slice($tiles, 0, 83);
-        $this->tiles->moveCards(array_map('getIdPredicate', $tiles), 'discard');*/
+        $this->tiles->moveCards(array_map(fn($t) => $t->id, $tiles), 'discard');*/
 
         /*$this->debug_SetLineTiles(2343492, 1, 1, 3);
         $this->debug_SetLineTiles(2343492, 2, 2, 3);
@@ -206,13 +206,13 @@ trait DebugUtilTrait {
 
         $tiles = array_slice($colorTiles, 0, $number);
 
-        $this->tiles->moveCards(array_map('getIdPredicate', $tiles), 'factory', $factory);
+        $this->tiles->moveCards(array_map(fn($t) => $t->id, $tiles), 'factory', $factory);
 
     }
 
     function debug_RemoveFp() {
         $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', 0));
-        $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
+        $firstPlayerTokens = Arrays::filter($factoryTiles, fn($fpTile) => $fpTile->type == 0);
         $hasFirstPlayer = count($firstPlayerTokens) > 0;
         if ($hasFirstPlayer) {
             $this->putFirstPlayerTile($firstPlayerTokens, 2343492);
@@ -238,24 +238,14 @@ trait DebugUtilTrait {
     }
 
     function debug_playToEndRound() {
-      $round = $this->getStat('roundsNumber');
-      while (intval($this->gamestate->state_id()) < ST_END_ROUND && $this->getStat('roundsNumber') == $round) {
-        $state = intval($this->gamestate->state_id());
-        $playerId = intval($this->getActivePlayerId());
-        switch ($state) {
-          case ST_PLAYER_CHOOSE_TILE:
-            $this->zombieTurn_chooseTile($playerId);
-            break;     
-          case ST_PLAYER_CHOOSE_FACTORY:
-            $this->zombieTurn_chooseFactory($playerId);
-            break;
-          case ST_PLAYER_CHOOSE_LINE:
-            $this->zombieTurn_chooseLine($playerId);
-            break;
-          case ST_PLAYER_CONFIRM_LINE:
-            $this->zombieTurn_confirmLine($playerId);
-            break;
+        $round = $this->getStat('roundsNumber');
+        $count = 0;
+        while ($this->getStat('roundsNumber') == $round && $count < 100) {
+            $count++;
+            foreach($this->gamestate->getActivePlayerList() as $playerId) {
+                $playerId = (int)$playerId;
+                $this->gamestate->runStateClassZombie($this->gamestate->getCurrentState($playerId), $playerId);
+            }
         }
-      }
     }
 }

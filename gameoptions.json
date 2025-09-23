@@ -1,0 +1,46 @@
+{
+    "100": {
+        "name": "Variant option",
+        "values": {
+            "1": {
+                "name": "Disabled",
+                "description": "Colored wall face"
+            },
+            "2": {
+                "name": "Enabled",
+                "description": "Grayed wall face",
+                "tmdisplay": "Variant option (gray wall)",
+                "nobeginner": true
+            }
+        },
+        "default": 1
+    },
+    "110": {
+        "name": "Special Factories (Azul Master Chocolatier variant)",
+        "values": {
+            "1": {
+                "name": "Disabled"
+            },
+            "2": {
+                "name": "Enabled",
+                "description": "Random special factories are placed in the game",
+                "tmdisplay": "Special Factories",
+                "nobeginner": true
+            }
+        },
+        "default": 1
+    },
+    "102": {
+        "name": "Fast scoring",
+        "values": {
+            "1": {
+                "name": "Enabled",
+                "tmdisplay": "Fast scoring"
+            },
+            "2": {
+                "name": "Disabled"
+            }
+        },
+        "default": 2
+    }
+}

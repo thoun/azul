@@ -32,13 +32,13 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
         }
 
         if ($this->game->getGameProgression() == 100) {
-            return ST_END_SCORE;
+            return EndScore::class;
         } else {
             $playerId = intval($this->game->getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
             $this->gamestate->changeActivePlayer($playerId);
             $this->game->giveExtraTime($playerId);
 
-            return ST_FILL_FACTORIES;
+            return FillFactories::class;
         }
     }
 
@@ -77,7 +77,7 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
                         $column = $selectedColumns[$line];
                     }
                 } else {
-                    $column = $this->game->getColumnForTile($line, $wallTile->type);
+                    $column = $this->getColumnForTile($line, $wallTile->type);
                 }
 
                 if ($column == 0) {
@@ -87,9 +87,9 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
                     $wallTile->column = $column;
                     $discardedTiles = array_slice($playerTiles, 1);
                     $this->game->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
-                    $this->game->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
+                    $this->game->tiles->moveCards(array_map(fn($t) => $t->id, $discardedTiles), 'discard');
     
-                    $pointsDetail = $this->game->getPointsDetailForPlacedTile($playerId, $wallTile);
+                    $pointsDetail = $this->getPointsDetailForPlacedTile($playerId, $wallTile);
     
                     $obj = new \stdClass();
                     $obj->placedTile = $wallTile;
@@ -134,10 +134,10 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
         foreach ($playersIds as $playerId) {
             $playerTiles = $this->game->getTilesFromLine($playerId, 0);
             if (count($playerTiles) > 0) {                
-                $this->game->tiles->moveCards(array_map('getIdPredicate', $playerTiles), 'discard');
+                $this->game->tiles->moveCards(array_map(fn($t) => $t->id, $playerTiles), 'discard');
                 $points = 0;
                 for ($i = 0; $i < min(7, count($playerTiles)); $i++) {
-                    $points += $this->game->getPointsForFloorLine($i);
+                    $points += $this->getPointsForFloorLine($i);
                 }
 
                 $obj = new \stdClass();
@@ -152,7 +152,7 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
                 $this->game->incStat($points, 'pointsLossFloorLine', $playerId);
             } 
             $playerTilesZero = $this->game->getTilesFromLine($playerId, -1);
-            $this->game->tiles->moveCards(array_map('getIdPredicate', $playerTilesZero), 'discard');
+            $this->game->tiles->moveCards(array_map(fn($t) => $t->id, $playerTilesZero), 'discard');
             $specialFactoryZeroTiles[$playerId] = $playerTilesZero;
         }
         $this->notify->all('emptyFloorLine', '', [
@@ -166,5 +166,97 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
                 'points' => -$notif->points,
             ]);
         }
+    }
+
+    function getColumnForTile(int $row, int $type) {
+        $indexForDefaultWall = [
+            1 => 3,
+            2 => 4,
+            3 => 0,
+            4 => 1,
+            5 => 2,
+        ];
+
+        return ($row + $indexForDefaultWall[$type] - 1) % 5 + 1;
+    }
+
+    function getPointsDetailForPlacedTile(int $playerId, object $tile) {
+        $tilesOnWall = $this->game->getTilesFromDb($this->game->tiles->getCardsInLocation('wall'.$playerId));
+
+        $rowTiles = [$tile];
+        $columnTiles = [$tile];
+
+        // tiles above
+        for ($i = $tile->line - 1; $i >= 1; $i--) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $i, $tile->column);
+            if ($iTile != null) {
+                $columnTiles[] = $iTile;
+            } else {
+                break;
+            }
+        }
+        // tiles under
+        for ($i = $tile->line + 1; $i <= 5; $i++) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $i, $tile->column);
+            if ($iTile != null) {
+                $columnTiles[] = $iTile;
+            } else {
+                break;
+            }
+        }
+        // tiles left
+        for ($i = $tile->column - 1; $i >= 1; $i--) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $tile->line, $i);
+            if ($iTile != null) {
+                $rowTiles[] = $iTile;
+            } else {
+                break;
+            }
+        }
+        // tiles right
+        for ($i = $tile->column + 1; $i <= 5; $i++) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $tile->line, $i);
+            if ($iTile != null) {
+                $rowTiles[] = $iTile;
+            } else {
+                break;
+            }
+        }
+
+        $result = new \stdClass;
+        $result->rowTiles = $rowTiles;
+        $result->columnTiles = $columnTiles;
+
+        $rowSize = count($rowTiles);
+        $columnSize = count($columnTiles);
+
+        if ($rowSize > 1 && $columnSize > 1) {
+            $result->points = $columnSize + $rowSize;
+        } else if ($columnSize > 1) {
+            $result->points = $columnSize;
+        } else if ($rowSize > 1) {
+            $result->points = $rowSize;
+        } else {
+            $result->points = 1;
+        }
+
+        return $result;
+    }
+        
+    function getPointsForFloorLine(int $tileIndex) {
+        switch ($tileIndex) {
+            case 0: case 1: return 1;
+            case 2: case 3: case 4: return 2;
+            default: return 3;
+        }
+    }
+
+    function getTileOnWallCoordinates(array $tiles, int $row, int $column) {
+        foreach ($tiles as $tile) {
+            if ($tile->line == $row && $tile->column == $column) {
+                return $tile;
+            }
+        }
+        return null;
     }
 }
