@@ -11,15 +11,11 @@ trait ActionTrait {
         (note: each method below must match an input method in azul.action.php)
     */
     
-    function takeTiles(int $id, $skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('takeTiles');
-        }
-        
-        $playerId = intval(self::getActivePlayerId());
+    function actTakeTiles(int $id) {
+        $playerId = intval($this->getActivePlayerId());
 
         // for undo
-        $previousFirstPlayer = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
+        $previousFirstPlayer = intval($this->getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
 
         $tile = $this->getTileFromDb($this->tiles->getCard($id));
 
@@ -89,9 +85,9 @@ trait ActionTrait {
             $message = clienttranslate('${player_name} takes ${number} ${color}');
         }
 
-        self::notifyAllPlayers('tilesSelected', $message, [
+        $this->notifyAllPlayers('tilesSelected', $message, [
             'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
+            'player_name' => $this->getActivePlayerName(),
             'number' => count($selectedTiles),
             'color' => $this->getColor($tile->type),   
             'i18n' => ['color'],           
@@ -103,7 +99,7 @@ trait ActionTrait {
         ]);
 
         if ($takeFromSpecialFactoryZero) {
-            self::notifyAllPlayers('moveSpecialFactoryZero', '', [
+            $this->notifyAllPlayers('moveSpecialFactoryZero', '', [
                 'playerId' => $playerId,
             ]);
         }
@@ -129,13 +125,11 @@ trait ActionTrait {
         $this->gamestate->nextState($transition);
     }
 
-    function undoTakeTiles() {
-        self::checkAction('undoTakeTiles'); 
-
+    function actUndoTakeTiles() {
         /*if (!$this->isUndoActivated()) {
             throw new BgaUserException('Undo is disabled');
         }*/        
-        $playerId = self::getActivePlayerId();
+        $playerId = $this->getActivePlayerId();
 
         $undoFactory = $this->getGlobalVariable(UNDO_FACTORY);
         if ($undoFactory != null) {
@@ -153,7 +147,7 @@ trait ActionTrait {
                 $undoFactory->from => $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $undoFactory->from)),
             ];
     
-            self::notifyAllPlayers("factoriesChanged", '', [
+            $this->notifyAllPlayers("factoriesChanged", '', [
                 'factory' => $undoFactory->from,
                 'factories' => $partialFactories,
                 'tiles' => $undoFactory->tiles,
@@ -162,7 +156,7 @@ trait ActionTrait {
                 $partialFactories = [
                     $otherFactory => $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $otherFactory)),
                 ];    
-                self::notifyAllPlayers("factoriesChanged", '', [
+                $this->notifyAllPlayers("factoriesChanged", '', [
                     'factory' => $otherFactory,
                     'factories' => $partialFactories,
                     'tiles' => [],
@@ -174,18 +168,18 @@ trait ActionTrait {
 
         if (property_exists($undo, 'takeFromSpecialFactoryZero') && $undo->takeFromSpecialFactoryZero) {
             $this->setGameStateValue(SPECIAL_FACTORY_ZERO_OWNER, 0);
-            self::notifyAllPlayers('moveSpecialFactoryZero', '', [
+            $this->notifyAllPlayers('moveSpecialFactoryZero', '', [
                 'playerId' => 0,
             ]);
         }
 
         $factoryTilesBefore = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $undo->from));
         $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'factory', $undo->from);
-        self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $undo->previousFirstPlayer);
+        $this->setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $undo->previousFirstPlayer);
 
-        self::notifyAllPlayers('undoTakeTiles', clienttranslate('${player_name} cancels tile selection'), [
+        $this->notifyAllPlayers('undoTakeTiles', clienttranslate('${player_name} cancels tile selection'), [
             'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
+            'player_name' => $this->getActivePlayerName(),
             'undo' => $undo,
             'factoryTilesBefore' => $factoryTilesBefore,
             'repositionTiles' => $undoFactory != null,
@@ -194,11 +188,7 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function selectFactory(int $factory, $skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('selectFactory');
-        }
-
+    function actSelectFactory(int $factory) {
         $args = $this->argChooseFactory();
 
         $this->tiles->moveCards(array_map('getIdPredicate', $args['tiles']), 'factory', $factory);
@@ -207,7 +197,7 @@ trait ActionTrait {
             $factory => $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory)),
         ];
 
-        self::notifyAllPlayers("factoriesChanged", '', [
+        $this->notifyAllPlayers("factoriesChanged", '', [
             'factory' => $factory,
             'factories' => $partialFactories,
             'tiles' => $args['tiles'],
@@ -217,12 +207,8 @@ trait ActionTrait {
         $this->gamestate->nextState($args['type'] !== null ? 'nextFactory' : 'chooseLine');
     }
 
-    function selectLine(int $line, $skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('selectLine');
-        }
-        
-        $playerId = self::getActivePlayerId();
+    function actSelectLine(int $line) {
+        $playerId = $this->getActivePlayerId();
 
         if (array_search($line, $this->availableLines($playerId)) === false) {
             throw new BgaUserException('Line not available');
@@ -231,13 +217,13 @@ trait ActionTrait {
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $this->placeTilesOnLine($playerId, $tiles, $line, true);
 
-        $lastRoundLogged = intval(self::getGameStateValue(END_TURN_LOGGED)) > 0;
+        $lastRoundLogged = intval($this->getGameStateValue(END_TURN_LOGGED)) > 0;
         if ($this->lineWillBeComplete($playerId, $line) && !$lastRoundLogged) {
-            self::notifyAllPlayers('lastRound', clienttranslate('${player_name} will complete a line, it\'s last turn !'), [
+            $this->notifyAllPlayers('lastRound', clienttranslate('${player_name} will complete a line, it\'s last turn !'), [
                 'playerId' => $playerId,
-                'player_name' => self::getActivePlayerName(),
+                'player_name' => $this->getActivePlayerName(),
             ]);
-            self::setGameStateValue(END_TURN_LOGGED, 1);
+            $this->setGameStateValue(END_TURN_LOGGED, 1);
         }
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, $lastRoundLogged));
@@ -249,49 +235,39 @@ trait ActionTrait {
         }
     }
 
-    function confirmLine($skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('confirmLine');
-        }
-        
+    function actConfirmLine() {
         $this->gamestate->nextState('nextPlayer');
     }
     
-    function undoSelectLine() {
-        self::checkAction('undoSelectLine'); 
-
-        /*if (!$this->isUndoActivated()) {
-            throw new BgaUserException('Undo is disabled');
-        }*/
-        
-        $playerId = intval(self::getActivePlayerId());       
+    function actUndoSelectLine() {
+        $playerId = intval($this->getActivePlayerId());       
 
         $undo = $this->getGlobalVariable(UNDO_PLACE);
 
         $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'hand', $playerId);
 
-        $lastRoundLogged = intval(self::getGameStateValue(END_TURN_LOGGED)) > 0;
+        $lastRoundLogged = intval($this->getGameStateValue(END_TURN_LOGGED)) > 0;
         if ($lastRoundLogged && !$undo->lastRoundBefore) {
-            self::setGameStateValue(END_TURN_LOGGED, 0);
+            $this->setGameStateValue(END_TURN_LOGGED, 0);
         }
 
-        self::notifyAllPlayers('undoSelectLine', clienttranslate('${player_name} cancels tile placement'), [
+        $this->notifyAllPlayers('undoSelectLine', clienttranslate('${player_name} cancels tile placement'), [
             'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
+            'player_name' => $this->getActivePlayerName(),
             'undo' => $undo,
         ]);
         
         $this->gamestate->nextState('undo');
     }
 
-    function selectColumn(int $line, int $column) {
-        $playerId = intval(self::getCurrentPlayerId());
+    function actSelectColumn(int $line, int $column) {
+        $playerId = intval($this->getCurrentPlayerId());
 
         $this->setSelectedColumn($playerId, $line, $column);
 
         $arg = (object)$this->argChooseColumnForPlayer($playerId);
 
-        self::notifyPlayer($playerId, 'updateSelectColumn', '', [
+        $this->notifyPlayer($playerId, 'updateSelectColumn', '', [
             'playerId' => $playerId,
             'arg' => $arg,
         ]);
@@ -302,27 +278,25 @@ trait ActionTrait {
         }
     }
 
-    function confirmColumns() {
-        $playerId = intval(self::getCurrentPlayerId());
+    function actConfirmColumns() {
+        $playerId = intval($this->getCurrentPlayerId());
 
         // Make this player unactive now (and tell the machine state to use transtion "placeTiles" if all players are now unactive
         $this->gamestate->setPlayerNonMultiactive($playerId, 'confirmColumns');
     }
 
-    function undoColumns() {
-        $playerId = intval(self::getCurrentPlayerId());
+    function actUndoColumns() {
+        $playerId = intval($this->getCurrentPlayerId());
 
-        self::DbQuery("UPDATE player SET selected_columns = '[]' WHERE player_id = $playerId");
+        $this->DbQuery("UPDATE player SET selected_columns = '[]' WHERE player_id = $playerId");
         
-        self::notifyPlayer($playerId, 'updateSelectColumn', '', [
+        $this->notifyPlayer($playerId, 'updateSelectColumn', '', [
             'playerId' => $playerId,
             'arg' => $this->argChooseColumnForPlayer($playerId),
             'undo' => true,
         ]);
 
-        if (intval($this->gamestate->state_id()) == ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS) {
-            $this->gamestate->nextPrivateState($playerId, 'undo');
-        }
+        $this->gamestate->nextPrivateState($playerId, 'undo');
     }
 
 }

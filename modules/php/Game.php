@@ -15,28 +15,31 @@
   * In this PHP file, you are going to defines the rules of the game.
   *
   */
+declare(strict_types=1);
 
+namespace Bga\Games\Azul;
 
-require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
+require_once('framework-prototype/Helpers/Arrays.php');
 
-require_once('modules/constants.inc.php');
-require_once('modules/tile.php');
-require_once('modules/undo.php');
-require_once('modules/utils.php');
-require_once('modules/actions.php');
-require_once('modules/args.php');
-require_once('modules/states.php');
-require_once('modules/debug-util.php');
+require_once('constants.inc.php');
+require_once('tile.php');
+require_once('undo.php');
+require_once('utils.php');
+require_once('actions.php');
+require_once('args.php');
+require_once('states.php');
 
-class Azul extends \Bga\GameFramework\Table {
+class Game extends \Bga\GameFramework\Table {
 
-    use UtilTrait;
-    use ActionTrait;
-    use ArgsTrait;
-    use StateTrait;
+    use \UtilTrait;
+    use \ActionTrait;
+    use \ArgsTrait;
+    use \StateTrait;
     use DebugUtilTrait;
 
     public \Bga\GameFramework\Components\Deck $tiles;
+    public array $factoriesByPlayers;
+    public array $indexForDefaultWall;
 
 	function __construct() {
         // Your global variables labels:
@@ -47,7 +50,7 @@ class Azul extends \Bga\GameFramework\Table {
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
         
-        self::initGameStateLabels([
+        $this->initGameStateLabels([
             FIRST_PLAYER_FOR_NEXT_TURN => 10,
             END_TURN_LOGGED => 12,
             SPECIAL_FACTORY_ZERO_OWNER => 20,
@@ -58,7 +61,23 @@ class Azul extends \Bga\GameFramework\Table {
             SPECIAL_FACTORIES => 110,
         ]);
 
-        $this->tiles = self::getNew("module.common.deck");
+
+        $this->factoriesByPlayers = [
+            2 => 5,
+            3 => 7,
+            4 => 9,
+        ];
+
+
+        $this->indexForDefaultWall = [
+            1 => 3,
+            2 => 4,
+            3 => 0,
+            4 => 1,
+            5 => 2,
+        ];
+
+        $this->tiles = $this->getNew("module.common.deck");
         $this->tiles->init("tile");
         $this->tiles->autoreshuffle = true;      
 	}	
@@ -74,7 +93,7 @@ class Azul extends \Bga\GameFramework\Table {
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
-        $gameinfos = self::getGameinfos();
+        $gameinfos = $this->getGameinfos();
         $default_colors = $gameinfos['player_colors'];
  
         // Create players
@@ -86,33 +105,33 @@ class Azul extends \Bga\GameFramework\Table {
             $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
         }
         $sql .= implode(',', $values);
-        self::DbQuery( $sql );
-        self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
-        self::reloadPlayersBasicInfos();
+        $this->DbQuery( $sql );
+        $this->reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
+        $this->reloadPlayersBasicInfos();
         
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue(FIRST_PLAYER_FOR_NEXT_TURN, intval(array_keys($players)[0]));
+        $this->setGameStateInitialValue(FIRST_PLAYER_FOR_NEXT_TURN, intval(array_keys($players)[0]));
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        self::initStat('table', 'roundsNumber', 0);
-        self::initStat('table', 'turnsNumber', 0);
-        self::initStat('player', 'turnsNumber', 0);
-        self::initStat('table', 'pointsWallTile', 0);
-        self::initStat('player', 'pointsWallTile', 0);
-        self::initStat('table', 'pointsLossFloorLine', 0);
-        self::initStat('player', 'pointsLossFloorLine', 0);
-        self::initStat('table', 'pointsCompleteLine', 0);
-        self::initStat('player', 'pointsCompleteLine', 0);
-        self::initStat('table', 'pointsCompleteColumn', 0);
-        self::initStat('player', 'pointsCompleteColumn', 0);
-        self::initStat('table', 'pointsCompleteColor', 0);
-        self::initStat('player', 'pointsCompleteColor', 0);
-        self::initStat('table', 'incompleteLinesAtEndRound', 0);
-        self::initStat('player', 'incompleteLinesAtEndRound', 0);
-        self::initStat('player', 'firstPlayer', 0);
+        $this->initStat('table', 'roundsNumber', 0);
+        $this->initStat('table', 'turnsNumber', 0);
+        $this->initStat('player', 'turnsNumber', 0);
+        $this->initStat('table', 'pointsWallTile', 0);
+        $this->initStat('player', 'pointsWallTile', 0);
+        $this->initStat('table', 'pointsLossFloorLine', 0);
+        $this->initStat('player', 'pointsLossFloorLine', 0);
+        $this->initStat('table', 'pointsCompleteLine', 0);
+        $this->initStat('player', 'pointsCompleteLine', 0);
+        $this->initStat('table', 'pointsCompleteColumn', 0);
+        $this->initStat('player', 'pointsCompleteColumn', 0);
+        $this->initStat('table', 'pointsCompleteColor', 0);
+        $this->initStat('player', 'pointsCompleteColor', 0);
+        $this->initStat('table', 'incompleteLinesAtEndRound', 0);
+        $this->initStat('player', 'incompleteLinesAtEndRound', 0);
+        $this->initStat('player', 'firstPlayer', 0);
 
         $this->setupTiles();
 
@@ -140,10 +159,10 @@ class Azul extends \Bga\GameFramework\Table {
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score, player_no playerNo FROM player ";
-        $result['players'] = self::getCollectionFromDb($sql);
+        $result['players'] = $this->getCollectionFromDb($sql);
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
-        $result['firstPlayerTokenPlayerId'] = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
+        $result['firstPlayerTokenPlayerId'] = intval($this->getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
         $isVariant = $this->isVariant();
         $result['variant'] = $isVariant;
 
@@ -245,7 +264,7 @@ class Azul extends \Bga\GameFramework\Table {
             $maxPointsAnswers = array_keys($possibleAnswerPoints, $maxPoints);
             $zombieChoice = $maxPointsAnswers[bga_rand(0, count($maxPointsAnswers) - 1)];
 
-            $this->takeTiles($zombieChoice, true);
+            $this->actTakeTiles($zombieChoice);
         }
 
         private function zombieTurn_chooseLineAnswerPoints(int $tileColor, int $tileCount, array $playerLines, array $playerWallTiles): array {
@@ -292,7 +311,7 @@ class Azul extends \Bga\GameFramework\Table {
             $args = $this->argChooseFactory();
             $possibleFactories = $args['possibleFactories'];
             $zombieChoice = $possibleFactories[bga_rand(0, count($possibleFactories) - 1)];
-            $this->selectFactory($zombieChoice, true);
+            $this->actSelectFactory($zombieChoice);
         }
 
         public function zombieTurn_chooseLine(int $playerId) {
@@ -305,11 +324,11 @@ class Azul extends \Bga\GameFramework\Table {
             $maxPoints = max($possibleAnswerPoints);
             $maxPointsAnswers = array_keys($possibleAnswerPoints, $maxPoints);
             $zombieChoice = $maxPointsAnswers[bga_rand(0, count($maxPointsAnswers) - 1)];
-            $this->selectLine($zombieChoice, true);
+            $this->actSelectLine($zombieChoice);
         }
 
         public function zombieTurn_confirmLine(int $playerId) {
-            $this->confirmLine(true);
+            $this->actConfirmLine();
         }
     
         function zombieTurn($state, $active_player): void {
@@ -344,7 +363,7 @@ class Azul extends \Bga\GameFramework\Table {
                 return;
             }
     
-            throw new feException( "Zombie mode not supported at this game state: ".$statename );
+            throw new \feException( "Zombie mode not supported at this game state: ".$statename );
         }
         
     ///////////////////////////////////////////////////////////////////////////////////:
@@ -367,16 +386,16 @@ class Azul extends \Bga\GameFramework\Table {
             // For example, if the game was running with a release of your game named "140430-1345",
             // $from_version is equal to 1404301345
             
-            if ($from_version <= 2109161337) {
+            /*if ($from_version <= 2109161337) {
                 // ! important ! Use DBPREFIX_<table_name> for all tables    
                 $sql = "CREATE TABLE IF NOT EXISTS DBPREFIX_global_variables(`name` varchar(50) NOT NULL, `value` json, PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8";
-                self::applyDbUpgradeToAllDB($sql);
+                $this->applyDbUpgradeToAllDB($sql);
             }
 
             if ($from_version <= 2109241936) {
                 // ! important ! Use <table_name> for all tables    
                 $sql = "ALTER TABLE DBPREFIX_player ADD `selected_columns` json";
-                self::applyDbUpgradeToAllDB($sql);
-            }
+                $this->applyDbUpgradeToAllDB($sql);
+            }*/
         }    
 }

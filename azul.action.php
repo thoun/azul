@@ -25,98 +25,98 @@
   class action_azul extends APP_GameAction { 
     // Constructor: please do not modify
    	public function __default() {
-      if (self::isArg( 'notifwindow')) {
+      if ($this->isArg( 'notifwindow')) {
         $this->view = "common_notifwindow";
-        $this->viewArgs['table'] = self::getArg("table", AT_posint, true);
+        $this->viewArgs['table'] = $this->getArg("table", AT_posint, true);
       } else {
         $this->view = "azul_azul";
-        self::trace( "Complete reinitialization of board game" );
+        $this->trace( "Complete reinitialization of board game" );
       }
   	} 
 
     public function takeTiles() {
-      self::setAjaxMode();
+      $this->setAjaxMode();
 
       // Retrieve arguments
-      $id = self::getArg("id", AT_posint, true);
+      $id = $this->getArg("id", AT_posint, true);
 
-      $this->game->takeTiles($id);
+      $this->game->actTakeTiles($id);
 
-      self::ajaxResponse();
+      $this->ajaxResponse();
     }
 
     public function undoTakeTiles() {
-      self::setAjaxMode();
+      $this->setAjaxMode();
 
-      $this->game->undoTakeTiles();
+      $this->game->actUndoTakeTiles();
 
-      self::ajaxResponse();
+      $this->ajaxResponse();
     }
 
     public function selectFactory() {
-      self::setAjaxMode();
+      $this->setAjaxMode();
 
       // Retrieve arguments
-      $factory = self::getArg("factory", AT_posint, true);
+      $factory = $this->getArg("factory", AT_posint, true);
 
-      $this->game->selectFactory($factory);
+      $this->game->actSelectFactory($factory);
 
-      self::ajaxResponse();
+      $this->ajaxResponse();
     }
 
     public function selectLine() {
-      self::setAjaxMode();
+      $this->setAjaxMode();
 
       // Retrieve arguments
-      $line = self::getArg("line", AT_posint, true);
+      $line = $this->getArg("line", AT_posint, true);
 
-      $this->game->selectLine($line);
+      $this->game->actSelectLine($line);
 
-      self::ajaxResponse();
+      $this->ajaxResponse();
     }
 
     public function confirmLine() {
-      self::setAjaxMode();
+      $this->setAjaxMode();
 
-      $this->game->confirmLine();
+      $this->game->actConfirmLine();
 
-      self::ajaxResponse();
+      $this->ajaxResponse();
     }
 
     public function undoSelectLine() {
-      self::setAjaxMode();
+      $this->setAjaxMode();
 
-      $this->game->undoSelectLine();
+      $this->game->actUndoSelectLine();
 
-      self::ajaxResponse();
+      $this->ajaxResponse();
     }
 
     public function selectColumn() {
-      self::setAjaxMode();
+      $this->setAjaxMode();
 
       // Retrieve arguments
-      $line = self::getArg("line", AT_posint, true);
-      $column = self::getArg("column", AT_posint, true);
+      $line = $this->getArg("line", AT_posint, true);
+      $column = $this->getArg("column", AT_posint, true);
 
-      $this->game->selectColumn($line, $column);
+      $this->game->actSelectColumn($line, $column);
 
-      self::ajaxResponse();
+      $this->ajaxResponse();
     }
 
     public function confirmColumns() {
-      self::setAjaxMode();
+      $this->setAjaxMode();
 
-      $this->game->confirmColumns();
+      $this->game->actConfirmColumns();
 
-      self::ajaxResponse();
+      $this->ajaxResponse();
     }
 
     public function undoColumns() {
-      self::setAjaxMode();
+      $this->setAjaxMode();
 
-      $this->game->undoColumns();
+      $this->game->actUndoColumns();
 
-      self::ajaxResponse();
+      $this->ajaxResponse();
     }
 
   }

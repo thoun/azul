@@ -1,21 +1,20 @@
 <?php
 
+namespace Bga\Games\Azul;
+
+use Bga\GameFrameworkPrototype\Helpers\Arrays;
+
+function debug(...$debugData) {
+    if (\Bga\GameFramework\Table::getBgaEnvironment() != 'studio') { 
+        return;
+    }die('debug data : <pre>'.substr(json_encode($debugData, JSON_PRETTY_PRINT), 1, -1).'</pre>');
+}
+
 trait DebugUtilTrait {
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Utility functions
 ////////////
-
-    // shortcut to launch multiple debug lines
-    function d() {
-        if ($this->getBgaEnvironment() != 'studio') { 
-            return;
-        } 
-
-        $this->debug_EmptyFactories();
-        //$this->debug_RemoveFp();
-        //$this->stFillFactories();
-    }
 
     function debug_Setup() {
         if ($this->getBgaEnvironment() != 'studio') { 
@@ -220,15 +219,6 @@ trait DebugUtilTrait {
         }
     }
 
-    function array_some(array $array, callable $fn) {
-        foreach ($array as $value) {
-            if($fn($value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     function debug_PlayRandomlyForPlayer(int $playerId) {
         $factories = [];
         $factoryNumber = $this->getFactoryNumber();
@@ -241,7 +231,7 @@ trait DebugUtilTrait {
         $factory = bga_rand(0, count($factories) - 1);
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
         //if (count($tiles) > 0) {
-            $line = $this->array_some($tiles, fn($tile) => $tile->type == 0) ? 0 : bga_rand(0, 5);
+            $line = Arrays::some($tiles, fn($tile) => $tile->type == 0) ? 0 : bga_rand(0, 5);
 
             $this->placeTilesOnLine($playerId, $tiles, $line, false);
         //}

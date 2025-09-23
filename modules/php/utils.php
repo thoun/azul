@@ -38,11 +38,11 @@ trait UtilTrait {
             throw new \Error('Global Variable null');
         }*/
         $jsonObj = json_encode($obj);
-        self::DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('$name', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
+        $this->DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('$name', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
     }
 
     function getGlobalVariable(string $name, $asArray = null) {
-        $json_obj = self::getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = '$name'");
+        $json_obj = $this->getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = '$name'");
         if ($json_obj) {
             $object = json_decode($json_obj, $asArray);
             return $object;
@@ -52,11 +52,11 @@ trait UtilTrait {
     }
 
     function isVariant() {
-        return intval(self::getGameStateValue(VARIANT_OPTION)) === 2;
+        return intval($this->getGameStateValue(VARIANT_OPTION)) === 2;
     }
 
     function isSpecialFactories() {
-        return intval(self::getGameStateValue(SPECIAL_FACTORIES)) === 2;
+        return intval($this->getGameStateValue(SPECIAL_FACTORIES)) === 2;
     }
 
     function isUndoActivated(int $player) {
@@ -64,41 +64,37 @@ trait UtilTrait {
     }
 
     function isFastScoring() {
-        return intval(self::getGameStateValue(FAST_SCORING)) === 1;
+        return intval($this->getGameStateValue(FAST_SCORING)) === 1;
     }
 
     function getFactoryNumber($playerNumber = null) {
         if ($playerNumber == null) {
-            $playerNumber = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player "));
+            $playerNumber = intval($this->getUniqueValueFromDB("SELECT count(*) FROM player "));
         }
 
         return $this->factoriesByPlayers[$playerNumber];
     }
 
-    function getPlayerName(int $playerId) {
-        return self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = $playerId");
-    }
-
     function getPlayerScore(int $playerId) {
-        return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+        return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
     }
 
     function incPlayerScore(int $playerId, int $incScore) {
-        self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+        $this->DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
     }
 
     function decPlayerScore(int $playerId, int $decScore) {
         $newScore = max(0, $this->getPlayerScore($playerId) - $decScore);
-        self::DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
+        $this->DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
         return $newScore;
     }
 
     function incPlayerScoreAux(int $playerId, int $incScoreAux) {
-        self::DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
+        $this->DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
     }
 
     function getSelectedColumns(int $playerId) {
-        $json_obj = self::getUniqueValueFromDB("SELECT `selected_columns` FROM `player` where `player_id` = $playerId");
+        $json_obj = $this->getUniqueValueFromDB("SELECT `selected_columns` FROM `player` where `player_id` = $playerId");
         $object = json_decode($json_obj, true);
         return $object ?? [];
     }
@@ -108,7 +104,7 @@ trait UtilTrait {
         $object[$line] = $column;
         
         $jsonObj = json_encode($object);        
-        self::DbQuery("UPDATE player SET selected_columns = '$jsonObj' WHERE player_id = $playerId");
+        $this->DbQuery("UPDATE player SET selected_columns = '$jsonObj' WHERE player_id = $playerId");
     }
 
     function getTileFromDb($dbTile) {
@@ -153,7 +149,7 @@ trait UtilTrait {
 
         $this->setGlobalVariable(SPECIAL_FACTORIES, $specialFactories);
 
-        self::notifyAllPlayers('specialFactories', '', [
+        $this->notifyAllPlayers('specialFactories', '', [
             'specialFactories' => $specialFactories,
         ]);
     }
@@ -163,13 +159,13 @@ trait UtilTrait {
     }
 
     function putFirstPlayerTile(array $firstPlayerTokens, int $playerId) {
-        self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
+        $this->setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
 
         $this->placeTilesOnLine($playerId, $firstPlayerTokens, 0, false);
 
-        self::notifyAllPlayers('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round'), [
+        $this->notifyAllPlayers('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round'), [
             'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
+            'player_name' => $this->getActivePlayerName(),
         ]);
     }
 
@@ -208,9 +204,9 @@ trait UtilTrait {
                 clienttranslate('${player_name} places ${number} ${color} on floor line') :
                 clienttranslate('${player_name} places ${number} ${color} on line ${lineNumber}'));
 
-        self::notifyAllPlayers('tilesPlacedOnLine', $message, [
+        $this->notifyAllPlayers('tilesPlacedOnLine', $message, [
             'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
+            'player_name' => $this->getActivePlayerName(),
             'number' => count($tiles),
             'color' => $this->getColor($tiles[0]->type),
             'i18n' => ['color'],
@@ -365,244 +361,6 @@ trait UtilTrait {
 
     function getColumnForTile(int $row, int $type) {
         return ($row + $this->indexForDefaultWall[$type] - 1) % 5 + 1;
-    }
-
-    function notifPlaceLine(array $playersIds, int $line) {
-        $completeLinesNotif = [];
-        foreach ($playersIds as $playerId) {
-            $playerTiles = $this->getTilesFromLine($playerId, $line);
-            if (count($playerTiles) == $line) {
-                
-                $wallTile = $playerTiles[0];
-                $column = null;
-                if ($this->isVariant()) {
-                    $selectedColumns = $this->getSelectedColumns($playerId);
-                    if (!array_key_exists($line, $selectedColumns)) {
-                        // happens when a player left the game with a complete row
-                        $column = 0;
-                    } else {
-                        $column = $selectedColumns[$line];
-                    }
-                } else {
-                    $column = $this->getColumnForTile($line, $wallTile->type);
-                }
-
-                if ($column == 0) {
-                    // variant : we place tiles on floor line, count will be done after
-                    $this->placeTilesOnLine($playerId, $playerTiles, 0, false);
-                } else {
-                    $wallTile->column = $column;
-                    $discardedTiles = array_slice($playerTiles, 1);
-                    $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
-                    $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
-    
-                    $pointsDetail = $this->getPointsDetailForPlacedTile($playerId, $wallTile);
-    
-                    $obj = new stdClass();
-                    $obj->placedTile = $wallTile;
-                    $obj->discardedTiles = $discardedTiles;
-                    $obj->pointsDetail = $pointsDetail;
-    
-                    $completeLinesNotif[$playerId] = $obj;
-    
-                    $this->incPlayerScore($playerId, $pointsDetail->points);
-    
-                    self::incStat($pointsDetail->points, 'pointsWallTile');
-                    self::incStat($pointsDetail->points, 'pointsWallTile', $playerId);
-                }
-            } else if (count($playerTiles) > 0) {
-                self::incStat(1, 'incompleteLinesAtEndRound');
-                self::incStat(1, 'incompleteLinesAtEndRound', $playerId);
-            }
-        }
-
-        if (count($completeLinesNotif) > 0) {
-            self::notifyAllPlayers('placeTileOnWall', '', [
-                'completeLines' => $completeLinesNotif,
-            ]);
-
-            foreach ($completeLinesNotif as $playerId => $notif) {
-                self::notifyAllPlayers('placeTileOnWallTextLogDetails', clienttranslate('${player_name} places ${number} ${color} and gains ${points} point(s)'), [
-                    'player_name' => $this->getPlayerName($playerId),
-                    'number' => 1,
-                    'color' => $this->getColor($notif->placedTile->type),
-                    'i18n' => ['color'],
-                    'type' => $notif->placedTile->type,
-                    'preserve' => [ 2 => 'type' ],
-                    'points' => $notif->pointsDetail->points,
-                ]);
-            }
-        }
-    }
-
-    function notifPlaceLines(array $playersIds) {
-        $fastScoring = $this->isFastScoring();
-
-        if ($fastScoring) {
-            for ($line = 1; $line <= 5; $line++) {
-                $this->notifPlaceLine($playersIds, $line);
-            }
-            $this->notifFloorLine($playersIds, $line);
-        } else {
-            foreach($playersIds as $playerId) {
-                for ($line = 1; $line <= 5; $line++) {
-                    $this->notifPlaceLine([$playerId], $line);
-                }
-                $this->notifFloorLine([$playerId], $line);
-            }
-        }
-    }
-
-    function notifFloorLine(array $playersIds) {
-        $floorLinesNotif = [];
-        $specialFactoryZeroTiles = [];
-        foreach ($playersIds as $playerId) {
-            $playerTiles = $this->getTilesFromLine($playerId, 0);
-            if (count($playerTiles) > 0) {                
-                $this->tiles->moveCards(array_map('getIdPredicate', $playerTiles), 'discard');
-                $points = 0;
-                for ($i = 0; $i < min(7, count($playerTiles)); $i++) {
-                    $points += $this->getPointsForFloorLine($i);
-                }
-
-                $obj = new stdClass();
-                $obj->tiles = $playerTiles;
-                $obj->points = -$points;
-
-                $floorLinesNotif[$playerId] = $obj;
-
-                $this->decPlayerScore($playerId, $points);
-
-                self::incStat($points, 'pointsLossFloorLine');
-                self::incStat($points, 'pointsLossFloorLine', $playerId);
-            } 
-            $playerTilesZero = $this->getTilesFromLine($playerId, -1);
-            $this->tiles->moveCards(array_map('getIdPredicate', $playerTilesZero), 'discard');
-            $specialFactoryZeroTiles[$playerId] = $playerTilesZero;
-        }
-        self::notifyAllPlayers('emptyFloorLine', '', [
-            'floorLines' => $floorLinesNotif,
-            'specialFactoryZeroTiles' => $specialFactoryZeroTiles,
-        ]);
-
-        foreach ($floorLinesNotif as $playerId => $notif) {
-            self::notifyAllPlayers('emptyFloorLineTextLogDetails', clienttranslate('${player_name} loses ${points} point(s) with Floor line'), [
-                'player_name' => $this->getPlayerName($playerId),
-                'points' => -$notif->points,
-            ]);
-        }
-    }
-
-    function notifCompleteLines(array $playersIds, array $walls, int $line) {        
-        $scoresNotif = [];
-        foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile)=> $tile->line == $line));
-            usort($playerTiles, 'sortByColumn');
-
-            if (count($playerTiles) == 5) {
-
-                $obj = new stdClass();
-                $obj->tiles = $playerTiles;
-                $obj->points = 2;
-
-                $scoresNotif[$playerId] = $obj;
-
-                $this->incPlayerScore($playerId, $obj->points);
-                $this->incPlayerScoreAux($playerId, 1);
-
-                self::incStat($obj->points, 'pointsCompleteLine');
-                self::incStat($obj->points, 'pointsCompleteLine', $playerId);
-            }
-        }
-
-        if (count($scoresNotif) > 0) {
-            self::notifyAllPlayers('endScore', '', [
-                'scores' => $scoresNotif,
-            ]);
-
-            foreach ($scoresNotif as $playerId => $notif) {
-                self::notifyAllPlayers('completeLineLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete line ${line}'), [
-                    'player_name' => $this->getPlayerName($playerId),
-                    'line' => $notif->tiles[0]->line,
-                    'points' => $notif->points,
-                ]);
-            }
-        }
-    }
-
-    function notifCompleteColumns(array $playersIds, array $walls, int $column) {                
-        $scoresNotif = [];
-        foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->column == $column));
-            usort($playerTiles, 'sortByLine');
-            
-            if (count($playerTiles) == 5) {
-
-                $obj = new stdClass();
-                $obj->tiles = $playerTiles;
-                $obj->points = 7;
-
-                $scoresNotif[$playerId] = $obj;
-
-                $this->incPlayerScore($playerId, $obj->points);
-
-                self::incStat($obj->points, 'pointsCompleteColumn');
-                self::incStat($obj->points, 'pointsCompleteColumn', $playerId);
-            }
-        }
-
-        if (count($scoresNotif) > 0) {
-            self::notifyAllPlayers('endScore', '', [
-                'scores' => $scoresNotif,
-            ]);
-
-            foreach ($scoresNotif as $playerId => $notif) {
-                self::notifyAllPlayers('completeColumnLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete column ${column}'), [
-                    'player_name' => $this->getPlayerName($playerId),
-                    'column' => $notif->tiles[0]->column,
-                    'points' => $notif->points,
-                ]);
-            }
-        }
-    }
-
-    function notifCompleteColors(array $playersIds, array $walls, int $color) {                
-        $scoresNotif = [];
-        foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->type == $color));
-            usort($playerTiles, 'sortByLine');
-            
-            if (count($playerTiles) == 5) {
-
-                $obj = new stdClass();
-                $obj->tiles = $playerTiles;
-                $obj->points = 10;
-
-                $scoresNotif[$playerId] = $obj;
-
-                $this->incPlayerScore($playerId, $obj->points);
-
-                self::incStat($obj->points, 'pointsCompleteColor');
-                self::incStat($obj->points, 'pointsCompleteColor', $playerId);
-            }
-        }
-
-        if (count($scoresNotif) > 0) {
-            self::notifyAllPlayers('endScore', '', [
-                'scores' => $scoresNotif,
-            ]);
-
-            foreach ($scoresNotif as $playerId => $notif) {
-                self::notifyAllPlayers('completeColorLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete color ${color}'), [
-                    'player_name' => $this->getPlayerName($playerId),
-                    'color' => $this->getColor($notif->tiles[0]->type),
-                    'type' => $notif->tiles[0]->type,
-                    'i18n' => ['color'],
-                    'points' => $notif->points,
-                    'preserve' => [ 2 => 'type' ],
-                ]);
-            }
-        }
     }
 
     function getAvailableColumnForColor(int $playerId, int $color, int $line) {

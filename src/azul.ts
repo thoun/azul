@@ -182,10 +182,9 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
             
             if (!privateMulti) {
                 if (!document.getElementById('confirmColumns_button')) {
-                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
-                    this.addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
+                    this.statusBar.addActionButton(_("Confirm chosen column(s)"), () => this.confirmColumns(), { id: 'confirmColumns_button', disabled: !!nextColumnToSelect });
+                    this.statusBar.addActionButton(_("Undo column selection"), () => this.undoColumns(), { color: 'secondary' });
                 }
-                dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect);
             }
         }
     }
@@ -253,21 +252,18 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
             switch (stateName) {  
                 case 'chooseFactory':
                 case 'chooseLine':
-                    //if (this.getGameUserPreference(101) !== 2) {
-                        this.addActionButton('undoTakeTiles_button', _("Undo tile selection"), () => this.undoTakeTiles());
-                    //}
+                    this.statusBar.addActionButton(_("Undo tile selection"), () => this.bgaPerformAction('actUndoTakeTiles'));
                     break;     
                 case 'confirmLine':
-                    this.addActionButton('confirmLine_button', _("Confirm"), () => this.confirmLine());
-                    this.addActionButton('undoSelectLine_button', _("Undo line selection"), () => this.undoSelectLine(), null, null, 'gray');
+                    this.statusBar.addActionButton(_("Confirm"), () => this.bgaPerformAction('actConfirmLine'), { id: 'confirmLine_button' });
+                    this.statusBar.addActionButton(_("Undo line selection"), () => this.bgaPerformAction('actUndoSelectLine'), { color: 'secondary' });
                     this.startActionTimer('confirmLine_button', 5);
                     break;
                 case 'privateChooseColumns':
                 case 'privateConfirmColumns':
                     const privateChooseColumnArgs = args as ChooseColumnsForPlayer;
-                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
-                    this.addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
-                    dojo.toggleClass('confirmColumns_button', 'disabled', !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns');
+                    this.statusBar.addActionButton(_("Confirm chosen column(s)"), () => this.confirmColumns(), { id: 'confirmColumns_button', disabled: !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns' });
+                    this.statusBar.addActionButton(_("Undo column selection"), () => this.undoColumns(), { color: 'secondary' });
                     break;
             }
         }
@@ -582,41 +578,30 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     }
 
     public takeTiles(id: number) {
-        this.bgaPerformAction('takeTiles', {
+        console.warn('takeTiles', id);
+        this.bgaPerformAction('actTakeTiles', {
             id
         });
     }
 
-    public undoTakeTiles() {
-        this.bgaPerformAction('undoTakeTiles');
-    }
-
     public selectFactory(factory: number) {
-        if(!this.checkAction('selectFactory', true)) {
+        if(!this.checkAction('actSelectFactory', true)) {
             return;
         }
 
-        this.bgaPerformAction('selectFactory', {
+        this.bgaPerformAction('actSelectFactory', {
             factory
         });
     }
 
     public selectLine(line: number) {
-        this.bgaPerformAction('selectLine', {
+        this.bgaPerformAction('actSelectLine', {
             line
         });
     }
 
-    public confirmLine() {
-        this.bgaPerformAction('confirmLine');
-    }
-
-    public undoSelectLine() {
-        this.bgaPerformAction('undoSelectLine');
-    }
-
     public selectColumn(line: number, column: number) {
-        this.bgaPerformAction('selectColumn', {
+        this.bgaPerformAction('actSelectColumn', {
             line,
             column
         });
@@ -625,11 +610,11 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     }
 
     public confirmColumns() {
-        this.bgaPerformAction('confirmColumns');
+        this.bgaPerformAction('actConfirmColumns');
     }
 
     public undoColumns() {
-        this.bgaPerformAction('undoColumns');
+        this.bgaPerformAction('actUndoColumns');
     }
 
     placeFirstPlayerToken(playerId: number) {

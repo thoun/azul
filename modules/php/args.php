@@ -45,7 +45,7 @@ trait ArgsTrait {
     }
 
     function argChooseLine() {
-        $playerId = self::getActivePlayerId();
+        $playerId = $this->getActivePlayerId();
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
         $number = count($tiles);

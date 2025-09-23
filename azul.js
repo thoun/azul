@@ -1365,10 +1365,9 @@ var Azul = /** @class */ (function (_super) {
             }
             if (!privateMulti) {
                 if (!document.getElementById('confirmColumns_button')) {
-                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), function () { return _this.confirmColumns(); });
-                    this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
+                    this.statusBar.addActionButton(_("Confirm chosen column(s)"), function () { return _this.confirmColumns(); }, { id: 'confirmColumns_button', disabled: !!nextColumnToSelect_1 });
+                    this.statusBar.addActionButton(_("Undo column selection"), function () { return _this.undoColumns(); }, { color: 'secondary' });
                 }
-                dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect_1);
             }
         }
     };
@@ -1427,21 +1426,18 @@ var Azul = /** @class */ (function (_super) {
             switch (stateName) {
                 case 'chooseFactory':
                 case 'chooseLine':
-                    //if (this.getGameUserPreference(101) !== 2) {
-                    this.addActionButton('undoTakeTiles_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); });
-                    //}
+                    this.statusBar.addActionButton(_("Undo tile selection"), function () { return _this.bgaPerformAction('actUndoTakeTiles'); });
                     break;
                 case 'confirmLine':
-                    this.addActionButton('confirmLine_button', _("Confirm"), function () { return _this.confirmLine(); });
-                    this.addActionButton('undoSelectLine_button', _("Undo line selection"), function () { return _this.undoSelectLine(); }, null, null, 'gray');
+                    this.statusBar.addActionButton(_("Confirm"), function () { return _this.bgaPerformAction('actConfirmLine'); }, { id: 'confirmLine_button' });
+                    this.statusBar.addActionButton(_("Undo line selection"), function () { return _this.bgaPerformAction('actUndoSelectLine'); }, { color: 'secondary' });
                     this.startActionTimer('confirmLine_button', 5);
                     break;
                 case 'privateChooseColumns':
                 case 'privateConfirmColumns':
                     var privateChooseColumnArgs = args;
-                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), function () { return _this.confirmColumns(); });
-                    this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
-                    dojo.toggleClass('confirmColumns_button', 'disabled', !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns');
+                    this.statusBar.addActionButton(_("Confirm chosen column(s)"), function () { return _this.confirmColumns(); }, { id: 'confirmColumns_button', disabled: !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns' });
+                    this.statusBar.addActionButton(_("Undo column selection"), function () { return _this.undoColumns(); }, { color: 'secondary' });
                     break;
             }
         }
@@ -1675,44 +1671,36 @@ var Azul = /** @class */ (function (_super) {
         helpDialog.show();
     };
     Azul.prototype.takeTiles = function (id) {
-        this.bgaPerformAction('takeTiles', {
+        console.warn('takeTiles', id);
+        this.bgaPerformAction('actTakeTiles', {
             id: id
         });
     };
-    Azul.prototype.undoTakeTiles = function () {
-        this.bgaPerformAction('undoTakeTiles');
-    };
     Azul.prototype.selectFactory = function (factory) {
-        if (!this.checkAction('selectFactory', true)) {
+        if (!this.checkAction('actSelectFactory', true)) {
             return;
         }
-        this.bgaPerformAction('selectFactory', {
+        this.bgaPerformAction('actSelectFactory', {
             factory: factory
         });
     };
     Azul.prototype.selectLine = function (line) {
-        this.bgaPerformAction('selectLine', {
+        this.bgaPerformAction('actSelectLine', {
             line: line
         });
     };
-    Azul.prototype.confirmLine = function () {
-        this.bgaPerformAction('confirmLine');
-    };
-    Azul.prototype.undoSelectLine = function () {
-        this.bgaPerformAction('undoSelectLine');
-    };
     Azul.prototype.selectColumn = function (line, column) {
-        this.bgaPerformAction('selectColumn', {
+        this.bgaPerformAction('actSelectColumn', {
             line: line,
             column: column
         });
         this.removeColumnSelection();
     };
     Azul.prototype.confirmColumns = function () {
-        this.bgaPerformAction('confirmColumns');
+        this.bgaPerformAction('actConfirmColumns');
     };
     Azul.prototype.undoColumns = function () {
-        this.bgaPerformAction('undoColumns');
+        this.bgaPerformAction('actUndoColumns');
     };
     Azul.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
