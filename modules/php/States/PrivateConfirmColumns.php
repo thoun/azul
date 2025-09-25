@@ -14,7 +14,7 @@ class PrivateConfirmColumns extends \Bga\GameFramework\States\GameState
             id: ST_PRIVATE_CONFIRM_COLUMNS, 
             type: StateType::PRIVATE,
             name: 'privateConfirmColumns',
-            descriptionMyTurn: clienttranslate('${you} must must choose columns to place tiles'),
+            descriptionMyTurn: clienttranslate('${you} must choose columns to place tiles'),
             transitions: [
                 "undo" => ST_PRIVATE_CHOOSE_COLUMNS,
                 "confirmColumns" => ST_PLACE_TILES,
@@ -24,36 +24,6 @@ class PrivateConfirmColumns extends \Bga\GameFramework\States\GameState
 
     function getArgs(int $playerId) {
         return (array)$this->game->argChooseColumnForPlayer($playerId);
-    }
-
-    function onEnteringState(int $playerId) {
-        $selectedColumns = $this->game->getSelectedColumns($playerId);
-        $disablePlayer = true;
-        
-        for ($line = 1; $line <= 5; $line++) {
-            if (!array_key_exists($line, $selectedColumns)) {
-                $playerTiles = $this->game->getTilesFromLine($playerId, $line);
-                if (count($playerTiles) == $line) {
-                    $availableColumns = $this->game->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
-
-                    if (count($availableColumns) > 1) {
-                        $disablePlayer = false;
-                    } else {
-                        // if only one possibility, it's automaticaly selected
-                        $this->game->setSelectedColumn($playerId, $line, $availableColumns[0]);
-
-                        if ($line < 5) {
-                            $this->gamestate->nextPrivateState($playerId, 'next');
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        if ($disablePlayer) {
-            $this->gamestate->setPlayerNonMultiactive($playerId, 'confirmColumns');
-        }
     }
 
     #[PossibleAction]

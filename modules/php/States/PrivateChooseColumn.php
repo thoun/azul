@@ -15,7 +15,7 @@ class PrivateChooseColumn extends \Bga\GameFramework\States\GameState
             id: ST_PRIVATE_CHOOSE_COLUMNS, 
             type: StateType::PRIVATE,
             name: 'privateChooseColumns',
-            descriptionMyTurn: clienttranslate('${you} must must choose columns to place tiles'),
+            descriptionMyTurn: clienttranslate('${you} must choose columns to place tiles'),
             transitions: [
                 "next" => ST_PRIVATE_CHOOSE_COLUMNS,
                 "undo" => ST_PRIVATE_CHOOSE_COLUMNS,

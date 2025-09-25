@@ -14,7 +14,7 @@ class MultiChooseColumns extends \Bga\GameFramework\States\GameState
             type: StateType::MULTIPLE_ACTIVE_PLAYER,
             name: 'multiChooseColumns',
             description: clienttranslate('Players with complete lines must choose columns to place tiles'),
-            descriptionMyTurn: clienttranslate('${you} must must choose columns to place tiles'),
+            descriptionMyTurn: '',
             initialPrivate: PrivateChooseColumn::class,
             transitions: [
                 "confirmColumns" => PlaceTiles::class,

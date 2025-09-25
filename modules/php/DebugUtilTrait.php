@@ -240,7 +240,9 @@ trait DebugUtilTrait {
     function debug_playToEndRound() {
         $round = $this->getStat('roundsNumber');
         $count = 0;
-        while ($this->getStat('roundsNumber') == $round && $count < 100) {
+        $stopIfAtState = null;
+        //$stopIfAtState = ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS;
+        while ($this->getStat('roundsNumber') == $round && $count < 100 && ($stopIfAtState === null || $this->gamestate->getCurrentMainStateId() < $stopIfAtState)) {
             $count++;
             foreach($this->gamestate->getActivePlayerList() as $playerId) {
                 $playerId = (int)$playerId;
