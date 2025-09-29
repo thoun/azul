@@ -243,7 +243,6 @@
   color: var(--player-color);
 }
 .player-table-wrapper .player-table {
-  background: url("img/playerboard.jpg");
   width: 740px;
   height: 484px;
   position: relative;
@@ -253,6 +252,8 @@
   z-index: 1;
   border-color: var(--player-color);
   box-shadow: 0 0 5px 2px var(--player-color);
+  /*&[data-board="1"] {*/
+  /*}*/
 }
 .player-table-wrapper .player-table .special-factory-zero {
   position: absolute;
@@ -275,13 +276,22 @@
   pointer-events: all;
   cursor: pointer;
 }
-.player-table-wrapper .player-table.variant {
-  background: url("img/playerboard-variant.jpg");
+.player-table-wrapper .player-table[data-board="1"] {
+  background: url("img/playerboard1.jpg");
 }
-.player-table-wrapper .player-table.variant .wall-tile-cb {
+.player-table-wrapper .player-table[data-board="2"] {
+  background: url("img/playerboard2.jpg");
+}
+.player-table-wrapper .player-table[data-board="3"] {
+  background: url("img/playerboard3.jpg");
+}
+.player-table-wrapper .player-table[data-board="4"] {
+  background: url("img/playerboard4.jpg");
+}
+.player-table-wrapper .player-table:not([data-board="1"]) .wall-tile-cb {
   display: none;
 }
-.player-table-wrapper .player-table:not(.variant) .wall {
+.player-table-wrapper .player-table .wall {
   background: rgba(255, 255, 255, 0.6901960784);
   box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.6901960784);
 }
@@ -588,11 +598,17 @@ html[data-chocolatier-skin=true] .tile-count.tile5 {
 html[data-chocolatier-skin=true] .tile-count.tile5.hover {
   box-shadow: 0 0 5px 5px #f1e5bc;
 }
-html[data-chocolatier-skin=true] .player-table-wrapper .player-table {
-  background: url("img/chocolatier/playerboard.jpg");
+html[data-chocolatier-skin=true] .player-table-wrapper .player-table[data-board="1"] {
+  background: url("img/chocolatier/playerboard1.jpg");
 }
-html[data-chocolatier-skin=true] .player-table-wrapper .player-table.variant {
-  background: url("img/chocolatier/playerboard-variant.jpg");
+html[data-chocolatier-skin=true] .player-table-wrapper .player-table[data-board="2"] {
+  background: url("img/chocolatier/playerboard2.jpg");
+}
+html[data-chocolatier-skin=true] .player-table-wrapper .player-table[data-board="3"] {
+  background: url("img/chocolatier/playerboard3.jpg");
+}
+html[data-chocolatier-skin=true] .player-table-wrapper .player-table[data-board="4"] {
+  background: url("img/chocolatier/playerboard4.jpg");
 }
 html[data-chocolatier-skin=true] .player-table-wrapper .player-table .wall {
   left: 383px;

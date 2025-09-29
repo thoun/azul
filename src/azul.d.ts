@@ -36,7 +36,8 @@ interface AzulGamedatas {
     factoryNumber: number;
     factories: { [factoryId: number]: Tile[] };
     firstPlayerTokenPlayerId: number;
-    variant: boolean;
+    boardNumber: number;
+    boardSetPoints: { line: number; column: number; color: number; };
     endRound: boolean;
     fastScoring: boolean;
     remainingTiles: number;
@@ -45,13 +46,14 @@ interface AzulGamedatas {
     specialFactoryZeroOwner?: number;
 }
 
-interface AzulGame extends Game {
+interface AzulGame extends GameGui<AzulGamedatas> {
     animationManager: AnimationManager;
     
     getPlayerId(): number;
     isDefaultFont(): boolean;
     getZoom(): number;
-    isVariant(): boolean;
+    getBoardNumber(): number;
+    getBoardSetPoints(): { line: number; column: number; color: number; };
     takeTiles(id: number): void;
     selectFactory(factoryIndex: number): any;
     selectLine(line: number): void;

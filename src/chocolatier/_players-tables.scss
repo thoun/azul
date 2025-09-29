@@ -1,9 +1,10 @@
 .player-table-wrapper {
     .player-table {
-        background: url('img/chocolatier/playerboard.jpg');
 
-        &.variant {            
-            background: url('img/chocolatier/playerboard-variant.jpg');
+        @for $board from 1 through 4 {
+            &[data-board="#{$board}"] {
+                background: url('img/chocolatier/playerboard#{$board}.jpg');
+            }
         }
 
         .wall {

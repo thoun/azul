@@ -84,7 +84,6 @@
     }
     
     .player-table {
-        background: url('img/playerboard.jpg');
         width: 740px;
         height: 484px;
         position: relative;
@@ -120,21 +119,25 @@
                     cursor: pointer;
                 }
             }
+        }        
+
+        @for $board from 1 through 4 {
+            &[data-board="#{$board}"] {
+                background: url('img/playerboard#{$board}.jpg');
+            }
         }
 
-        &.variant {            
-            background: url('img/playerboard-variant.jpg');
-
+        &:not([data-board="1"]) {
             .wall-tile-cb {
                 display: none;
             }
         }
-        &:not(.variant) {
+        /*&[data-board="1"] {*/
             .wall {
                 background: #ffffffb0;
                 box-shadow: 0 0 10px 5px #ffffffb0;
             }
-        }
+        /*}*/
 
         .line {
             display: inline-block;

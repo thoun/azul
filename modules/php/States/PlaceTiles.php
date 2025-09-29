@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Bga\Games\Azul\States;
 
 use Bga\GameFramework\StateType;
+use Bga\Games\Azul\Boards\Board;
 use Bga\Games\Azul\Game;
 
 class PlaceTiles extends \Bga\GameFramework\States\GameState
@@ -16,10 +17,11 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
         );
     }
 
-    function onEnteringState() {        
+    function onEnteringState() {
+        $board = $this->game->getBoard();
         $playersIds = $this->game->getPlayersIds();
 
-        $this->notifPlaceLines($playersIds);
+        $this->notifPlaceLines($playersIds, $board);
     
         $firstPlayerTile = $this->game->getTilesFromDb($this->game->tiles->getCardsOfType(0))[0];
         $this->game->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
@@ -42,25 +44,25 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
         }
     }
 
-    function notifPlaceLines(array $playersIds) {
+    function notifPlaceLines(array $playersIds, Board $board) {
         $fastScoring = $this->game->isFastScoring();
 
         if ($fastScoring) {
             for ($line = 1; $line <= 5; $line++) {
-                $this->notifPlaceLine($playersIds, $line);
+                $this->notifPlaceLine($playersIds, $line, $board);
             }
             $this->notifFloorLine($playersIds, $line);
         } else {
             foreach($playersIds as $playerId) {
                 for ($line = 1; $line <= 5; $line++) {
-                    $this->notifPlaceLine([$playerId], $line);
+                    $this->notifPlaceLine([$playerId], $line, $board);
                 }
                 $this->notifFloorLine([$playerId], $line);
             }
         }
     }
 
-    function notifPlaceLine(array $playersIds, int $line) {
+    function notifPlaceLine(array $playersIds, int $line, Board $board) {
         $completeLinesNotif = [];
         foreach ($playersIds as $playerId) {
             $playerTiles = $this->game->getTilesFromLine($playerId, $line);
@@ -68,7 +70,7 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
                 
                 $wallTile = $playerTiles[0];
                 $column = null;
-                if ($this->game->isVariant()) {
+                if ($board->getFixedColors() !== null) {
                     $selectedColumns = $this->game->getSelectedColumns($playerId);
                     if (!array_key_exists($line, $selectedColumns)) {
                         // happens when a player left the game with a complete row
@@ -239,6 +241,13 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
         } else {
             $result->points = 1;
         }
+
+        $fixedColors = $this->game->getBoard()->getFixedColors();
+        $fixedTilesForLine = $fixedColors[$tile->line] ?? [];
+        $fixedColor = $fixedTilesForLine[$tile->column] ?? null;
+        $multiplier = $fixedColor === null ? 1 : ($fixedColor['multiplier'] ?? 1);
+
+        $result->points *= $multiplier;
 
         return $result;
     }

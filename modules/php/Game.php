@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Bga\Games\Azul;
 
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
+use Bga\Games\Azul\Boards\Board;
 use Bga\Games\Azul\States\ChooseTile;
 use Tile;
 
@@ -34,6 +35,7 @@ class Game extends \Bga\GameFramework\Table {
     use DebugUtilTrait;
 
     public \Bga\GameFramework\Components\Deck $tiles;
+    public Board $board;
     public array $factoriesByPlayers;
 
 	function __construct() {
@@ -144,8 +146,9 @@ class Game extends \Bga\GameFramework\Table {
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
         $result['firstPlayerTokenPlayerId'] = intval($this->getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
-        $isVariant = $this->isVariant();
-        $result['variant'] = $isVariant;
+        $board = $this->getBoard();
+        $result['boardNumber'] = $this->getBoardNumber();
+        $result['boardSetPoints'] = $board->getSetPoints();
 
         $factories = [];
         $factoryNumber = $result['factoryNumber'];
@@ -167,7 +170,7 @@ class Game extends \Bga\GameFramework\Table {
                 }
             }
 
-            if ($isVariant) {
+            if ($board->getFixedColors() !== null) {
                 $player['selectedColumns'] = $this->getSelectedColumnsArray($playerId);
             }
         }
@@ -350,8 +353,17 @@ class Game extends \Bga\GameFramework\Table {
         }
     }
 
-    function isVariant(): bool {
-        return $this->tableOptions->get(100) === 2;
+    function getBoardNumber(): int {
+        return $this->tableOptions->get(100);
+    }
+
+    function getBoard(): Board {
+        if (!isset($this->board)) {
+            $boardNumber = $this->getBoardNumber();
+            $className = "Bga\Games\Azul\Boards\Board{$boardNumber}";
+            $this->board = new $className;
+        }
+        return $this->board;
     }
 
     function isSpecialFactories(): bool {
@@ -529,6 +541,8 @@ class Game extends \Bga\GameFramework\Table {
     }
 
     function getAvailableColumnForColor(int $playerId, int $color, int $line) {
+        $fixedColors = $this->getBoard()->getFixedColors();
+        $fixedTilesForLine = $fixedColors[$line] ?? [];
         $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
 
         $ghostTiles = $this->getSelectedColumnsArray($playerId);
@@ -536,12 +550,14 @@ class Game extends \Bga\GameFramework\Table {
 
         $availableColumns = [];
         for ($column = 1; $column <= 5; $column++) {
+            $fixedColor = $fixedTilesForLine[$column] ?? null;
 
             $tilesSameColorSameColumnOrSamePosition = Arrays::filter(
                 $wallAndGhost, fn($tile) => $tile->column == $column && ($tile->type == $color || $tile->line == $line)
             );
+            $validColor = $fixedColor === null || $fixedColor['color'] === $color;
 
-            if (count($tilesSameColorSameColumnOrSamePosition) == 0) {
+            if ($validColor && count($tilesSameColorSameColumnOrSamePosition) == 0) {
                 $availableColumns[] = $column;
             }
         }

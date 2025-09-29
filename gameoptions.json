@@ -1,16 +1,26 @@
 {
     "100": {
-        "name": "Variant option",
+        "name": "Board",
         "values": {
             "1": {
-                "name": "Disabled",
-                "description": "Colored wall face"
+                "name": "Colored side"
             },
             "2": {
-                "name": "Enabled",
-                "description": "Grayed wall face",
-                "tmdisplay": "Variant option (gray wall)",
+                "name": "Gray side",
+                "tmdisplay": "Gray side",
                 "nobeginner": true
+            },
+            "3": {
+                "name": "Crystal Mozaic: Side 1",
+                "tmdisplay": "Crystal Mozaic: Side 1",
+                "nobeginner": true,
+                "alpha": true
+            },
+            "4": {
+                "name": "Crystal Mozaic: Side 2",
+                "tmdisplay": "Crystal Mozaic: Side 2",
+                "nobeginner": true,
+                "alpha": true
             }
         },
         "default": 1

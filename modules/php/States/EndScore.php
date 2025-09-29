@@ -5,6 +5,7 @@ namespace Bga\Games\Azul\States;
 
 use Bga\GameFramework\StateType;
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
+use Bga\Games\Azul\Boards\Board;
 use Bga\Games\Azul\Game;
 
 class EndScore extends \Bga\GameFramework\States\GameState
@@ -19,6 +20,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
 
     function onEnteringState() {        
         $playersIds = $this->game->getPlayersIds();
+        $board = $this->game->getBoard();
 
         $walls = [];
         foreach ($playersIds as $playerId) {
@@ -27,32 +29,32 @@ class EndScore extends \Bga\GameFramework\States\GameState
         
         $fastScoring = $this->game->isFastScoring();
         if ($fastScoring) {
-            $this->endScoreNotifs($playersIds, $walls);
+            $this->endScoreNotifs($playersIds, $walls, $board);
         } else {
             foreach($playersIds as $playerId) {
-                $this->endScoreNotifs([$playerId], $walls);
+                $this->endScoreNotifs([$playerId], $walls, $board);
             }
         }
 
         return ST_END_GAME;
     }
 
-    private function endScoreNotifs(array $playersIds, array $walls) {
+    private function endScoreNotifs(array $playersIds, array $walls, Board $board) {
         // Gain 2 points for each complete horizontal line of 5 consecutive tiles on your wall.
         for ($line = 1; $line <= 5; $line++) {
-            $this->notifCompleteLines($playersIds, $walls, $line);
+            $this->notifCompleteLines($playersIds, $walls, $line, $board);
         }
         // Gain 7 points for each complete vertical line of 5 consecutive tiles on your wall.
         for ($column = 1; $column <= 5; $column++) {
-            $this->notifCompleteColumns($playersIds, $walls, $column);
+            $this->notifCompleteColumns($playersIds, $walls, $column, $board);
         }
         // Gain 10 points for each color of which you have placed all 5 tiles on your wall.
         for ($color = 1; $color <= 5; $color++) {
-            $this->notifCompleteColors($playersIds, $walls, $color);
+            $this->notifCompleteColors($playersIds, $walls, $color, $board);
         }
     }
 
-    function notifCompleteLines(array $playersIds, array $walls, int $line) {        
+    function notifCompleteLines(array $playersIds, array $walls, int $line, Board $board) {        
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
             $playerTiles = Arrays::filter($walls[$playerId], fn($tile)=> $tile->line == $line);
@@ -62,7 +64,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
 
                 $obj = new \stdClass();
                 $obj->tiles = $playerTiles;
-                $obj->points = 2;
+                $obj->points = $board->getSetPoints()['line'];
 
                 $scoresNotif[$playerId] = $obj;
 
@@ -96,7 +98,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
         return ($a->line < $b->line) ? -1 : 1;
     }
 
-    function notifCompleteColumns(array $playersIds, array $walls, int $column) {                
+    function notifCompleteColumns(array $playersIds, array $walls, int $column, Board $board) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
             $playerTiles = Arrays::filter($walls[$playerId], fn($tile) => $tile->column == $column);
@@ -106,7 +108,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
 
                 $obj = new \stdClass();
                 $obj->tiles = $playerTiles;
-                $obj->points = 7;
+                $obj->points = $board->getSetPoints()['column'];
 
                 $scoresNotif[$playerId] = $obj;
 
@@ -132,7 +134,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
         }
     }
 
-    function notifCompleteColors(array $playersIds, array $walls, int $color) {                
+    function notifCompleteColors(array $playersIds, array $walls, int $color, Board $board) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
             $playerTiles = Arrays::filter($walls[$playerId], fn($tile) => $tile->type == $color);
@@ -142,7 +144,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
 
                 $obj = new \stdClass();
                 $obj->tiles = $playerTiles;
-                $obj->points = 10;
+                $obj->points = $board->getSetPoints()['color'];
 
                 $scoresNotif[$playerId] = $obj;
 

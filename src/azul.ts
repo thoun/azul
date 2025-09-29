@@ -67,12 +67,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
         `);
 
         // ignore loading of some pictures
-        if (this.isVariant()) {
-            this.dontPreloadImage('playerboard.jpg');
-        } else {
-            this.dontPreloadImage('playerboard-variant.jpg');
-        }
-        this.dontPreloadImage('publisher.png');
+        [1,2,3,4].filter(boardNumber => boardNumber != this.getBoardNumber()).forEach(boardNumber => this.dontPreloadImage(`playerboard${boardNumber}.jpg`));
 
         log("Starting game setup");
         
@@ -405,8 +400,11 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
             `${factoriesWidth + (Math.floor(tablesMaxWidth / playerTableWidth) * playerTableWidth)}px` : `unset`;
     }
 
-    public isVariant(): boolean {
-        return this.gamedatas.variant;
+    public getBoardNumber(): number {
+        return this.gamedatas.boardNumber;
+    }
+    public getBoardSetPoints(): { line: number; column: number; color: number; } {
+        return this.gamedatas.boardSetPoints;
     }
 
     public getPlayerId(): number {
@@ -807,7 +805,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
         }
         
         let message = _("This is the last round of the game!");
-        if (this.isVariant()) {
+        if (this.getBoardNumber()) {
             message += ' <i>(' + _("if the complete line can be placed on the wall") + ')</i>';
         }
         dojo.place(`<div id="last-round">${message}</div>`, 'page-title');

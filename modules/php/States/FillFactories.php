@@ -37,7 +37,7 @@ class FillFactories extends \Bga\GameFramework\States\GameState
             $factories[$factory] = $this->game->getTilesFromDb($this->game->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
         }
 
-        if ($this->game->isVariant()) {
+        if ($this->game->getBoard()->getFixedColors() !== null) {
             $this->game->DbQuery("UPDATE player SET selected_columns = '{}'");
 
             $lastRoundLogged = intval($this->game->getGameStateValue(END_TURN_LOGGED)) > 0;

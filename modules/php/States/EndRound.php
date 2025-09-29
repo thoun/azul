@@ -17,7 +17,7 @@ class EndRound extends \Bga\GameFramework\States\GameState
     }
 
     function onEnteringState() {        
-        if ($this->game->isVariant()) {
+        if ($this->game->getBoard()->getFixedColors() !== null) {
             return MultiChooseColumns::class;
         } else {
             return PlaceTiles::class;

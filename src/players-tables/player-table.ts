@@ -14,7 +14,7 @@ class PlayerTable {
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
         <div id="player-hand-${this.playerId}" class="player-hand ${player.hand.length ? '' : 'empty'}">
         </div>
-        <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="--player-color: #${player.color};">
+        <div id="player-table-${this.playerId}" class="player-table data-board="${this.game.getBoardNumber()}" style="--player-color: #${player.color};">
             <div class="player-name-wrapper shift">
                 <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
             </div>
@@ -42,14 +42,15 @@ class PlayerTable {
             }
         }
         html += `</div>`;
-        if (this.game.isVariant()) {
+        if (this.game.getBoardNumber()) {
             html += `<div id="player-table-${this.playerId}-column0" class="floor wall-spot"></div>`;
         }
         
+        const boardSetPoints = this.game.getBoardSetPoints();
         html += `
-            <div class="score-magnified row">2</div>
-            <div class="score-magnified column">7</div>
-            <div class="score-magnified color">10</div>
+            <div class="score-magnified row">${boardSetPoints.line}</div>
+            <div class="score-magnified column">${boardSetPoints.column}</div>
+            <div class="score-magnified color">${boardSetPoints.color}</div>
         `;
 
         html += `   
@@ -64,7 +65,7 @@ class PlayerTable {
             document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
         }
         document.getElementById(`player-table-${this.playerId}-line-1`).addEventListener('click', () => this.game.selectLine(0));
-        if (this.game.isVariant()) {
+        if (this.game.getBoardNumber()) {
             for (let line=1; line<=5; line++) {
                 for (let column=1; column<=5; column++) {
                     document.getElementById(`player-table-${this.playerId}-wall-spot-${line}-${column}`).addEventListener('click', () => {
@@ -83,7 +84,7 @@ class PlayerTable {
         this.placeTilesOnWall(player.wall);
 
         
-        if (this.game.isVariant()) {
+        if (this.game.getBoardNumber()) {
             // if player hit refresh when column is selected but not yet applied, we reset ghost tile
             if (this.playerId === this.game.getPlayerId()) {
                 player.selectedColumns.forEach(selectedColumn => this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));

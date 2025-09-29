@@ -1080,7 +1080,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
-        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand ").concat(player.hand.length ? '' : 'empty', "\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table ").concat(this.game.isVariant() ? 'variant' : '', "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div id=\"player-table-").concat(this.playerId, "-line-1\" class=\"special-factory-zero factory\" data-special-factory=\"6\"></div>\n            ");
+        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand ").concat(player.hand.length ? '' : 'empty', "\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table data-board=\"").concat(this.game.getBoardNumber(), "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div id=\"player-table-").concat(this.playerId, "-line-1\" class=\"special-factory-zero factory\" data-special-factory=\"6\"></div>\n            ");
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-".concat(this.playerId, "-line").concat(i, "\" class=\"line\" style=\"top: ").concat(10 + 70 * (i - 1), "px; width: ").concat(69 * i - 5, "px;\"></div>");
         }
@@ -1097,10 +1097,11 @@ var PlayerTable = /** @class */ (function () {
             }
         }
         html += "</div>";
-        if (this.game.isVariant()) {
+        if (this.game.getBoardNumber()) {
             html += "<div id=\"player-table-".concat(this.playerId, "-column0\" class=\"floor wall-spot\"></div>");
         }
-        html += "\n            <div class=\"score-magnified row\">2</div>\n            <div class=\"score-magnified column\">7</div>\n            <div class=\"score-magnified color\">10</div>\n        ";
+        var boardSetPoints = this.game.getBoardSetPoints();
+        html += "\n            <div class=\"score-magnified row\">".concat(boardSetPoints.line, "</div>\n            <div class=\"score-magnified column\">").concat(boardSetPoints.column, "</div>\n            <div class=\"score-magnified color\">").concat(boardSetPoints.color, "</div>\n        ");
         html += "   \n            </div>\n        </div>";
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
@@ -1112,7 +1113,7 @@ var PlayerTable = /** @class */ (function () {
             _loop_5(i);
         }
         document.getElementById("player-table-".concat(this.playerId, "-line-1")).addEventListener('click', function () { return _this.game.selectLine(0); });
-        if (this.game.isVariant()) {
+        if (this.game.getBoardNumber()) {
             var _loop_6 = function (line) {
                 var _loop_8 = function (column) {
                     document.getElementById("player-table-".concat(this_4.playerId, "-wall-spot-").concat(line, "-").concat(column)).addEventListener('click', function () {
@@ -1138,7 +1139,7 @@ var PlayerTable = /** @class */ (function () {
             _loop_7(i);
         }
         this.placeTilesOnWall(player.wall);
-        if (this.game.isVariant()) {
+        if (this.game.getBoardNumber()) {
             // if player hit refresh when column is selected but not yet applied, we reset ghost tile
             if (this.playerId === this.game.getPlayerId()) {
                 player.selectedColumns.forEach(function (selectedColumn) { return _this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color); });
@@ -1258,13 +1259,7 @@ var Azul = /** @class */ (function (_super) {
         var _this = this;
         this.getGameAreaElement().insertAdjacentHTML('beforeend', "\n            <div id=\"table\">\n                <div id=\"centered-table\">\n                    <div id=\"factories\">\n                        <div id=\"bag\">\n                            <span id=\"bag-counter\"></span>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        ");
         // ignore loading of some pictures
-        if (this.isVariant()) {
-            this.dontPreloadImage('playerboard.jpg');
-        }
-        else {
-            this.dontPreloadImage('playerboard-variant.jpg');
-        }
-        this.dontPreloadImage('publisher.png');
+        [1, 2, 3, 4].filter(function (boardNumber) { return boardNumber != _this.getBoardNumber(); }).forEach(function (boardNumber) { return _this.dontPreloadImage("playerboard".concat(boardNumber, ".jpg")); });
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
@@ -1547,8 +1542,11 @@ var Azul = /** @class */ (function (_super) {
         document.getElementById('centered-table').style.width = tablesMaxWidth < playerTableWidth * this.gamedatas.playerorder.length ?
             "".concat(factoriesWidth + (Math.floor(tablesMaxWidth / playerTableWidth) * playerTableWidth), "px") : "unset";
     };
-    Azul.prototype.isVariant = function () {
-        return this.gamedatas.variant;
+    Azul.prototype.getBoardNumber = function () {
+        return this.gamedatas.boardNumber;
+    };
+    Azul.prototype.getBoardSetPoints = function () {
+        return this.gamedatas.boardSetPoints;
     };
     Azul.prototype.getPlayerId = function () {
         return Number(this.player_id);
@@ -1852,7 +1850,7 @@ var Azul = /** @class */ (function (_super) {
             return;
         }
         var message = _("This is the last round of the game!");
-        if (this.isVariant()) {
+        if (this.getBoardNumber()) {
             message += ' <i>(' + _("if the complete line can be placed on the wall") + ')</i>';
         }
         dojo.place("<div id=\"last-round\">".concat(message, "</div>"), 'page-title');
