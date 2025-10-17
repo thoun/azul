@@ -99,22 +99,9 @@ class Game extends \Bga\GameFramework\Table {
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        $this->initStat('table', 'roundsNumber', 0);
-        $this->initStat('table', 'turnsNumber', 0);
-        $this->initStat('player', 'turnsNumber', 0);
-        $this->initStat('table', 'pointsWallTile', 0);
-        $this->initStat('player', 'pointsWallTile', 0);
-        $this->initStat('table', 'pointsLossFloorLine', 0);
-        $this->initStat('player', 'pointsLossFloorLine', 0);
-        $this->initStat('table', 'pointsCompleteLine', 0);
-        $this->initStat('player', 'pointsCompleteLine', 0);
-        $this->initStat('table', 'pointsCompleteColumn', 0);
-        $this->initStat('player', 'pointsCompleteColumn', 0);
-        $this->initStat('table', 'pointsCompleteColor', 0);
-        $this->initStat('player', 'pointsCompleteColor', 0);
-        $this->initStat('table', 'incompleteLinesAtEndRound', 0);
-        $this->initStat('player', 'incompleteLinesAtEndRound', 0);
-        $this->initStat('player', 'firstPlayer', 0);
+        $this->tableStats->init('roundsNumber', 0);
+        $this->playerStats->init(['turnsNumber', 'pointsWallTile', 'pointsLossFloorLine', 'pointsCompleteLine', 'pointsCompleteColumn', 'pointsCompleteColor', 'incompleteLinesAtEndRound'], 0, updateTableStat: true);
+        $this->playerStats->init('firstPlayer', 0);
 
         $this->setupTiles();
 

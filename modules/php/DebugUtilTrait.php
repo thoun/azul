@@ -238,9 +238,9 @@ trait DebugUtilTrait {
     }
 
     function debug_playToEmptyFactories() {
-        $round = $this->getStat('roundsNumber');
+        $round = $this->tableStats->get('roundsNumber');
         $count = 0;
-        while ($this->getStat('roundsNumber') == $round && $count < 100 && $this->gamestate->getCurrentMainStateId() < ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS) {
+        while ($this->tableStats->get('roundsNumber') == $round && $count < 100 && $this->gamestate->getCurrentMainStateId() < ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS) {
             $count++;
             foreach($this->gamestate->getActivePlayerList() as $playerId) {
                 $playerId = (int)$playerId;
@@ -250,10 +250,10 @@ trait DebugUtilTrait {
     }
 
     function debug_playToEndRound() {
-        $round = $this->getStat('roundsNumber');
+        $round = $this->tableStats->get('roundsNumber');
         $count = 0;
         $stopIfAtState = null;
-        while ($this->getStat('roundsNumber') == $round && $count < 100 && ($stopIfAtState === null || $this->gamestate->getCurrentMainStateId() < $stopIfAtState)) {
+        while ($this->tableStats->get('roundsNumber') == $round && $count < 100 && ($stopIfAtState === null || $this->gamestate->getCurrentMainStateId() < $stopIfAtState)) {
             $count++;
             foreach($this->gamestate->getActivePlayerList() as $playerId) {
                 $playerId = (int)$playerId;

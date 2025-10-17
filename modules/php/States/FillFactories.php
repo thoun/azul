@@ -111,8 +111,8 @@ class FillFactories extends \Bga\GameFramework\States\GameState
             }
         }
 
-        $this->game->incStat(1, 'roundsNumber');
-        $this->game->incStat(1, 'firstPlayer', intval($this->game->getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
+        $this->tableStats->inc('roundsNumber', 1);
+        $this->playerStats->inc('firstPlayer', 1, intval($this->game->getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
 
         return ChooseTile::class;
     }

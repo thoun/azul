@@ -102,12 +102,10 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
     
                     $this->game->incPlayerScore($playerId, $pointsDetail->points);
     
-                    $this->game->incStat($pointsDetail->points, 'pointsWallTile');
-                    $this->game->incStat($pointsDetail->points, 'pointsWallTile', $playerId);
+                    $this->playerStats->inc('pointsWallTile', $pointsDetail->points, $playerId, true);
                 }
             } else if (count($playerTiles) > 0) {
-                $this->game->incStat(1, 'incompleteLinesAtEndRound');
-                $this->game->incStat(1, 'incompleteLinesAtEndRound', $playerId);
+                $this->playerStats->inc('incompleteLinesAtEndRound', 1, $playerId, true);
             }
         }
 
@@ -150,8 +148,7 @@ class PlaceTiles extends \Bga\GameFramework\States\GameState
 
                 $this->game->decPlayerScore($playerId, $points);
 
-                $this->game->incStat($points, 'pointsLossFloorLine');
-                $this->game->incStat($points, 'pointsLossFloorLine', $playerId);
+                $this->playerStats->inc('pointsLossFloorLine', $points, $playerId, true);
             } 
             $playerTilesZero = $this->game->getTilesFromLine($playerId, -1);
             $this->game->tiles->moveCards(array_map(fn($t) => $t->id, $playerTilesZero), 'discard');

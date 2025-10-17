@@ -20,8 +20,7 @@ class NextPlayer extends \Bga\GameFramework\States\GameState
     function onEnteringState(int $activePlayerId) {
         $factoriesAllEmpty = $this->game->tiles->countCardInLocation('factory') == 0;
 
-        $this->game->incStat(1, 'turnsNumber');
-        $this->game->incStat(1, 'turnsNumber', $activePlayerId);
+        $this->playerStats->inc('turnsNumber', 1, $activePlayerId, true);
 
         if ($factoriesAllEmpty) {
             return EndRound::class;

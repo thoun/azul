@@ -71,8 +71,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
                 $this->game->incPlayerScore($playerId, $obj->points);
                 $this->game->incPlayerScoreAux($playerId, 1);
 
-                $this->game->incStat($obj->points, 'pointsCompleteLine');
-                $this->game->incStat($obj->points, 'pointsCompleteLine', $playerId);
+                $this->playerStats->inc('pointsCompleteLine', $obj->points, $playerId, true);
             }
         }
 
@@ -114,8 +113,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
 
                 $this->game->incPlayerScore($playerId, $obj->points);
 
-                $this->game->incStat($obj->points, 'pointsCompleteColumn');
-                $this->game->incStat($obj->points, 'pointsCompleteColumn', $playerId);
+                $this->playerStats->inc('pointsCompleteColumn', $obj->points, $playerId, true);
             }
         }
 
@@ -150,8 +148,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
 
                 $this->game->incPlayerScore($playerId, $obj->points);
 
-                $this->game->incStat($obj->points, 'pointsCompleteColor');
-                $this->game->incStat($obj->points, 'pointsCompleteColor', $playerId);
+                $this->playerStats->inc('pointsCompleteColor', $obj->points, $playerId, true);
             }
         }
 
