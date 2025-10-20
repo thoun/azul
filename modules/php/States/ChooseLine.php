@@ -5,6 +5,7 @@ namespace Bga\Games\Azul\States;
 
 use Bga\GameFramework\States\PossibleAction;
 use Bga\GameFramework\StateType;
+use Bga\GameFramework\UserException;
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
 use Bga\Games\Azul\Game;
 
@@ -37,7 +38,7 @@ class ChooseLine extends \Bga\GameFramework\States\GameState
     #[PossibleAction]
     function actSelectLine(int $line, int $activePlayerId) {
         if (array_search($line, $this->availableLines($activePlayerId)) === false) {
-            throw new \BgaUserException('Line not available');
+            throw new UserException('Line not available');
         }
 
         $tiles = $this->game->getTilesFromDb($this->game->tiles->getCardsInLocation('hand', $activePlayerId));

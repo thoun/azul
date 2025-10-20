@@ -93,6 +93,13 @@ namespace Bga\GameFramework\States {
         public \Bga\GameFramework\Legacy $legacy;
         public \Bga\GameFramework\TableOptions $tableOptions;
         public \Bga\GameFramework\UserPreferences $userPreferences;
+        public \Bga\GameFramework\TableStats $tableStats;
+        public \Bga\GameFramework\PlayerStats $playerStats;
+        public \Bga\GameFramework\Components\DeckFactory $deckFactory;
+        public \Bga\GameFramework\Components\Counters\CounterFactory $counterFactory;
+        public \Bga\GameFramework\Components\Counters\PlayerCounter $playerScore;
+        public \Bga\GameFramework\Components\Counters\PlayerCounter $playerScoreAux;
+
         public ?\Bga\GameFramework\GameStateMachine $gamestate = null;
 
         public function __construct(
@@ -107,12 +114,6 @@ namespace Bga\GameFramework\States {
             public bool $updateGameProgression = false,
             public ?int $initialPrivate = null,
         ) {
-            $this->globals = $game->globals;
-            $this->notify = $game->notify;
-            $this->legacy = $game->legacy;
-            $this->tableOptions = $game->tableOptions;
-            $this->userPreferences = $game->userPreferences;
-            $this->gamestate = $game->gamestate;
         }
 
         /**
@@ -172,7 +173,7 @@ namespace Bga\GameFramework {
          */
         public static function gameSetup(int|string $nextStateId = 2): self
         {
-            return $this->create();
+            return self::create();
         }
 
         /**
@@ -182,7 +183,7 @@ namespace Bga\GameFramework {
          */
         public static function endScore(): self
         {
-            return $this->create();
+            return self::create();
         }
 
         /**
@@ -191,7 +192,7 @@ namespace Bga\GameFramework {
          */
         public static function gameEnd(): self
         {
-            return $this->create();
+            return self::create();
         }
 
         /**
@@ -304,10 +305,10 @@ namespace Bga\GameFramework {
          *
          * @param int $playerId the player ID to send the notification to.
          * @param string $notifName a comprehensive string code that explain what is the notification for.
-         * @param string $message some text that can be displayed on player's log window (should be surrounded by clienttranslate if not empty).
+         * @param (string | NotificationMessage) $message some text that can be displayed on player's log window (should be surrounded by clienttranslate if not empty).
          * @param array $args notification arguments.
          */
-        public function player(int $playerId, string $notifName, ?string $message = '', array $args = []): void {
+        public function player(int $playerId, string $notifName, string | NotificationMessage $message = '', array $args = []): void {
             //
         }
 
@@ -315,10 +316,10 @@ namespace Bga\GameFramework {
          * Send a notification to all players of the game and spectators (public).
          *
          * @param string $notifName a comprehensive string code that explain what is the notification for.
-         * @param string $message some text that can be displayed on player's log window (should be surrounded by clienttranslate if not empty).
+         * @param (string | NotificationMessage) $message some text that can be displayed on player's log window (should be surrounded by clienttranslate if not empty).
          * @param array $args notification arguments.
          */
-        public function all(string $notifName, ?string $message = '', array $args = []): void {
+        public function all(string $notifName, string | NotificationMessage $message = '', array $args = []): void {
             //
         }
     }
@@ -446,6 +447,120 @@ namespace Bga\GameFramework {
         }
     }
 
+    abstract class TableStats {
+        /**
+         * Create a statistic entry with a default value.
+         *
+         * @param string|array $nameOrNames Statistic identifier(s) defined in `stats.json`.
+         * @param int|float|bool $value Default value to register.
+         */
+        public function init(string|array $nameOrNames, int|float|bool $value): void {
+        }
+
+        /**
+         * Update a table statistic to the provided value.
+         *
+         * @param string $name Statistic identifier defined in `stats.json`.
+         * @param int|float|bool $value Value to persist.
+         */
+        public function set(string $name, int|float|bool $value): void {
+        }
+
+        /**
+         * Increment a table statistic by the given delta.
+         *
+         * @param string $name Statistic identifier defined in `stats.json`.
+         * @param int|float $delta Signed difference to apply.
+         */
+        public function inc(string $name, int|float $delta): void {
+        }
+
+        /**
+         * Fetch a table statistic.
+         *
+         * @param string $name Statistic identifier defined in `stats.json`.
+         *
+         * @return int|float|bool The statistic value.
+         */
+        public function get(string $name): int|float|bool {
+            return 0;
+        }
+    }
+
+    abstract class PlayerStats {
+        /**
+         * Create a statistic entry with a default value.
+         *
+         * @param string|array $nameOrNames Statistic identifier(s) defined in `stats.json`.
+         * @param int|float|bool $value Default value to register.
+         * @param bool $updateTableStat if there is a table stat of the same name to init at the same time (for example, for a turnNumber counter that would store the turns played by each player but also the total of turns for the table)
+         */
+        public function init(string|array $nameOrNames, int|float|bool $value, bool $updateTableStat = false): void {
+        }
+
+        /**
+         * Update a player statistic to the provided value.
+         *
+         * @param string $name Statistic identifier defined in `stats.json`.
+         * @param int|float|bool $value Value to persist.
+         * @param int $player_id Target player id.
+         */
+        public function set(string $name, int|float|bool $value, int $player_id): void {
+        }
+
+        /**
+         * Apply the same value to a player statistic for every player.
+         *
+         * @param string $name Statistic identifier defined in `stats.json`.
+         * @param int|float|bool $value Value to persist for all players.
+         */
+        public function setAll(string $name, int|float|bool $value): void {
+        }
+
+        /**
+         * Increment a player statistic by the given delta.
+         *
+         * @param string $name Statistic identifier defined in `stats.json`.
+         * @param int|float $delta Signed difference to apply.
+         * @param int $player_id Target player id.
+         * @param bool $updateTableStat if there is a table stat of the same name to update at the same time (for example, for a turnNumber counter that would store the turns played by each player but also the total of turns for the table)
+         */
+        public function inc(string $name, int|float $delta, int $player_id, bool $updateTableStat = false): void {
+        }
+
+        /**
+         * Increment a statistic for every player.
+         *
+         * @param string $name Statistic identifier defined in `stats.json`.
+         * @param int|float $delta Signed difference to apply.
+         */
+        public function incAll(string $name, int|float $delta): void {
+        }
+
+        /**
+         * Fetch a player statistic.
+         *
+         * @param string $name Statistic identifier defined in `stats.json`.
+         * @param int $player_id Target player id.
+         *
+         * @return int|float|bool The statistic value.
+         */
+        public function get(string $name, int $player_id): int|float|bool {
+            return 0;
+        }
+
+        /**
+         * Retrieve the statistic for all players, keyed by player id.
+         *
+         * @param string $name Statistic identifier defined in `stats.json`.
+         *
+         * @return array<int, int|float|bool> Player id keyed map of the statistic values.
+         */
+        public function getAll(string $name): array {
+            return [];
+        }
+    }
+
     abstract class GameState
     {
         public ?string $name = null;
@@ -465,7 +580,7 @@ namespace Bga\GameFramework {
         }
     }
 
-    abstract class GamestateMachine extends \APP_Object
+    abstract class GamestateMachine
     {
         /**
          * You can call this method to make any player active.
@@ -914,7 +1029,14 @@ namespace Bga\GameFramework {
         }
     }
 
-    abstract class Table extends \APP_Object
+    class NotificationMessage {
+        public function __construct(
+            public string $message = '',
+            public array $args = [],
+        ) {}
+    }
+
+    abstract class Table
     {
         /**
          * Access the underlying game state machine object.
@@ -947,9 +1069,79 @@ namespace Bga\GameFramework {
         readonly public \Bga\GameFramework\UserPreferences $userPreferences;
 
         /**
+         * Access the underlying TableStats object.
+         */
+            public \Bga\GameFramework\TableStats $tableStats;
+
+        /**
+         * Access the underlying PlayerStats object.
+         */
+            public \Bga\GameFramework\PlayerStats $playerStats;
+
+        /**
+         * Access the underlying DeckFactory object.
+         */
+        readonly public \Bga\GameFramework\Components\DeckFactory $deckFactory;
+
+        /**
+         * Access the underlying CounterFactory object.
+         */
+        readonly public \Bga\GameFramework\Components\Counters\CounterFactory $counterFactory;
+
+        /**
+         * Access the underlying PlayerCounter object for player_score.
+         */
+        readonly public \Bga\GameFramework\Components\Counters\PlayerCounter $playerScore;
+
+        /**
+         * Access the underlying PlayerCounter object for player_score_aux.
+         */
+        readonly public \Bga\GameFramework\Components\Counters\PlayerCounter $playerScoreAux;
+
+        /**
          * Default constructor.
          */
         public function __construct()
+        {
+            //
+        }
+
+        /**
+         * Debug message. Appear only if needed.
+         */
+        final public function debug(string $message): void
+        {
+            //
+        }
+
+        /**
+         * Dump an object with a custom prefix.
+         */
+        final public function dump(string $prefix, mixed $object): void
+        {
+            //
+        }
+
+        /**
+         * Error message. Appear in production.
+         */
+        final public function error(string $message): void
+        {
+            //
+        }
+
+        /**
+         * Standard log message (INFO level).
+         */
+        final public function trace(string $message): void
+        {
+            //
+        }
+
+        /**
+         * Warning message. Appear in production.
+         */
+        final public function warn(string $message): void
         {
             //
         }
@@ -1230,7 +1422,6 @@ namespace Bga\GameFramework {
          *     tie_breaker_description: string,
          *     losers_not_raned: bool,
          *     solo_mode_ranked: bool,
-         *     is_beta: int,
          *     is_coop: int,
          *     language_dependency: bool,
          *     player_colors: array<string>,
@@ -1889,9 +2080,11 @@ namespace Bga\GameFramework {
          * To get a Deck instance with `$this->getNew("module.common.deck")`
          * 
          * @param string $objectName must be 'module.common.deck'
+         * 
+         * @deprecated use $this->deckFactory->createDeck($tableName)
          */
         protected function getNew(string $objectName): \Bga\GameFramework\Components\Deck {
-            return new \Bga\GameFramework\Components\Deck();
+            return $this->deckFactory->createDeck('');
         }
     
         /**
@@ -1922,6 +2115,50 @@ namespace Bga\GameFramework {
             return '';
         }
     }
+
+    /**
+     * Exception visible to the players, not added to the production logs (expected errors). Should be translated.
+     */
+    class UserException extends \Exception
+    {
+        /**
+         * @param string|NotificationMessage $message Error message to be surrounded by `clienttranslate`, with optional arguments.
+         */
+        public function __construct(string|NotificationMessage $message)
+        {
+            parent::__construct();
+        }
+    }
+
+    /**
+     * Exception not visible to the players, added to the production logs (unexpected errors). Should not be translated.
+     */
+    class SystemException extends \Exception
+    {
+        /**
+         * @param string|NotificationMessage $message Error message (not translated) with optional arguments.
+         */
+        public function __construct(string|NotificationMessage $message)
+        {
+            parent::__construct();
+        }
+    }
+
+    /**
+     * Exception visible to the players, added to the production logs (unexpected errors). Only to help the game dev have more information on a complex bug.
+     */
+    class VisibleSystemException extends \Exception
+    {
+        /**
+         * @param string|NotificationMessage $message Error message (not translated) with optional arguments.
+         */
+        public function __construct(string|NotificationMessage $message)
+        {
+            parent::__construct();
+        }
+    }
+
+
 }
 
 namespace Bga\GameFramework\Db {
@@ -1988,7 +2225,7 @@ namespace Bga\GameFramework\Db {
 
 namespace Bga\GameFramework\Components {
 
-    class Deck extends \Deck
+    abstract class Deck extends \Deck
     {
         var $autoreshuffle;
         var $autoreshuffle_trigger; 
@@ -2223,6 +2460,217 @@ namespace Bga\GameFramework\Components {
             return [];
         }
     }
+
+    final class DeckFactory {
+        /**
+         * Create a Deck component and set the DB table name.
+         * 
+         * @param string $tableName name of the DB table
+         * @return Deck a new Deck object
+         */
+        public function createDeck(string $tableName): Deck {
+            return new class extends Deck{}();
+        }
+    }
+
+}
+
+namespace Bga\GameFramework\Components\Counters {        
+    /**
+     * Factory to create counters.
+     */
+    final class CounterFactory {
+        /**
+         * Create a PlayerCounter component.
+         * 
+         * @param string $name the name of the counter, used to link it to the JS counter
+         * @param ?int $min the minimum value of the counter (null = no minimum)
+         * @param ?int $max the maximum value of the counter (null = no maximum)
+         * @return PlayerCounter a new PlayerCounter object
+         */
+        public function createPlayerCounter(string $name, ?int $min = 0, ?int $max = null): PlayerCounter {
+            return new class extends PlayerCounter {}();
+        }
+
+        /**
+         * Create a TableCounter component.
+         * 
+         * @param string $name the name of the counter, used to link it to the JS counter
+         * @param ?int $min the minimum value of the counter (null = no minimum)
+         * @param ?int $max the maximum value of the counter (null = no maximum)
+         * @return TableCounter a new TableCounter object
+         */
+        public function createTableCounter(string $name, ?int $min = 0, ?int $max = null): TableCounter {
+            return new class extends TableCounter{}();
+        }
+    }
+
+    abstract class OutOfRangeCounterException extends \BgaSystemException
+    {
+    }
+    
+    abstract class UnknownPlayerException extends \BgaSystemException
+    {
+    }
+
+    /**
+     * Represents a player counter that is stored in DB, one value for each player. For example, the money the player have.
+     */
+    abstract class PlayerCounter {
+        /**
+         * Initialize the DB elements. Must be called during game `setupNewGame`.
+         * 
+         * @param int $initialValue, if different than 0
+         */
+        public function initDb(array $playerIds, int $initialValue = 0) {
+        }
+
+        /**
+         * Returns the current value of the counter.
+         * 
+         * @param int $playerId the player id
+         * @return int the value
+         * @throws UnknownPlayerException if $playerId is not in the player ids initialized by initDb
+         */
+        public function get(int $playerId): int {
+            return 0;
+        }
+
+        /**
+         * Set the value of the counter, and send a notif to update the value on the front side.
+         * 
+         * @param int $playerId the player id
+         * @param int $value the new value
+         * @param ?NotificationMessage $message the notif to send to the front, with a message and optional args. Empty message for no log, null for no notif at all (the front will not be updated).
+         * @return int the new value
+         * @throws OutOfRangeCounterException if the value is outside the min/max
+         * @throws UnknownPlayerException if $playerId is not in the player ids initialized by initDb
+         */
+        public function set(int $playerId, int $value, ?\Bga\GameFramework\NotificationMessage $message = new \Bga\GameFramework\NotificationMessage()): int {
+            return 0;
+        }
+
+        /**
+         * Increment the value of the counter, and send a notif to update the value on the front side.
+         * 
+         * Note: if the inc is 0, no notif will be sent.
+         * 
+         * @param int $playerId the player id
+         * @param int $inc the value to add to the current value
+         * @param ?NotificationMessage $message the notif to send to the front, with a message and optional args. Empty message for no log, null for no notif at all (the front will not be updated).
+         * @return int the new value
+         * @throws OutOfRangeCounterException if the value is outside the min/max
+         * @throws UnknownPlayerException if $playerId is not in the player ids initialized by initDb
+         */
+        public function inc(int $playerId, int $inc, ?\Bga\GameFramework\NotificationMessage $message = new \Bga\GameFramework\NotificationMessage()): int {
+            return 0;
+        }
+
+        /**
+         * Return the lowest value.
+         * 
+         * @return int the lowest value
+         */
+        public function getMin(): int {
+            return 0;
+        }
+
+        /**
+         * Return the highest value.
+         * 
+         * @return int the highest value
+         */
+        public function getMax(): int {
+            return 0;
+        }
+        
+        /**
+         * Return the values for each player, as an associative array $playerId => $value.
+         * 
+         * @return array<int, int> the values
+         */
+        public function getAll(): array {
+            return [];
+        }
+
+        /**
+         * Set the value of the counter for all the players, and send a notif to update the value on the front side.
+         * 
+         * @param int $value the new value
+         * @param ?NotificationMessage $message the notif to send to the front, with a message and optional args. Empty message for no log, null for no notif at all (the front will not be updated).
+         * @return int the new value
+         * @throws OutOfRangeCounterException if the value is outside the min/max
+         */
+        public function setAll(int $value, ?\Bga\GameFramework\NotificationMessage $message = new \Bga\GameFramework\NotificationMessage()): int {
+            return 0;
+        }
+
+        /**
+         * Updates the result object, to be used in the `getAllDatas` function.
+         * Will set the value on each $result["players"] sub-array.
+         * 
+         * @param array $result the object to update.
+         * @param ?string $fieldName the field name to set in $result["players"], if different than the counter name.
+         */
+        public function fillResult(array &$result, ?string $fieldName = null) {
+        }
+    }
+
+    /**
+     * Represents a game counter that is stored in DB. For example, the number of rounds.
+     */
+    abstract class TableCounter {
+        /**
+         * Initialize the DB elements. Must be called during game `setupNewGame`.
+         * 
+         * @param int $initialValue, if different than 0
+         */
+        public function initDb(int $initialValue = 0) {}
+
+        /**
+         * Returns the current value of the counter.
+         * 
+         * @return int the value
+         */
+        public function get(): int {
+            return 0;
+        }
+
+        /**
+         * Set the value of the counter, and send a notif to update the value on the front side.
+         * 
+         * @param int $value the new value
+         * @param @param ?NotificationMessage $message the notif to send to the front, with a message and optional args. Empty message for no log, null for no notif at all (the front will not be updated).
+         * @return int the new value
+         * @throws OutOfRangeCounterException if the value is outside the min/max
+         */
+        public function set(int $value, ?\Bga\GameFramework\NotificationMessage $message = new \Bga\GameFramework\NotificationMessage()): int {
+            return 0;
+        }
+
+        /**
+         * Increment the value of the counter, and send a notif to update the value on the front side.
+         * 
+         * Note: if the inc is 0, no notif will be sent.
+         * 
+         * @param int $inc the value to add to the current value
+         * @param @param ?NotificationMessage $message the notif to send to the front, with a message and optional args. Empty message for no log, null for no notif at all (the front will not be updated).
+         * @return int the new value
+         * @throws OutOfRangeCounterException if the value is outside the min/max
+         */
+        public function inc(int $inc, ?\Bga\GameFramework\NotificationMessage $message = new \Bga\GameFramework\NotificationMessage()): int {
+            return 0;
+        }
+
+        /**
+         * Updates the result object, to be used in the `getAllDatas` function.
+         * 
+         * @param array $result the object to update.
+         * @param ?string $fieldName the field name to set in $result, if different than the counter name.
+         */
+        public function fillResult(array &$result, ?string $fieldName = null) {
+        }
+    }
 }
 
 namespace {
@@ -2262,49 +2710,6 @@ namespace {
 
     function bga_rand(int $min, int $max): int {
         return 0;
-    }
-
-    abstract class APP_Object
-    {
-        /**
-         * Debug message. Appear only if needed.
-         */
-        final public function debug(string $message): void
-        {
-            //
-        }
-
-        /**
-         * Dump an object with a custom prefix.
-         */
-        final public function dump(string $prefix, mixed $object): void
-        {
-            //
-        }
-
-        /**
-         * Error message. Appear in production.
-         */
-        final public function error(string $message): void
-        {
-            //
-        }
-
-        /**
-         * Standard log message (INFO level).
-         */
-        final public function trace(string $message): void
-        {
-            //
-        }
-
-        /**
-         * Warning message. Appear in production.
-         */
-        final public function warn(string $message): void
-        {
-            //
-        }
     }
 
     abstract class APP_Template
@@ -2439,7 +2844,7 @@ namespace {
     /** Base64 string. */
     const AT_base64 = 33;
 
-    abstract class APP_GameAction extends APP_Object
+    abstract class APP_GameAction
     {
         /**
          * The associated table game instance.
@@ -2521,33 +2926,20 @@ namespace {
      *******************************************************************************************************************
      */
 
-    /** Exception code to use when there's no real error. */
-    const FEX_NOERROR = 0;
-
-    /** Exception code to use when there's no public code. */
+    /** Exception code to use when there's no public code.
+     * 
+     * @deprecated use \Bga\GameFramework\UserException, \Bga\GameFramework\SystemException or \Bga\GameFramework\VisibleSystemException depending on your need, that don't need FEX code
+     */
     const FEX_NOCODE = 100;
-
-    /** Exception code to use when an input argument is invalid. */
-    const FEX_bad_input_argument = 300;
-
-    /** If you go over 64k, storeLegacyData function is going to FAIL and throws this exception code. */
-    const FEX_legacy_size_exceeded = 805;
-
-    /** Exception code to use when the game action is not allowed. */
-    const FEX_game_action_no_allowed = 900;
-
-    /** Exception code to use when it's not the player turn to play. */
-    const FEX_this_is_not_your_turn = 901;
-
-    /** Exception code to use when the action needs confirmation. */
-    const FEX_please_confirm = 902;
 
     /**
      * Base exception.
+     * 
+     * @deprecated use \Bga\GameFramework\UserException, \Bga\GameFramework\SystemException or \Bga\GameFramework\VisibleSystemException depending on your need
      */
     class feException extends Exception
     {
-        public function __construct($message, $expected = false, $visibility = true, $code=FEX_NOCODE, $publicMsg='', public ?array $args = null) {
+        public function __construct($message, $expected = false, $visibility = true, $code=100, $publicMsg='', public ?array $args = null) {
         }
     }
 
@@ -2560,7 +2952,12 @@ namespace {
      */
     class BgaSystemException extends feException
     {
-        public function __construct($message, $code=FEX_NOCODE, ?array $args = null) {
+        /**
+         * @param (string | NotificationMessage) $message the error message. It shouldn't be translated as it will not be visible to players.
+         * @param int $code (do not use)
+         * @param ?array $args the args, if not set in a NotificationMessage
+         */
+        public function __construct($message, $code=100, ?array $args = null) {
         }
     }
 
@@ -2572,7 +2969,12 @@ namespace {
      */
     class BgaVisibleSystemException extends BgaSystemException
     {
-        public function __construct($message, $code=FEX_NOCODE, ?array $args = null) {
+        /**
+         * @param (string | NotificationMessage) $message the error message. It should be translated with clienttranslate as it will be visible to players.
+         * @param int $code (do not use)
+         * @param ?array $args the args, if not set in a NotificationMessage
+         */
+        public function __construct($message, $code=100, ?array $args = null) {
         }
     }
 
@@ -2580,20 +2982,25 @@ namespace {
      * Base class to notify a user error.
      *
      * You must throw this exception when a player wants to do something that they are not allowed to do. The error
-     * message will be shown to the player as a "red message". The error message must be translated, make sure you use
-     * `_()` here and NOT `clientranslate()`. Throwing such an exception is NOT considered a bug, so it is not traced in
-     * BGA error logs.
+     * message will be shown to the player as a "red message". 
+     * The error message should be translated (with clientranslate() and args).
+     * Throwing such an exception is NOT considered a bug, so it is not traced in BGA error logs.
      */
     class BgaUserException extends BgaVisibleSystemException
     {
-        public function __construct($message, $code=FEX_NOCODE, ?array $args = null) {
+        /**
+         * @param (string | NotificationMessage) $message the error message. It should be translated with clienttranslate as it will be visible to players.
+         * @param int $code (do not use)
+         * @param ?array $args the args, if not set in a NotificationMessage
+         */
+        public function __construct($message, $code=100, ?array $args = null) {
         }
     }
 
     /**
      * @deprecated Use \Bga\GameFramework\Components\Deck instead
      */
-    class Deck
+    abstract class Deck
     {
         
     }

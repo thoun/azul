@@ -60,8 +60,7 @@ class Game extends \Bga\GameFramework\Table {
             4 => 9,
         ];
 
-        $this->tiles = $this->getNew("module.common.deck");
-        $this->tiles->init("tile");
+        $this->tiles = $this->deckFactory->createDeck('tile');
         $this->tiles->autoreshuffle = true;      
 	}	
 

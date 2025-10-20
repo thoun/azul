@@ -5,6 +5,7 @@ namespace Bga\Games\Azul\States;
 
 use Bga\GameFramework\States\PossibleAction;
 use Bga\GameFramework\StateType;
+use Bga\GameFramework\UserException;
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
 use Bga\Games\Azul\Game;
 
@@ -29,10 +30,10 @@ class ChooseTile extends \Bga\GameFramework\States\GameState
         $tile = $this->game->getTileFromDb($this->game->tiles->getCard($id));
 
         if ($tile->location !== 'factory') {
-            throw new \BgaUserException("Tile is not in a factory");
+            throw new UserException("Tile is not in a factory");
         }
         if ($tile->type === 0) {
-            throw new \BgaUserException("Tile is First Player token");
+            throw new UserException("Tile is First Player token");
         }
 
         $factory = $tile->column;
