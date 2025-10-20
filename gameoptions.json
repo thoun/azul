@@ -38,7 +38,23 @@
                 "nobeginner": true
             }
         },
-        "default": 1
+        "default": 1,
+        "startcondition": {
+            "2": [
+                {
+                    "type": "otheroptionisnot",
+                    "id": 100,
+                    "value": 3,
+                    "message": "Azul Master Chocolatier is not compatible with Crystal Mozaic"
+                },
+                {
+                    "type": "otheroptionisnot",
+                    "id": 100,
+                    "value": 4,
+                    "message": "Azul Master Chocolatier is not compatible with Crystal Mozaic"
+                }
+            ]
+        }
     },
     "102": {
         "name": "Fast scoring",

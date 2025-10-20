@@ -1080,7 +1080,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
-        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand ").concat(player.hand.length ? '' : 'empty', "\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table data-board=\"").concat(this.game.getBoardNumber(), "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div id=\"player-table-").concat(this.playerId, "-line-1\" class=\"special-factory-zero factory\" data-special-factory=\"6\"></div>\n            ");
+        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand ").concat(player.hand.length ? '' : 'empty', "\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table\" data-board=\"").concat(this.game.getBoardNumber(), "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div id=\"player-table-").concat(this.playerId, "-line-1\" class=\"special-factory-zero factory\" data-special-factory=\"6\"></div>\n            ");
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-".concat(this.playerId, "-line").concat(i, "\" class=\"line\" style=\"top: ").concat(10 + 70 * (i - 1), "px; width: ").concat(69 * i - 5, "px;\"></div>");
         }
@@ -1475,7 +1475,7 @@ var Azul = /** @class */ (function (_super) {
                 this.playersTables.forEach(function (playerTable) { return playerTable.setFont(prefValue); });
                 break;
             case 210:
-                var chocolatierSkin = prefValue == 1 || !!this.gamedatas.specialFactories;
+                var chocolatierSkin = this.gamedatas.boardNumber <= 2 && (prefValue == 1 || !!this.gamedatas.specialFactories);
                 document.getElementsByTagName('html')[0].dataset.chocolatierSkin = chocolatierSkin.toString();
                 try {
                     document.getElementById('preference_control_203').closest(".preference_choice").style.display = chocolatierSkin ? 'none' : null;

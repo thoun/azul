@@ -14,7 +14,7 @@ class PlayerTable {
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
         <div id="player-hand-${this.playerId}" class="player-hand ${player.hand.length ? '' : 'empty'}">
         </div>
-        <div id="player-table-${this.playerId}" class="player-table data-board="${this.game.getBoardNumber()}" style="--player-color: #${player.color};">
+        <div id="player-table-${this.playerId}" class="player-table" data-board="${this.game.getBoardNumber()}" style="--player-color: #${player.color};">
             <div class="player-name-wrapper shift">
                 <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
             </div>

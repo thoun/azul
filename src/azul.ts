@@ -320,7 +320,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
                 this.playersTables.forEach(playerTable => playerTable.setFont(prefValue));
                 break;
             case 210:
-                const chocolatierSkin = prefValue == 1 || !!this.gamedatas.specialFactories;
+                const chocolatierSkin = this.gamedatas.boardNumber <= 2 && (prefValue == 1 || !!this.gamedatas.specialFactories);
                 document.getElementsByTagName('html')[0].dataset.chocolatierSkin = chocolatierSkin.toString();
 
                 try {
