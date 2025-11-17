@@ -12,8 +12,7 @@ class PlayerTable {
         const nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
 
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
-        <div id="player-hand-${this.playerId}" class="player-hand ${player.hand.length ? '' : 'empty'}">
-        </div>
+        <div id="player-hand-${this.playerId}" class="player-hand ${player.hand.length ? '' : 'empty'}"></div>
         <div id="player-table-${this.playerId}" class="player-table" data-board="${this.game.getBoardNumber()}" style="--player-color: #${player.color};">
             <div class="player-name-wrapper shift">
                 <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
@@ -110,7 +109,7 @@ class PlayerTable {
         this.setHandVisible(tiles.length > 0);
     }
 
-    public placeTilesOnLine(tiles: Tile[], line: number, temporarilyRemoveOverflow: boolean = false, newAnimation: boolean = false): Promise<any> {
+    public placeTilesOnLine(tiles: Tile[], line: number, newAnimation: boolean = false): Promise<any> {
         if (!tiles?.length) {
             return Promise.resolve();
         }
@@ -118,25 +117,29 @@ class PlayerTable {
         const lineId = `player-table-${this.playerId}-line${line}`;
 
         /*if (line == 0) {
-            console.warn(
-                tiles[0].id,
-                document.getElementById(`tile${tiles[0].id}`), 
-                document.getElementById(lineId)
-            );
-            return Promise.all(tiles.map(tile => this.game.animationManager.slideAndAttach(document.getElementById(`tile${tile.id}`), document.getElementById(lineId))));
+            const tilesDiv = tiles.map(tile => document.getElementById(`tile${tile.id}`));
+            const destinationDiv = document.getElementById(lineId);
+            tilesDiv.forEach(tileDiv => {
+                tileDiv.style.position = 'relative';
+                tileDiv.style.left = 'unset';
+                tileDiv.style.top = 'unset';
+            });
+            return Promise.all(tilesDiv.map(tileDiv => this.game.animationManager.slideAndAttach(tileDiv, destinationDiv)));
         }*/
 
-        const line0 = temporarilyRemoveOverflow ? document.getElementById(lineId) : null;
-        if (temporarilyRemoveOverflow) {
-            line0.style.overflow = 'unset';
+        let line0 = null;
+        if (line == 0) {
+            tiles = tiles.sort((a, b) => a.column - b.column);
+            line0 = document.getElementById(lineId);
+            line0.style.zIndex = '1';
         }
         return Promise.all(tiles.map(tile => {
             const left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column-1) * 74);
             const top = line == -1 ? 9 : 0;
             return this.game.placeTile(tile, lineId, left, top, undefined, newAnimation);
         })).then(() => {
-            if (temporarilyRemoveOverflow) {
-                line0.style.overflow = null;
+            if (line0) {
+                line0.style.zIndex = 'unset';
             }
         });
     }

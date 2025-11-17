@@ -25,7 +25,7 @@
         //z-index: 1;
         //position: relative;
 
-        &.empty {
+        &.empty:empty {
             opacity: 0;
         }
     }
@@ -152,7 +152,10 @@
                 top: 407px;
                 left: 1px;
                 height: 71px;
-                overflow: hidden;
+
+                .tile:nth-child(n+8) {
+                    display: none;
+                }
             }
 
             &.selectable {

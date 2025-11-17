@@ -197,7 +197,7 @@
   opacity: 1;
   transition: opacity 0.5s;
 }
-.player-table-wrapper .player-hand.empty {
+.player-table-wrapper .player-hand.empty:empty {
   opacity: 0;
 }
 .player-table-wrapper .player-name-wrapper {
@@ -308,7 +308,9 @@
   top: 407px;
   left: 1px;
   height: 71px;
-  overflow: hidden;
+}
+.player-table-wrapper .player-table .line.floor .tile:nth-child(n+8) {
+  display: none;
 }
 .player-table-wrapper .player-table .line.selectable {
   border-color: red;

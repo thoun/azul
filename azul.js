@@ -701,7 +701,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
-        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand ").concat(player.hand.length ? '' : 'empty', "\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table\" data-board=\"").concat(this.game.getBoardNumber(), "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div id=\"player-table-").concat(this.playerId, "-line-1\" class=\"special-factory-zero factory\" data-special-factory=\"6\"></div>\n            ");
+        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand ").concat(player.hand.length ? '' : 'empty', "\"></div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table\" data-board=\"").concat(this.game.getBoardNumber(), "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div id=\"player-table-").concat(this.playerId, "-line-1\" class=\"special-factory-zero factory\" data-special-factory=\"6\"></div>\n            ");
         for (var i = 1; i <= 5; i++) {
             html += "<div id=\"player-table-".concat(this.playerId, "-line").concat(i, "\" class=\"line\" style=\"top: ").concat(10 + 70 * (i - 1), "px; width: ").concat(69 * i - 5, "px;\"></div>");
         }
@@ -786,33 +786,36 @@ var PlayerTable = /** @class */ (function () {
         });
         this.setHandVisible(tiles.length > 0);
     };
-    PlayerTable.prototype.placeTilesOnLine = function (tiles, line, temporarilyRemoveOverflow, newAnimation) {
+    PlayerTable.prototype.placeTilesOnLine = function (tiles, line, newAnimation) {
         var _this = this;
-        if (temporarilyRemoveOverflow === void 0) { temporarilyRemoveOverflow = false; }
         if (newAnimation === void 0) { newAnimation = false; }
         if (!(tiles === null || tiles === void 0 ? void 0 : tiles.length)) {
             return Promise.resolve();
         }
         var lineId = "player-table-".concat(this.playerId, "-line").concat(line);
         /*if (line == 0) {
-            console.warn(
-                tiles[0].id,
-                document.getElementById(`tile${tiles[0].id}`),
-                document.getElementById(lineId)
-            );
-            return Promise.all(tiles.map(tile => this.game.animationManager.slideAndAttach(document.getElementById(`tile${tile.id}`), document.getElementById(lineId))));
+            const tilesDiv = tiles.map(tile => document.getElementById(`tile${tile.id}`));
+            const destinationDiv = document.getElementById(lineId);
+            tilesDiv.forEach(tileDiv => {
+                tileDiv.style.position = 'relative';
+                tileDiv.style.left = 'unset';
+                tileDiv.style.top = 'unset';
+            });
+            return Promise.all(tilesDiv.map(tileDiv => this.game.animationManager.slideAndAttach(tileDiv, destinationDiv)));
         }*/
-        var line0 = temporarilyRemoveOverflow ? document.getElementById(lineId) : null;
-        if (temporarilyRemoveOverflow) {
-            line0.style.overflow = 'unset';
+        var line0 = null;
+        if (line == 0) {
+            tiles = tiles.sort(function (a, b) { return a.column - b.column; });
+            line0 = document.getElementById(lineId);
+            line0.style.zIndex = '1';
         }
         return Promise.all(tiles.map(function (tile) {
             var left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74);
             var top = line == -1 ? 9 : 0;
             return _this.game.placeTile(tile, lineId, left, top, undefined, newAnimation);
         })).then(function () {
-            if (temporarilyRemoveOverflow) {
-                line0.style.overflow = null;
+            if (line0) {
+                line0.style.zIndex = 'unset';
             }
         });
     };
