@@ -9,12 +9,7 @@
     },
     "files": [
         "bga-framework.d.ts",
-        "node_modules/bga-animations/src/animations.ts",
-        "node_modules/bga-animations/src/animations/attach-with-animation.ts",
-        "node_modules/bga-animations/src/animations/slide-animation.ts",
-        "node_modules/bga-animations/src/animations/cumulated-animations.ts",
-        "node_modules/bga-animations/src/animations-utils.ts",
-        "node_modules/bga-animations/src/animation-manager.ts",
+        "bga-animations.d.ts",
         "node_modules/bga-zoom/src/zoom-manager.ts",
         "src/azul.d.ts",
         "src/slide-utils.ts",

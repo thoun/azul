@@ -116,6 +116,16 @@ class PlayerTable {
         }
 
         const lineId = `player-table-${this.playerId}-line${line}`;
+
+        /*if (line == 0) {
+            console.warn(
+                tiles[0].id,
+                document.getElementById(`tile${tiles[0].id}`), 
+                document.getElementById(lineId)
+            );
+            return Promise.all(tiles.map(tile => this.game.animationManager.slideAndAttach(document.getElementById(`tile${tile.id}`), document.getElementById(lineId))));
+        }*/
+
         const line0 = temporarilyRemoveOverflow ? document.getElementById(lineId) : null;
         if (temporarilyRemoveOverflow) {
             line0.style.overflow = 'unset';

@@ -2673,6 +2673,28 @@ namespace Bga\GameFramework\Components\Counters {
     }
 }
 
+
+namespace Bga\GameFramework\Helpers {
+    final class Json {
+
+        /**
+         * Decode an object stored in JSON. Will return associative arrays as such.
+         * 
+         * @param $class the class to map the object into
+         */
+        public static function decode(string $json_obj, ?string $class = null): mixed {
+            return null;        
+        }
+
+        /**
+         * Encode an object to JSON. Will add a flag to mark associative arrays so `decode` can return them as expected.
+         */
+        public static function encode(mixed $obj): string {
+            return '';
+        }
+    }
+}
+
 namespace {
     exit("This file should not be included, only analyzed by your IDE");
 

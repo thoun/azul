@@ -22,7 +22,7 @@ GameGui = (function () { // this hack required so we fake extend GameGui
 })();
 
 class Azul extends GameGui<AzulGamedatas> implements AzulGame {
-    public animationManager: AnimationManager;
+    public animationManager: /*BgaAnimations.Manager*/AnimationManager;
 
     public gamedatas: AzulGamedatas;
     private zoomManager: ZoomManager;
@@ -75,7 +75,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
 
         log('gamedatas', gamedatas);
 
-        this.animationManager = new AnimationManager(this);
+        this.animationManager = new window['BgaAnimations'].Manager(this);
 
         this.createPlayerPanels(gamedatas);
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles, gamedatas.specialFactories);
@@ -92,7 +92,6 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
             },
             onDimensionsChange: (newZoom) => this.onTableCenterSizeChange(newZoom),
         });
-        this.animationManager.setZoomManager(this.zoomManager);
 
         this.setupNotifications();
         this.setupPreferences();
@@ -262,9 +261,8 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
                     this.statusBar.addActionButton(_("Undo tile selection"), () => this.bgaPerformAction('actUndoTakeTiles'));
                     break;     
                 case 'confirmLine':
-                    this.statusBar.addActionButton(_("Confirm"), () => this.bgaPerformAction('actConfirmLine'), { id: 'confirmLine_button' });
+                    this.statusBar.addActionButton(_("Confirm"), () => this.bgaPerformAction('actConfirmLine'), { autoclick: this.getGameUserPreference(204) != 2 });
                     this.statusBar.addActionButton(_("Undo line selection"), () => this.bgaPerformAction('actUndoSelectLine'), { color: 'secondary' });
-                    this.startActionTimer('confirmLine_button', 5);
                     break;
                 case 'privateChooseColumns':
                 case 'privateConfirmColumns':
@@ -357,31 +355,6 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
 
     public isDefaultFont(): boolean {
         return this.getGameUserPreference(206) == 1;
-    }
-
-    private startActionTimer(buttonId: string, time: number) {
-        if (this.getGameUserPreference(204) == 2) {
-            return;
-        }
-
-        const button = document.getElementById(buttonId);
- 
-        let actionTimerId = null;
-        const _actionTimerLabel = button.innerHTML;
-        let _actionTimerSeconds = time;
-        const actionTimerFunction = () => {
-            const button = document.getElementById(buttonId);
-            if (button == null) {
-                window.clearInterval(actionTimerId);
-            } else if (_actionTimerSeconds-- > 1) {
-                button.innerHTML = _actionTimerLabel + ' (' + _actionTimerSeconds + ')';
-            } else {
-                window.clearInterval(actionTimerId);
-                button.click();
-            }
-        };
-        actionTimerFunction();
-        actionTimerId = window.setInterval(() => actionTimerFunction(), 1000);
     }
 
     public getZoom() {
@@ -630,15 +603,13 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            this.animationManager.attachWithAnimation(
-                new BgaSlideAnimation({
-                    element: firstPlayerToken,
-                    scale: 1, // ignore game zoom
-                }),
+            this.animationManager.slideAndAttach(
+                firstPlayerToken,
                 document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
+                { bump: 1 }
             );
         } else {
-            dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);
+            document.getElementById(`player_board_${playerId}_firstPlayerWrapper`).insertAdjacentHTML('beforeend', '<div id="firstPlayerToken" class="tile tile0"></div>');
 
             this.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }

@@ -22,6 +22,7 @@ namespace Bga\Games\Azul;
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
 use Bga\Games\Azul\Boards\Board;
 use Bga\Games\Azul\States\ChooseTile;
+use Bga\Games\Azul\States\FillFactories;
 use Tile;
 
 require_once('framework-prototype/Helpers/Arrays.php');
@@ -111,6 +112,7 @@ class Game extends \Bga\GameFramework\Table {
         //$this->debugSetup();
 
         /************ End of the game initialization *****/
+        return FillFactories::class;
     }
 
     /*

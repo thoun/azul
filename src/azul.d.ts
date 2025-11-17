@@ -47,7 +47,7 @@ interface AzulGamedatas {
 }
 
 interface AzulGame extends GameGui<AzulGamedatas> {
-    animationManager: AnimationManager;
+    animationManager: /*BgaAnimations.Manager*/AnimationManager;
     
     getPlayerId(): number;
     isDefaultFont(): boolean;

@@ -1,9 +1,8 @@
 define([
     "dojo","dojo/_base/declare",
-    "ebg/core/gamegui",
-    "ebg/counter",
-    "ebg/stock"
+    getLibUrl('bga-animations', '1.x'),
 ],
-function (dojo, declare) {
+function (dojo, declare, BgaAnimations) {
+    window['BgaAnimations'] = BgaAnimations;
     return declare("bgagame.azul", ebg.core.gamegui, new Azul());             
 });
