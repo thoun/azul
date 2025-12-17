@@ -698,6 +698,7 @@ var HAND_CENTER = 327;
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
         var _this = this;
+        var _a;
         this.game = game;
         this.playerId = Number(player.id);
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
@@ -760,10 +761,10 @@ var PlayerTable = /** @class */ (function () {
             _loop_6(i);
         }
         this.placeTilesOnWall(player.wall);
-        if (this.game.getBoardNumber()) {
+        if (this.game.getBoardNumber() > 1) {
             // if player hit refresh when column is selected but not yet applied, we reset ghost tile
             if (this.playerId === this.game.getPlayerId()) {
-                player.selectedColumns.forEach(function (selectedColumn) { return _this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color); });
+                (_a = player.selectedColumns) === null || _a === void 0 ? void 0 : _a.forEach(function (selectedColumn) { return _this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color); });
             }
         }
     }

@@ -83,10 +83,10 @@ class PlayerTable {
         this.placeTilesOnWall(player.wall);
 
         
-        if (this.game.getBoardNumber()) {
+        if (this.game.getBoardNumber() > 1) {
             // if player hit refresh when column is selected but not yet applied, we reset ghost tile
             if (this.playerId === this.game.getPlayerId()) {
-                player.selectedColumns.forEach(selectedColumn => this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));
+                player.selectedColumns?.forEach(selectedColumn => this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));
             }
         }
     }
