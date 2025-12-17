@@ -884,6 +884,7 @@ var Azul = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.playersTables = [];
         _this.zoom = 0.75;
+        Object.assign(_this, _this.bga);
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             _this.zoom = Number(zoomStr);
@@ -904,9 +905,9 @@ var Azul = /** @class */ (function (_super) {
     */
     Azul.prototype.setup = function (gamedatas) {
         var _this = this;
-        this.getGameAreaElement().insertAdjacentHTML('beforeend', "\n            <div id=\"table\">\n                <div id=\"centered-table\">\n                    <div id=\"factories\">\n                        <div id=\"bag\">\n                            <span id=\"bag-counter\"></span>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        ");
+        this.gameArea.getElement().insertAdjacentHTML('beforeend', "\n            <div id=\"table\">\n                <div id=\"centered-table\">\n                    <div id=\"factories\">\n                        <div id=\"bag\">\n                            <span id=\"bag-counter\"></span>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        ");
         // ignore loading of some pictures
-        [1, 2, 3, 4].filter(function (boardNumber) { return boardNumber != _this.getBoardNumber(); }).forEach(function (boardNumber) { return _this.dontPreloadImage("playerboard".concat(boardNumber, ".jpg")); });
+        [1, 2, 3, 4].filter(function (boardNumber) { return boardNumber != _this.getBoardNumber(); }).forEach(function (boardNumber) { return _this.images.dontPreloadImage("playerboard".concat(boardNumber, ".jpg")); });
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
@@ -977,18 +978,18 @@ var Azul = /** @class */ (function (_super) {
         }
     };
     Azul.prototype.onEnteringChooseTile = function () {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             dojo.addClass('factories', 'selectable');
         }
     };
     Azul.prototype.onEnteringChooseFactory = function (args) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             args.possibleFactories.forEach(function (i) { return dojo.addClass("factory".concat(i), 'selectable'); });
         }
     };
     Azul.prototype.onEnteringChooseLine = function (args) {
         var _this = this;
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             args.lines.forEach(function (i) { return dojo.addClass("player-table-".concat(_this.getPlayerId(), "-line").concat(i), 'selectable'); });
             dojo.addClass("player-table-".concat(this.getPlayerId(), "-line-1"), 'selectable');
         }
@@ -997,7 +998,7 @@ var Azul = /** @class */ (function (_super) {
         var _this = this;
         var table = this.getPlayerTable(playerId);
         infos.selectedColumns.forEach(function (selectedColumn) { return table.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color); });
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             var nextColumnToSelect_1 = infos.nextColumnToSelect;
             if (nextColumnToSelect_1) {
                 nextColumnToSelect_1.availableColumns.forEach(function (column) {
@@ -1064,15 +1065,15 @@ var Azul = /** @class */ (function (_super) {
     Azul.prototype.onUpdateActionButtons = function (stateName, args) {
         var _this = this;
         log('onUpdateActionButtons', stateName, args);
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'chooseFactory':
                 case 'chooseLine':
-                    this.statusBar.addActionButton(_("Undo tile selection"), function () { return _this.bgaPerformAction('actUndoTakeTiles'); });
+                    this.statusBar.addActionButton(_("Undo tile selection"), function () { return _this.actions.performAction('actUndoTakeTiles'); });
                     break;
                 case 'confirmLine':
-                    this.statusBar.addActionButton(_("Confirm"), function () { return _this.bgaPerformAction('actConfirmLine'); }, { autoclick: this.getGameUserPreference(204) != 2 });
-                    this.statusBar.addActionButton(_("Undo line selection"), function () { return _this.bgaPerformAction('actUndoSelectLine'); }, { color: 'secondary' });
+                    this.statusBar.addActionButton(_("Confirm"), function () { return _this.actions.performAction('actConfirmLine'); }, { autoclick: this.userPreferences.get(204) != 2 });
+                    this.statusBar.addActionButton(_("Undo line selection"), function () { return _this.actions.performAction('actUndoSelectLine'); }, { color: 'secondary' });
                     break;
                 case 'privateChooseColumns':
                 case 'privateConfirmColumns':
@@ -1098,7 +1099,7 @@ var Azul = /** @class */ (function (_super) {
             document.getElementById('preference_fontrol_299').closest(".preference_choice").style.display = 'none';
         }
         catch (e) { }
-        [201, 202, 203, 205, 206, 210, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.getGameUserPreference(prefId)); });
+        [201, 202, 203, 205, 206, 210, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.userPreferences.get(prefId)); });
     };
     /** @ts-ignore */
     Azul.prototype.onGameUserPreferenceChanged = function (prefId, prefValue) {
@@ -1140,7 +1141,7 @@ var Azul = /** @class */ (function (_super) {
             if (!elem) {
                 dojo.place("\n                <div id=\"zoom-notice\">\n                    ".concat(_("Use zoom controls to adapt players board size !"), "\n                    <div style=\"text-align: center; margin-top: 10px;\"><a id=\"hide-zoom-notice\">").concat(_("Dismiss"), "</a></div>\n                    <div class=\"arrow-right\"></div>\n                </div>\n                "), 'bga-zoom-controls');
                 document.getElementById('hide-zoom-notice').addEventListener('click', function () {
-                    return _this.setGameUserPreference(299, 2);
+                    return _this.userPreferences.set(299, 2);
                 });
             }
         }
@@ -1149,7 +1150,7 @@ var Azul = /** @class */ (function (_super) {
         }
     };
     Azul.prototype.isDefaultFont = function () {
-        return this.getGameUserPreference(206) == 1;
+        return this.userPreferences.get(206) == 1;
     };
     Azul.prototype.getZoom = function () {
         return this.zoom;
@@ -1292,7 +1293,7 @@ var Azul = /** @class */ (function (_super) {
         helpDialog.show();
     };
     Azul.prototype.takeTiles = function (id) {
-        this.bgaPerformAction('actTakeTiles', {
+        this.actions.performAction('actTakeTiles', {
             id: id
         });
     };
@@ -1300,27 +1301,27 @@ var Azul = /** @class */ (function (_super) {
         if (!this.checkAction('actSelectFactory', true)) {
             return;
         }
-        this.bgaPerformAction('actSelectFactory', {
+        this.actions.performAction('actSelectFactory', {
             factory: factory
         });
     };
     Azul.prototype.selectLine = function (line) {
-        this.bgaPerformAction('actSelectLine', {
+        this.actions.performAction('actSelectLine', {
             line: line
         });
     };
     Azul.prototype.selectColumn = function (line, column) {
-        this.bgaPerformAction('actSelectColumn', {
+        this.actions.performAction('actSelectColumn', {
             line: line,
             column: column
         });
         this.removeColumnSelection();
     };
     Azul.prototype.confirmColumns = function () {
-        this.bgaPerformAction('actConfirmColumns');
+        this.actions.performAction('actConfirmColumns');
     };
     Azul.prototype.undoColumns = function () {
-        this.bgaPerformAction('actUndoColumns');
+        this.actions.performAction('actUndoColumns');
     };
     Azul.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
@@ -1401,9 +1402,9 @@ var Azul = /** @class */ (function (_super) {
     };
     Azul.prototype.notif_tilesPlacedOnLine = function (notif) {
         var _this = this;
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0, true, true);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1, true, true);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line, false, true).then(function () {
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0, true);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1, true);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line, false).then(function () {
             if (notif.args.fromHand) {
                 _this.getPlayerTable(notif.args.playerId).setHandVisible(false);
             }
@@ -1487,7 +1488,7 @@ var Azul = /** @class */ (function (_super) {
     };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
-    Azul.prototype.format_string_recursive = function (log, args) {
+    Azul.prototype.bgaFormatText = function (log, args) {
         try {
             if (log && args && !args.processed) {
                 if (typeof args.lineNumber === 'number') {
@@ -1510,7 +1511,7 @@ var Azul = /** @class */ (function (_super) {
         catch (e) {
             console.error(log, args, "Exception thrown", e.stack);
         }
-        return this.inherited(arguments);
+        return { log: log, args: args };
     };
     return Azul;
 }(GameGui));

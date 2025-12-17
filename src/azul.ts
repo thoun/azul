@@ -31,8 +31,21 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
 
     public zoom: number = 0.75;
 
+    public gameui: GameGui<AzulGamedatas>;
+    public statusBar: StatusBar;
+    public images: Images;
+    public sounds: Sounds;
+    public userPreferences: UserPreferences;
+    public players: Players;
+    public actions: Actions;
+    public notifications: Notifications;
+    public gameArea: GameArea;
+    public playerPanels: PlayerPanels;
+    public dialogs: Dialogs;
+
     constructor() {   
         super();
+        Object.assign(this, this.bga);
 
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
@@ -54,7 +67,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     */
 
     public setup(gamedatas: AzulGamedatas) {
-        this.getGameAreaElement().insertAdjacentHTML('beforeend', `
+        this.gameArea.getElement().insertAdjacentHTML('beforeend', `
             <div id="table">
                 <div id="centered-table">
                     <div id="factories">
@@ -67,7 +80,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
         `);
 
         // ignore loading of some pictures
-        [1,2,3,4].filter(boardNumber => boardNumber != this.getBoardNumber()).forEach(boardNumber => this.dontPreloadImage(`playerboard${boardNumber}.jpg`));
+        [1,2,3,4].filter(boardNumber => boardNumber != this.getBoardNumber()).forEach(boardNumber => this.images.dontPreloadImage(`playerboard${boardNumber}.jpg`));
 
         log("Starting game setup");
         
@@ -152,19 +165,19 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     }
 
     onEnteringChooseTile() {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             dojo.addClass('factories', 'selectable');
         }
     }
 
     onEnteringChooseFactory(args: EnteringChooseFactoryArgs) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             args.possibleFactories.forEach(i => dojo.addClass(`factory${i}`, 'selectable'));
         }
     }
 
     onEnteringChooseLine(args: EnteringChooseLineArgs) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
             dojo.addClass(`player-table-${this.getPlayerId()}-line-1`, 'selectable');
         }
@@ -175,7 +188,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
 
         infos.selectedColumns.forEach(selectedColumn => table.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));
 
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             const nextColumnToSelect = infos.nextColumnToSelect;
             if (nextColumnToSelect) {
                 nextColumnToSelect.availableColumns.forEach(column =>
@@ -254,15 +267,15 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         log('onUpdateActionButtons', stateName, args);
         
-        if(this.isCurrentPlayerActive()) {
+        if(this.players.isCurrentPlayerActive()) {
             switch (stateName) {  
                 case 'chooseFactory':
                 case 'chooseLine':
-                    this.statusBar.addActionButton(_("Undo tile selection"), () => this.bgaPerformAction('actUndoTakeTiles'));
+                    this.statusBar.addActionButton(_("Undo tile selection"), () => this.actions.performAction('actUndoTakeTiles'));
                     break;     
                 case 'confirmLine':
-                    this.statusBar.addActionButton(_("Confirm"), () => this.bgaPerformAction('actConfirmLine'), { autoclick: this.getGameUserPreference(204) != 2 });
-                    this.statusBar.addActionButton(_("Undo line selection"), () => this.bgaPerformAction('actUndoSelectLine'), { color: 'secondary' });
+                    this.statusBar.addActionButton(_("Confirm"), () => this.actions.performAction('actConfirmLine'), { autoclick: this.userPreferences.get(204) != 2 });
+                    this.statusBar.addActionButton(_("Undo line selection"), () => this.actions.performAction('actUndoSelectLine'), { color: 'secondary' });
                     break;
                 case 'privateChooseColumns':
                 case 'privateConfirmColumns':
@@ -294,7 +307,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
         } catch (e) {}
 
         [201, 202, 203, 205, 206, 210, 299].forEach(
-            prefId => this.onGameUserPreferenceChanged(prefId, this.getGameUserPreference(prefId))
+            prefId => this.onGameUserPreferenceChanged(prefId, this.userPreferences.get(prefId))
         );
     }
       
@@ -345,7 +358,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
                 `, 'bga-zoom-controls');
 
                 document.getElementById('hide-zoom-notice').addEventListener('click', () => 
-                    this.setGameUserPreference(299, 2)
+                    this.userPreferences.set(299, 2)
                 );
             }
         } else if (elem) {
@@ -354,7 +367,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     }
 
     public isDefaultFont(): boolean {
-        return this.getGameUserPreference(206) == 1;
+        return this.userPreferences.get(206) == 1;
     }
 
     public getZoom() {
@@ -562,7 +575,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     }
 
     public takeTiles(id: number) {
-        this.bgaPerformAction('actTakeTiles', {
+        this.actions.performAction('actTakeTiles', {
             id
         });
     }
@@ -572,19 +585,19 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
             return;
         }
 
-        this.bgaPerformAction('actSelectFactory', {
+        this.actions.performAction('actSelectFactory', {
             factory
         });
     }
 
     public selectLine(line: number) {
-        this.bgaPerformAction('actSelectLine', {
+        this.actions.performAction('actSelectLine', {
             line
         });
     }
 
     public selectColumn(line: number, column: number) {
-        this.bgaPerformAction('actSelectColumn', {
+        this.actions.performAction('actSelectColumn', {
             line,
             column
         });
@@ -593,11 +606,11 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     }
 
     public confirmColumns() {
-        this.bgaPerformAction('actConfirmColumns');
+        this.actions.performAction('actConfirmColumns');
     }
 
     public undoColumns() {
-        this.bgaPerformAction('actUndoColumns');
+        this.actions.performAction('actUndoColumns');
     }
 
     placeFirstPlayerToken(playerId: number) {
@@ -693,9 +706,9 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0, true, true);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1, true, true);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line, false, true).then(
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0, true);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTilesToSpecialFactoryZero, -1, true);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line, false).then(
             () => { 
                 if (notif.args.fromHand) {
                     this.getPlayerTable(notif.args.playerId).setHandVisible(false);
@@ -799,7 +812,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
 
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
-    public format_string_recursive(log: string, args: any) {
+    public bgaFormatText(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
                 if (typeof args.lineNumber === 'number') {
@@ -823,6 +836,6 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);
         }
-        return (this as any).inherited(arguments);
+        return { log, args };
     }
 }
