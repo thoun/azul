@@ -1470,7 +1470,7 @@ var Azul = /** @class */ (function (_super) {
             return;
         }
         var message = _("This is the last round of the game!");
-        if (this.getBoardNumber()) {
+        if (this.getBoardNumber() > 1) {
             message += ' <i>(' + _("if the complete line can be placed on the wall") + ')</i>';
         }
         dojo.place("<div id=\"last-round\">".concat(message, "</div>"), 'page-title');
