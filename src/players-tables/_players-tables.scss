@@ -245,6 +245,14 @@
             }
         }
     }
+
+
+    .player-board {
+        position: absolute;
+        width: 220px;
+        top: -12px;
+        left: -12px;
+    }
 }
 
 .wall-tile-cb {

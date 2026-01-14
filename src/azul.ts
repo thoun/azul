@@ -110,12 +110,8 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
         this.setupPreferences();
         if (gamedatas.specialFactories) {
             document.getElementsByTagName('html')[0].dataset.chocolatierSkin = 'true';
-            try {
-                (document.getElementById('preference_control_203').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
-                (document.getElementById('preference_fontrol_203').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
-                (document.getElementById('preference_control_210').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
-                (document.getElementById('preference_fontrol_210').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
-            } catch (e) {}
+            this.bga.userPreferences.toggleVisibility(203, false);
+            this.bga.userPreferences.toggleVisibility(210, false);
             
             document.getElementById('factories').insertAdjacentHTML('beforeend', `<button type="button" id="special-factories-help">${_('Special Factories')}</button>`);
             document.getElementById('special-factories-help').addEventListener('click', () => this.showHelp());
@@ -128,6 +124,16 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
 
         if (gamedatas.endRound) {
             this.notif_lastRound();
+        }
+
+        if ((this as any).bgaInternal.flags['ingame_player_panels']) {
+            setTimeout(() => {
+                Object.keys(gamedatas.players).forEach(playerId => {
+                    const playerPanel = document.getElementById(`overall_player_board_${playerId}`)
+                    const playerTable = document.getElementById(`player-table-${playerId}`);
+                    playerTable.insertAdjacentElement('beforeend', playerPanel);
+                });
+            });
         }
 
         log("Ending game setup");
@@ -301,19 +307,15 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     ///////////////////////////////////////////////////
 
     private setupPreferences() {
-        try {
-            (document.getElementById('preference_control_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
-            (document.getElementById('preference_fontrol_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
-        } catch (e) {}
-
-        [201, 202, 203, 205, 206, 210, 299].forEach(
-            prefId => this.onGameUserPreferenceChanged(prefId, this.userPreferences.get(prefId))
-        );
+        this.bga.userPreferences.toggleVisibility(299, false);
+        this.bga.userPreferences.onChange = (prefId: number, prefValue: number) => this.onUserPreferenceChanged(prefId, prefValue);
     }
       
-    /** @ts-ignore */
-    public onGameUserPreferenceChanged(prefId: number, prefValue: number) {
+    public onUserPreferenceChanged(prefId: number, prefValue: number) {
         switch (prefId) {
+            case 101:
+                this.bga.userPreferences.toggleVisibility(204, prefValue != 2);
+                break;
             case 201: 
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
                 break;
@@ -333,11 +335,7 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
             case 210:
                 const chocolatierSkin = this.gamedatas.boardNumber <= 2 && (prefValue == 1 || !!this.gamedatas.specialFactories);
                 document.getElementsByTagName('html')[0].dataset.chocolatierSkin = chocolatierSkin.toString();
-
-                try {
-                    (document.getElementById('preference_control_203').closest(".preference_choice") as HTMLDivElement).style.display = chocolatierSkin ? 'none' : null;
-                    (document.getElementById('preference_fontrol_203').closest(".preference_choice") as HTMLDivElement).style.display = chocolatierSkin ? 'none' : null;
-                } catch (e) {}
+                this.bga.userPreferences.toggleVisibility(203, !chocolatierSkin);
                 break;
             case 299: 
                 this.toggleZoomNotice(prefValue == 1);

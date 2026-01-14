@@ -383,6 +383,12 @@
   left: 593px;
   top: 425px;
 }
+.player-table-wrapper .player-board {
+  position: absolute;
+  width: 220px;
+  top: -12px;
+  left: -12px;
+}
 
 .wall-tile-cb {
   opacity: 0;
