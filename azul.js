@@ -1179,12 +1179,12 @@ var Azul = /** @class */ (function (_super) {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
     };
     Azul.prototype.incScore = function (playerId, incScore) {
-        var _a, _b, _c;
-        if (((_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) + incScore < 0) {
-            (_b = this.scoreCtrl[playerId]) === null || _b === void 0 ? void 0 : _b.toValue(0);
+        var scoreCounter = this.bga.playerPanels.getScoreCounter(playerId);
+        if (scoreCounter.getValue() + incScore < 0) {
+            scoreCounter.toValue(0);
         }
         else {
-            (_c = this.scoreCtrl[playerId]) === null || _c === void 0 ? void 0 : _c.incValue(incScore);
+            scoreCounter.incValue(incScore);
         }
     };
     Azul.prototype.placeTile = function (tile, destinationId, left, top, rotation, newAnimation) {
@@ -1239,8 +1239,7 @@ var Azul = /** @class */ (function (_super) {
         var _this = this;
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
-            // first player token
-            dojo.place("<div id=\"player_board_".concat(player.id, "_firstPlayerWrapper\" class=\"firstPlayerWrapper disabled-shimmer\"></div>"), "player_board_".concat(player.id));
+            _this.bga.playerPanels.getElement(playerId).insertAdjacentHTML('beforeend', "\n                <div id=\"player-board-".concat(player.id, "-firstPlayerWrapper\" class=\"firstPlayerWrapper disabled-shimmer\"></div>\n            "));
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 _this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
@@ -1325,10 +1324,10 @@ var Azul = /** @class */ (function (_super) {
     Azul.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            this.animationManager.slideAndAttach(firstPlayerToken, document.getElementById("player_board_".concat(playerId, "_firstPlayerWrapper")), { bump: 1 });
+            this.animationManager.slideAndAttach(firstPlayerToken, document.getElementById("player-board-".concat(playerId, "-firstPlayerWrapper")), { bump: 1 });
         }
         else {
-            document.getElementById("player_board_".concat(playerId, "_firstPlayerWrapper")).insertAdjacentHTML('beforeend', '<div id="firstPlayerToken" class="tile tile0"></div>');
+            document.getElementById("player-board-".concat(playerId, "-firstPlayerWrapper")).insertAdjacentHTML('beforeend', '<div id="firstPlayerToken" class="tile tile0"></div>');
             this.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
     };

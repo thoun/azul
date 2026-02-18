@@ -374,22 +374,22 @@ class Game extends \Bga\GameFramework\Table {
         return $this->factoriesByPlayers[$playerNumber];
     }
 
-    function getPlayerScore(int $playerId) {
-        return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+    function getPlayerScore(int $playerId): int {
+        return $this->bga->playerScore->get($playerId);
     }
 
-    function incPlayerScore(int $playerId, int $incScore) {
-        $this->DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+    function incPlayerScore(int $playerId, int $incScore): int {
+        return $this->bga->playerScore->inc($playerId, $incScore, null);
     }
 
-    function decPlayerScore(int $playerId, int $decScore) {
+    function decPlayerScore(int $playerId, int $decScore): int {
         $newScore = max(0, $this->getPlayerScore($playerId) - $decScore);
-        $this->DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
+        $this->bga->playerScore->set($playerId, $newScore, null);
         return $newScore;
     }
 
-    function incPlayerScoreAux(int $playerId, int $incScoreAux) {
-        $this->DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
+    function incPlayerScoreAux(int $playerId, int $incScoreAux): int {
+        return $this->bga->playerScoreAux->inc($playerId, $incScoreAux, null);
     }
 
     function getSelectedColumns(int $playerId) {

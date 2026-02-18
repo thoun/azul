@@ -404,10 +404,11 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     }
 
     private incScore(playerId: number, incScore: number) {
-        if (this.scoreCtrl[playerId]?.getValue() + incScore < 0) {
-            this.scoreCtrl[playerId]?.toValue(0);
+        const scoreCounter = this.bga.playerPanels.getScoreCounter(playerId);
+        if (scoreCounter.getValue() + incScore < 0) {
+            scoreCounter.toValue(0);
         } else {
-            this.scoreCtrl[playerId]?.incValue(incScore);
+            scoreCounter.incValue(incScore);
         }
     }
 
@@ -464,10 +465,11 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     private createPlayerPanels(gamedatas: AzulGamedatas) {
 
         Object.values(gamedatas.players).forEach(player => {
-            const playerId = Number(player.id);     
-
-            // first player token
-            dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper disabled-shimmer"></div>`, `player_board_${player.id}`);
+            const playerId = Number(player.id);  
+            
+            this.bga.playerPanels.getElement(playerId).insertAdjacentHTML('beforeend', `
+                <div id="player-board-${player.id}-firstPlayerWrapper" class="firstPlayerWrapper disabled-shimmer"></div>
+            `);
 
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
@@ -616,11 +618,11 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
         if (firstPlayerToken) {
             this.animationManager.slideAndAttach(
                 firstPlayerToken,
-                document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
+                document.getElementById(`player-board-${playerId}-firstPlayerWrapper`),
                 { bump: 1 }
             );
         } else {
-            document.getElementById(`player_board_${playerId}_firstPlayerWrapper`).insertAdjacentHTML('beforeend', '<div id="firstPlayerToken" class="tile tile0"></div>');
+            document.getElementById(`player-board-${playerId}-firstPlayerWrapper`).insertAdjacentHTML('beforeend', '<div id="firstPlayerToken" class="tile tile0"></div>');
 
             this.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
