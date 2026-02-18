@@ -249,13 +249,17 @@ class Game extends \Bga\GameFramework\Table {
         $this->tiles->moveCards(array_map(fn($t) => $t->id, $undo->tiles), 'factory', $undo->from);
         $this->setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $undo->previousFirstPlayer);
 
-        $this->notify->all('undoTakeTiles', clienttranslate('${player_name} cancels tile selection'), [
+        $this->bga->notify->all('undoTakeTiles', clienttranslate('${player_name} cancels tile selection'), [
             'playerId' => $activePlayerId,
             'player_name' => $this->getPlayerNameById($activePlayerId),
             'undo' => $undo,
             'factoryTilesBefore' => $factoryTilesBefore,
             'repositionTiles' => $undoFactory != null,
         ]);
+
+        if (isset($undo->moveId)) {
+            $this->bga->logs->remove($undo->moveId);
+        }
 
         return ChooseTile::class;
     }

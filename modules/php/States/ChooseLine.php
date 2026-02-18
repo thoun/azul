@@ -8,6 +8,7 @@ use Bga\GameFramework\StateType;
 use Bga\GameFramework\UserException;
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
 use Bga\Games\Azul\Game;
+use Bga\Games\Azul\Objects\Undo;
 
 class ChooseLine extends \Bga\GameFramework\States\GameState
 {
@@ -53,7 +54,13 @@ class ChooseLine extends \Bga\GameFramework\States\GameState
             $this->game->setGameStateValue(END_TURN_LOGGED, 1);
         }
 
-        $this->game->setGlobalVariable(UNDO_PLACE, new \Undo($tiles, null, null, $lastRoundLogged));
+        $this->game->setGlobalVariable(UNDO_PLACE, new Undo(
+            $tiles, 
+            null, 
+            null, 
+            $lastRoundLogged, 
+            moveId: $this->bga->logs->getCurrentMoveId(),
+        ));
 
         if ($this->game->isUndoActivated($activePlayerId)) {
             return ConfirmLine::class;

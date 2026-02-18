@@ -8,6 +8,7 @@ use Bga\GameFramework\StateType;
 use Bga\GameFramework\UserException;
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
 use Bga\Games\Azul\Game;
+use Bga\Games\Azul\Objects\Undo;
 
 class ChooseTile extends \Bga\GameFramework\States\GameState
 {
@@ -114,12 +115,13 @@ class ChooseTile extends \Bga\GameFramework\States\GameState
             ]);
         }
 
-        $this->game->setGlobalVariable(UNDO_SELECT, new \Undo(
+        $this->game->setGlobalVariable(UNDO_SELECT, new Undo(
             array_merge($selectedTiles, $discardedTiles, $firstPlayerTokens),
             $factory, 
             $previousFirstPlayer,
             null,
-            $takeFromSpecialFactoryZero
+            $takeFromSpecialFactoryZero,
+            moveId: $this->bga->logs->getCurrentMoveId(),
         ));
 
         $transition = ChooseLine::class;
@@ -127,7 +129,7 @@ class ChooseTile extends \Bga\GameFramework\States\GameState
         if ($specialFactories !== null && array_key_exists($factory, $specialFactories) && $specialFactories[$factory] == 7) {
             $remainingFactoryTiles = $this->game->getTilesFromDb($this->game->tiles->getCardsInLocation('factory', $factory));
             if (count($remainingFactoryTiles) > 0) {
-                $this->game->setGlobalVariable(UNDO_FACTORY, new \Undo($remainingFactoryTiles, $factory));
+                $this->game->setGlobalVariable(UNDO_FACTORY, new Undo($remainingFactoryTiles, $factory));
                 $transition = ChooseFactory::class;
             }
         }

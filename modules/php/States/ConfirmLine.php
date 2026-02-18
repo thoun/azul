@@ -35,11 +35,15 @@ class ConfirmLine extends \Bga\GameFramework\States\GameState
             $this->game->setGameStateValue(END_TURN_LOGGED, 0);
         }
 
-        $this->notify->all('undoSelectLine', clienttranslate('${player_name} cancels tile placement'), [
+        $this->bga->notify->all('undoSelectLine', clienttranslate('${player_name} cancels tile placement'), [
             'playerId' => $activePlayerId,
             'player_name' => $this->game->getPlayerNameById($activePlayerId),
             'undo' => $undo,
         ]);
+
+        if (isset($undo->moveId)) {
+            $this->bga->logs->remove($undo->moveId);
+        }
         
         return ChooseLine::class;
     }
