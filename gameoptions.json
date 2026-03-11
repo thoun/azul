@@ -13,14 +13,12 @@
             "3": {
                 "name": "Crystal Mozaic: Side 1",
                 "tmdisplay": "Crystal Mozaic: Side 1",
-                "nobeginner": true,
-                "alpha": true
+                "nobeginner": true
             },
             "4": {
                 "name": "Crystal Mozaic: Side 2",
                 "tmdisplay": "Crystal Mozaic: Side 2",
-                "nobeginner": true,
-                "alpha": true
+                "nobeginner": true
             }
         },
         "default": 1
