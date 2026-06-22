@@ -676,6 +676,12 @@ html[data-chocolatier-skin=true] #popin_azulChocolatierVariantHelpDialog {
   max-height: 80vh;
   overflow: hidden;
 }
+html[data-chocolatier-skin=true][data-theme=dark] #popin_azulChocolatierVariantHelpDialog {
+  background-color: var(--game-palette-bga-gray-244);
+}
+html[data-chocolatier-skin=true][data-theme=dark] #help-popin .row .title {
+  color: #ef517e;
+}
 html[data-chocolatier-skin=true] #help-popin {
   width: 520px;
   max-width: 35rem;
@@ -726,7 +732,7 @@ html.background2 {
 
 @font-face {
   font-family: "Algeria";
-  src: url("img/algeria.woff2") format("woff2"), url("img/algeria.woff") format("woff");
+  src: url("fonts/algeria.woff2") format("woff2"), url("fonts/algeria.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }

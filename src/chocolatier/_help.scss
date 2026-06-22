@@ -11,6 +11,20 @@
     overflow: hidden;
 }
 
+&[data-theme="dark"] {
+    #popin_azulChocolatierVariantHelpDialog {
+        background-color: var(--game-palette-bga-gray-244);
+    }
+
+    #help-popin {
+        .row {
+            .title {
+                color: #ef517e;
+            }
+        }
+    }
+}
+
 #help-popin {
     width: 520px;
     max-width: 35rem;

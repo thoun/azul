@@ -29,7 +29,6 @@ require_once('framework-prototype/Helpers/Arrays.php');
 
 require_once('constants.inc.php');
 require_once('tile.php');
-require_once('undo.php');
 
 class Game extends \Bga\GameFramework\Table {
 
