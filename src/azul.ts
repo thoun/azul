@@ -309,6 +309,13 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
     private setupPreferences() {
         this.bga.userPreferences.toggleVisibility(299, false);
         this.bga.userPreferences.onChange = (prefId: number, prefValue: number) => this.onUserPreferenceChanged(prefId, prefValue);
+
+        this.onUserPreferenceChanged(202, this.bga.userPreferences.get(202));
+        new MutationObserver(() => {
+            if (this.bga.userPreferences.get(202) == 0) {
+                this.updateBackgroundZoomControlsColor();
+            }
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     }
       
     public onUserPreferenceChanged(prefId: number, prefValue: number) {
@@ -320,8 +327,9 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
                 break;
             case 202:
-                dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'background2', prefValue == 2);
-                this.zoomManager.setZoomControlsColor(prefValue == 2 ? 'white' : 'black');
+                document.documentElement.dataset.background = `${prefValue}`;
+                dojo.toggleClass(document.documentElement as any, 'background2', prefValue == 2);
+                this.updateBackgroundZoomControlsColor();
                 break;
             case 203:
                 dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'cb', prefValue == 1);
@@ -341,6 +349,13 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
                 this.toggleZoomNotice(prefValue == 1);
                 break;
         }
+    }
+
+    private updateBackgroundZoomControlsColor() {
+        const backgroundPref = this.bga.userPreferences.get(202);
+        const darkBackground = backgroundPref == 2 || (backgroundPref == 0 && document.documentElement.dataset.theme == 'dark');
+
+        this.zoomManager.setZoomControlsColor(darkBackground ? 'white' : 'black');
     }
 
     private toggleZoomNotice(visible: boolean) {

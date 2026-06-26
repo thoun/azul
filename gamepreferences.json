@@ -39,17 +39,20 @@
         "default": 1
     },
     "202": {
-        "name": "Dark background",
+        "name": "Background",
         "needReload": false,
         "values": {
+            "0": {
+                "name": "Automatic"
+            },
             "1": {
-                "name": "Disabled"
+                "name": "Light"
             },
             "2": {
-                "name": "Enabled"
+                "name": "Dark"
             }
         },
-        "default": 1
+        "default": 0
     },
     "203": {
         "name": "Add pattern for red tile (color-blind help)",

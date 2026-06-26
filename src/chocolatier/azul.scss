@@ -16,8 +16,11 @@ html[data-chocolatier-skin="true"] {
   background: url('img/chocolatier/background.jpg') #fff8f0;
   background-repeat: repeat;
 
-
-  &.background2 {  
+  &[data-background="0"][data-theme="light"], &[data-background="1"] {
+    background: url('img/chocolatier/background.jpg') #fff8f0;
+    background-repeat: repeat;
+  }
+  &[data-background="0"][data-theme="dark"], &[data-background="2"] {
     background: url('img/chocolatier/background2.jpg') #fff8f0;
   }
 

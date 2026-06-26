@@ -6,11 +6,12 @@
 @import 'chocolatier/azul.scss';
 
 html {
-    background: url('img/background.jpg') #fff8f0;
     background-repeat: repeat;
 
-
-    &.background2 {  
+    &[data-background="0"][data-theme="light"], &[data-background="1"] {
+      background: url('img/background.jpg') #fff8f0;
+    }
+    &[data-background="0"][data-theme="dark"], &[data-background="2"] {
       background: url('img/background2.jpg') #00587a;
     }
 }

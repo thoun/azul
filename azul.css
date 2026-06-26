@@ -110,6 +110,7 @@
   font-size: 2em;
   font-weight: 700;
   position: absolute;
+  color: black;
   text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px #fff;
   pointer-events: none;
   display: none;
@@ -705,7 +706,11 @@ html[data-chocolatier-skin=true] #help-popin .row .picture .factory {
 html[data-chocolatier-skin=true] #help-popin .row .picture .factory:not(:first-child) {
   margin-left: -25px;
 }
-html[data-chocolatier-skin=true].background2 {
+html[data-chocolatier-skin=true][data-background="0"][data-theme=light], html[data-chocolatier-skin=true][data-background="1"] {
+  background: url("img/chocolatier/background.jpg") #fff8f0;
+  background-repeat: repeat;
+}
+html[data-chocolatier-skin=true][data-background="0"][data-theme=dark], html[data-chocolatier-skin=true][data-background="2"] {
   background: url("img/chocolatier/background2.jpg") #fff8f0;
 }
 html[data-chocolatier-skin=true] .mode_3d #game_play_area_background {
@@ -718,10 +723,12 @@ html[data-chocolatier-skin=true] #last-round {
 }
 
 html {
-  background: url("img/background.jpg") #fff8f0;
   background-repeat: repeat;
 }
-html.background2 {
+html[data-background="0"][data-theme=light], html[data-background="1"] {
+  background: url("img/background.jpg") #fff8f0;
+}
+html[data-background="0"][data-theme=dark], html[data-background="2"] {
   background: url("img/background2.jpg") #00587a;
 }
 

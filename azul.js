@@ -1101,6 +1101,12 @@ var Azul = /** @class */ (function (_super) {
         var _this = this;
         this.bga.userPreferences.toggleVisibility(299, false);
         this.bga.userPreferences.onChange = function (prefId, prefValue) { return _this.onUserPreferenceChanged(prefId, prefValue); };
+        this.onUserPreferenceChanged(202, this.bga.userPreferences.get(202));
+        new MutationObserver(function () {
+            if (_this.bga.userPreferences.get(202) == 0) {
+                _this.updateBackgroundZoomControlsColor();
+            }
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     };
     Azul.prototype.onUserPreferenceChanged = function (prefId, prefValue) {
         switch (prefId) {
@@ -1111,8 +1117,9 @@ var Azul = /** @class */ (function (_super) {
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
                 break;
             case 202:
-                dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2', prefValue == 2);
-                this.zoomManager.setZoomControlsColor(prefValue == 2 ? 'white' : 'black');
+                document.documentElement.dataset.background = "".concat(prefValue);
+                dojo.toggleClass(document.documentElement, 'background2', prefValue == 2);
+                this.updateBackgroundZoomControlsColor();
                 break;
             case 203:
                 dojo.toggleClass(document.getElementsByTagName('html')[0], 'cb', prefValue == 1);
@@ -1132,6 +1139,11 @@ var Azul = /** @class */ (function (_super) {
                 this.toggleZoomNotice(prefValue == 1);
                 break;
         }
+    };
+    Azul.prototype.updateBackgroundZoomControlsColor = function () {
+        var backgroundPref = this.bga.userPreferences.get(202);
+        var darkBackground = backgroundPref == 2 || (backgroundPref == 0 && document.documentElement.dataset.theme == 'dark');
+        this.zoomManager.setZoomControlsColor(darkBackground ? 'white' : 'black');
     };
     Azul.prototype.toggleZoomNotice = function (visible) {
         var _this = this;
