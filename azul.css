@@ -751,9 +751,15 @@ html[data-background="0"][data-theme=dark], html[data-background="2"] {
   box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.6);
 }
 
-.log .tile {
-  margin: 2px;
+.log .tile,
+.log-tile,
+.gamelogbox .tile,
+#replay_log .tile,
+.replay-log .tile,
+#replaylogs .tile {
+  margin: 0 2px;
   position: relative;
+  top: -2px;
   width: 16px;
   height: 16px;
   box-shadow: none;

@@ -204,7 +204,7 @@ var ZoomManager = /** @class */ (function () {
     ZoomManager.prototype.zoomOrDimensionChanged = function () {
         var _a, _b;
         this.settings.element.style.width = "".concat(this.wrapper.offsetWidth / this._zoom, "px");
-        this.wrapper.style.height = "".concat(this.settings.element.offsetHeight * this._zoom, "px");
+        this.wrapper.style.height = "".concat(this.settings.element.offsetHeight, "px");
         (_b = (_a = this.settings).onDimensionsChange) === null || _b === void 0 ? void 0 : _b.call(_a, this._zoom);
     };
     /**
@@ -1508,12 +1508,12 @@ var Azul = /** @class */ (function (_super) {
                     var number = args.number;
                     var html = '';
                     for (var i = 0; i < number; i++) {
-                        html += "<div class=\"tile tile".concat(args.type, "\"></div>");
+                        html += "<div class=\"tile log-tile tile".concat(args.type, "\"></div>");
                     }
                     log = _(log).replace('${number} ${color}', html);
                 }
                 else if (log.indexOf('${color}') !== -1 && typeof args.type === 'number') {
-                    var html = "<div class=\"tile tile".concat(args.type, "\"></div>");
+                    var html = "<div class=\"tile log-tile tile".concat(args.type, "\"></div>");
                     log = _(log).replace('${color}', html);
                 }
             }

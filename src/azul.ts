@@ -839,12 +839,12 @@ class Azul extends GameGui<AzulGamedatas> implements AzulGame {
                     const number = args.number;
                     let html = '';
                     for (let i=0; i<number; i++) {
-                        html += `<div class="tile tile${args.type}"></div>`;
+                        html += `<div class="tile log-tile tile${args.type}"></div>`;
                     }
 
                     log = _(log).replace('${number} ${color}', html);
                 } else if (log.indexOf('${color}') !== -1 && typeof args.type === 'number') {
-                    let html = `<div class="tile tile${args.type}"></div>`;
+                    let html = `<div class="tile log-tile tile${args.type}"></div>`;
                     log = _(log).replace('${color}', html);
                 }
             }
