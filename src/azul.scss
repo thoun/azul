@@ -39,15 +39,19 @@ html {
   }
 }
 
-.log {
-  .tile {
-    margin: 2px;
-    position: relative;
-    width: 16px;
-    height: 16px;
-    box-shadow: none;
-    vertical-align: middle;
-  }
+.log .tile,
+.log-tile,
+.gamelogbox .tile,
+#replay_log .tile,
+.replay-log .tile,
+#replaylogs .tile {
+  margin: 0 2px;
+  position: relative;
+  top: -2px;
+  width: 16px;
+  height: 16px;
+  box-shadow: none;
+  vertical-align: middle;
 }
 
 #last-round {
